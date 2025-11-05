@@ -9,7 +9,8 @@ export default function RecruitmentsManage() {
   const [formData, setFormData] = useState<RecruitmentItem>({
     id: '',
     title: '',
-    summary: ''
+    summary: '',
+    content: ''
   })
 
   useEffect(() => {
@@ -69,7 +70,8 @@ export default function RecruitmentsManage() {
     setFormData({
       id: '',
       title: '',
-      summary: ''
+      summary: '',
+      content: ''
     })
     setIsEditing(false)
     setEditingId(null)
@@ -123,7 +125,23 @@ export default function RecruitmentsManage() {
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                   rows={4}
                   required
+                  placeholder="목록에 표시될 간단한 요약"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  상세 내용 (선택)
+                </label>
+                <textarea
+                  value={formData.content || ''}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                  rows={8}
+                  placeholder="상세 페이지에 표시될 전체 내용"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  💡 상세 내용을 입력하면 상세 페이지에서 표시됩니다. 없으면 요약만 표시됩니다.
+                </p>
               </div>
               <div className="flex gap-3">
                 <button

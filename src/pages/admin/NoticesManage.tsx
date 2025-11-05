@@ -13,8 +13,11 @@ export default function NoticesManage() {
     title: '',
     date: new Date().toISOString().split('T')[0],
     summary: '',
+    content: '',
+    imageUrl: '',
     linkUrl: ''
   })
+  const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url')
 
   useEffect(() => {
     loadNotices()
@@ -46,12 +49,6 @@ export default function NoticesManage() {
     resetForm()
   }
 
-  const handleEdit = (index: number) => {
-    setFormData(notices[index])
-    setEditingIndex(index)
-    setIsEditing(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 
   const handleDelete = (index: number) => {
     if (confirm('정말 삭제하시겠습니까?')) {
@@ -66,10 +63,41 @@ export default function NoticesManage() {
       title: '',
       date: new Date().toISOString().split('T')[0],
       summary: '',
+      content: '',
+      imageUrl: '',
       linkUrl: ''
     })
+    setImageInputType('url')
     setIsEditing(false)
     setEditingIndex(null)
+  }
+
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('이미지 파일만 업로드 가능합니다.')
+        return
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result as string
+        setFormData({ ...formData, imageUrl: base64 })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleEdit = (index: number) => {
+    const notice = notices[index]
+    // imageUrl이 data:로 시작하면 업로드된 파일, 아니면 URL
+    if (notice.imageUrl) {
+      setImageInputType(notice.imageUrl.startsWith('data:') ? 'upload' : 'url')
+    }
+    setFormData(notice)
+    setEditingIndex(index)
+    setIsEditing(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
@@ -124,14 +152,100 @@ export default function NoticesManage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  요약
+                  요약 (목록에 표시)
                 </label>
                 <textarea
-                  value={formData.summary}
+                  value={formData.summary || ''}
                   onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                   rows={3}
+                  placeholder="공지사항 목록에 표시될 간단한 요약"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  상세 내용 (선택)
+                </label>
+                <textarea
+                  value={formData.content || ''}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                  rows={8}
+                  placeholder="상세 페이지에 표시될 전체 내용"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  💡 상세 내용을 입력하면 상세 페이지에서 표시됩니다. 없으면 요약만 표시됩니다.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  이미지 (선택)
+                </label>
+                
+                {/* 입력 방식 선택 */}
+                <div className="flex gap-4 mb-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="imageInputType"
+                      value="upload"
+                      checked={imageInputType === 'upload'}
+                      onChange={(e) => setImageInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">파일 업로드</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="imageInputType"
+                      value="url"
+                      checked={imageInputType === 'url'}
+                      onChange={(e) => setImageInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">URL 입력</span>
+                  </label>
+                </div>
+
+                {imageInputType === 'upload' ? (
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileUpload}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      💡 이미지 파일을 선택하면 Base64로 변환되어 저장됩니다.
+                    </p>
+                    {formData.imageUrl && formData.imageUrl.startsWith('data:') && (
+                      <div className="mt-3 w-full max-w-md rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <img src={formData.imageUrl} alt="이미지 미리보기" className="w-full h-auto object-contain" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="url"
+                      value={formData.imageUrl && !formData.imageUrl.startsWith('data:') ? formData.imageUrl : ''}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      placeholder="예: /images/notice.jpg 또는 https://..."
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      💡 이미지 URL을 입력하세요. (예: /images/notice.jpg 또는 https://...)
+                    </p>
+                    {formData.imageUrl && !formData.imageUrl.startsWith('data:') && formData.imageUrl.trim() !== '' && (
+                      <div className="mt-3 w-full max-w-md rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <img src={formData.imageUrl} alt="이미지 미리보기" className="w-full h-auto object-contain" onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23ddd" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="14"%3E이미지 없음%3C/text%3E%3C/svg%3E'
+                        }} />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

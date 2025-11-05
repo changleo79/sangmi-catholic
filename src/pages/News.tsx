@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { notices as defaultNotices } from '../data/notices'
 import { getNotices } from '../utils/storage'
 import { getRecruitments, getBulletins, type RecruitmentItem, type BulletinItem } from '../utils/storage'
@@ -8,6 +9,10 @@ export default function News() {
   const [notices, setNotices] = useState<NoticeItem[]>([])
   const [recruit, setRecruit] = useState<RecruitmentItem[]>([])
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
+  const [noticesPage, setNoticesPage] = useState(1)
+  const [recruitPage, setRecruitPage] = useState(1)
+  const [bulletinsPage, setBulletinsPage] = useState(1)
+  const itemsPerPage = 10
 
   useEffect(() => {
     // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
@@ -52,29 +57,46 @@ export default function News() {
               <h2 className="text-3xl font-bold text-gray-900">공지사항</h2>
             </div>
             <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
-              {notices.map((n, i) => (
-                <div
-                  key={i}
-                  className="p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 group cursor-pointer hover:pl-8 active:bg-purple-50/30"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-2 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100" style={{ backgroundColor: '#7B1F4B' }}></div>
-                        <h3 className="text-xl font-semibold text-gray-900 transition-all duration-300 group-hover:font-bold" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>
-                          {n.title}
-                        </h3>
+              {notices.slice(0, noticesPage * itemsPerPage).map((n, i) => {
+                const noticeId = `${n.date}-${encodeURIComponent(n.title)}`
+                return (
+                  <Link
+                    key={i}
+                    to={`/news/${noticeId}`}
+                    className="block p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 group cursor-pointer hover:pl-8 active:bg-purple-50/30"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-2 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100" style={{ backgroundColor: '#7B1F4B' }}></div>
+                          <h3 className="text-xl font-semibold text-gray-900 transition-all duration-300 group-hover:font-bold" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>
+                            {n.title}
+                          </h3>
+                        </div>
+                        {n.summary && (
+                          <p className="text-gray-600 ml-5 text-sm leading-relaxed line-clamp-2">{n.summary}</p>
+                        )}
                       </div>
-                      {n.summary && (
-                        <p className="text-gray-600 ml-5 text-sm leading-relaxed">{n.summary}</p>
-                      )}
+                      <span className="text-gray-400 text-sm whitespace-nowrap font-medium group-hover:text-gray-500 transition-colors">
+                        {n.date}
+                      </span>
                     </div>
-                    <span className="text-gray-400 text-sm whitespace-nowrap font-medium group-hover:text-gray-500 transition-colors">
-                      {n.date}
-                    </span>
-                  </div>
+                  </Link>
+                )
+              })}
+              {notices.length > noticesPage * itemsPerPage && (
+                <div className="p-6 border-t border-gray-100 text-center">
+                  <button
+                    onClick={() => setNoticesPage(prev => prev + 1)}
+                    className="px-6 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+                    style={{ backgroundColor: '#7B1F4B' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                  >
+                    더보기 ({notices.length - noticesPage * itemsPerPage}개 더)
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
           </section>
 
@@ -85,9 +107,10 @@ export default function News() {
               <h2 className="text-3xl font-bold text-gray-900">단체 소식</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {recruit.map((r) => (
-                <div
+              {recruit.slice(0, recruitPage * itemsPerPage).map((r) => (
+                <Link
                   key={r.id}
+                  to={`/recruitments/${r.id}`}
                   className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 group cursor-pointer hover:-translate-y-1"
                 >
                   <div className="flex items-start gap-4">
@@ -100,12 +123,25 @@ export default function News() {
                       <h3 className="text-xl font-bold text-gray-900 mb-2 transition-colors duration-300 group" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>
                         {r.title}
                       </h3>
-                      <p className="text-gray-600 leading-relaxed text-sm">{r.summary}</p>
+                      <p className="text-gray-600 leading-relaxed text-sm line-clamp-3">{r.summary}</p>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
+            {recruit.length > recruitPage * itemsPerPage && (
+              <div className="text-center mt-6">
+                <button
+                  onClick={() => setRecruitPage(prev => prev + 1)}
+                  className="px-6 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+                  style={{ backgroundColor: '#7B1F4B' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                >
+                  더보기 ({recruit.length - recruitPage * itemsPerPage}개 더)
+                </button>
+              </div>
+            )}
           </section>
 
           {/* 주보 안내 Section */}
@@ -115,13 +151,30 @@ export default function News() {
               <h2 className="text-3xl font-bold text-gray-900">주보 안내</h2>
             </div>
             {bulletins.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {bulletins.map((bulletin) => (
-                  <a
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {bulletins.slice(0, bulletinsPage * itemsPerPage).map((bulletin) => (
+                  <div
                     key={bulletin.id}
-                    href={bulletin.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={() => {
+                      if (bulletin.fileUrl.startsWith('data:')) {
+                        // Base64 PDF인 경우 새 창에서 열기
+                        const newWindow = window.open()
+                        if (newWindow) {
+                          newWindow.document.write(`
+                            <html>
+                              <head><title>${bulletin.title}</title></head>
+                              <body style="margin:0;padding:0;">
+                                <embed src="${bulletin.fileUrl}" type="application/pdf" width="100%" height="100%" style="position:absolute;top:0;left:0;width:100%;height:100%;" />
+                              </body>
+                            </html>
+                          `)
+                        }
+                      } else {
+                        // URL인 경우 일반 링크
+                        window.open(bulletin.fileUrl, '_blank', 'noopener,noreferrer')
+                      }
+                    }}
                     className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-100 hover:border-catholic-logo/20 group cursor-pointer hover:-translate-y-1"
                   >
                     <div className="flex flex-col h-full">
@@ -159,9 +212,23 @@ export default function News() {
                         </div>
                       </div>
                     </div>
-                  </a>
-                ))}
-              </div>
+                  </div>
+                  ))}
+                </div>
+                {bulletins.length > bulletinsPage * itemsPerPage && (
+                  <div className="text-center mt-6">
+                    <button
+                      onClick={() => setBulletinsPage(prev => prev + 1)}
+                      className="px-6 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+                      style={{ backgroundColor: '#7B1F4B' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                    >
+                      더보기 ({bulletins.length - bulletinsPage * itemsPerPage}개 더)
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
                 <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

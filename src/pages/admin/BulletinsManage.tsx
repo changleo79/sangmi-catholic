@@ -6,6 +6,8 @@ export default function BulletinsManage() {
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [pdfInputType, setPdfInputType] = useState<'upload' | 'url'>('upload')
+  const [thumbnailInputType, setThumbnailInputType] = useState<'upload' | 'url'>('url')
   const [formData, setFormData] = useState<Omit<BulletinItem, 'id'>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
@@ -25,6 +27,13 @@ export default function BulletinsManage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // PDF 파일 URL이 필수인지 확인
+    if (!formData.fileUrl) {
+      alert('PDF 파일을 업로드하거나 URL을 입력해주세요.')
+      return
+    }
+    
     const newBulletins = [...bulletins]
 
     if (editingId) {
@@ -43,6 +52,13 @@ export default function BulletinsManage() {
   }
 
   const handleEdit = (bulletin: BulletinItem) => {
+    // fileUrl이 data:로 시작하면 업로드된 파일, 아니면 URL
+    const isPdfUploaded = bulletin.fileUrl.startsWith('data:')
+    const isThumbnailUploaded = bulletin.thumbnailUrl?.startsWith('data:')
+    
+    setPdfInputType(isPdfUploaded ? 'upload' : 'url')
+    setThumbnailInputType(isThumbnailUploaded ? 'upload' : 'url')
+    
     setFormData({
       title: bulletin.title,
       date: bulletin.date,
@@ -71,8 +87,42 @@ export default function BulletinsManage() {
       thumbnailUrl: '',
       description: ''
     })
+    setPdfInputType('upload')
+    setThumbnailInputType('url')
     setIsEditing(false)
     setEditingId(null)
+  }
+
+  const handlePdfFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        alert('PDF 파일만 업로드 가능합니다.')
+        return
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result as string
+        setFormData({ ...formData, fileUrl: base64 })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleThumbnailFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('이미지 파일만 업로드 가능합니다.')
+        return
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result as string
+        setFormData({ ...formData, thumbnailUrl: base64 })
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   return (
@@ -123,34 +173,131 @@ export default function BulletinsManage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">PDF 파일 URL *</label>
-                <input
-                  type="url"
-                  value={formData.fileUrl}
-                  onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                  placeholder="예: /files/bulletin-2025-11.pdf 또는 https://..."
-                  required
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  💡 PDF 파일을 public/files/ 폴더에 업로드하고 경로를 입력하세요.
-                </p>
+                <label className="block text-sm font-medium text-gray-700 mb-2">PDF 파일 *</label>
+                
+                {/* 입력 방식 선택 */}
+                <div className="flex gap-4 mb-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="pdfInputType"
+                      value="upload"
+                      checked={pdfInputType === 'upload'}
+                      onChange={(e) => setPdfInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">파일 업로드</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="pdfInputType"
+                      value="url"
+                      checked={pdfInputType === 'url'}
+                      onChange={(e) => setPdfInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">URL 입력</span>
+                  </label>
+                </div>
+
+                {pdfInputType === 'upload' ? (
+                  <div>
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      onChange={handlePdfFileUpload}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      required={!formData.fileUrl}
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      💡 PDF 파일을 선택하면 Base64로 변환되어 저장됩니다. (브라우저에 저장됨)
+                    </p>
+                    {formData.fileUrl && formData.fileUrl.startsWith('data:') && (
+                      <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
+                        <p className="text-xs text-green-700">✓ PDF 파일이 업로드되었습니다.</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="url"
+                      value={formData.fileUrl && formData.fileUrl.startsWith('data:') ? '' : (formData.fileUrl || '')}
+                      onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      placeholder="예: /files/bulletin-2025-11.pdf 또는 https://..."
+                      required={!formData.fileUrl || !formData.fileUrl.startsWith('data:')}
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      💡 PDF 파일 URL을 입력하세요. (예: /files/bulletin-2025-11.pdf 또는 https://...)
+                    </p>
+                  </div>
+                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">썸네일 이미지 URL (선택)</label>
-                <input
-                  type="url"
-                  value={formData.thumbnailUrl}
-                  onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                  placeholder="예: /files/bulletin-2025-11-thumb.jpg"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  💡 주보의 썸네일 이미지 URL을 입력하세요. 없으면 기본 PDF 아이콘이 표시됩니다.
-                </p>
-                {formData.thumbnailUrl && (
-                  <div className="mt-3 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                    <img src={formData.thumbnailUrl} alt="썸네일 미리보기" className="w-full h-full object-cover" />
+                <label className="block text-sm font-medium text-gray-700 mb-2">썸네일 이미지 (선택)</label>
+                
+                {/* 입력 방식 선택 */}
+                <div className="flex gap-4 mb-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="thumbnailInputType"
+                      value="upload"
+                      checked={thumbnailInputType === 'upload'}
+                      onChange={(e) => setThumbnailInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">파일 업로드</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="thumbnailInputType"
+                      value="url"
+                      checked={thumbnailInputType === 'url'}
+                      onChange={(e) => setThumbnailInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">URL 입력</span>
+                  </label>
+                </div>
+
+                {thumbnailInputType === 'upload' ? (
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailFileUpload}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      💡 이미지 파일을 선택하면 Base64로 변환되어 저장됩니다.
+                    </p>
+                    {formData.thumbnailUrl && formData.thumbnailUrl.startsWith('data:') && (
+                      <div className="mt-3 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <img src={formData.thumbnailUrl} alt="썸네일 미리보기" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="url"
+                      value={formData.thumbnailUrl && formData.thumbnailUrl.startsWith('data:') ? '' : (formData.thumbnailUrl || '')}
+                      onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      placeholder="예: /files/bulletin-2025-11-thumb.jpg"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      💡 주보의 썸네일 이미지 URL을 입력하세요. 없으면 기본 PDF 아이콘이 표시됩니다.
+                    </p>
+                    {formData.thumbnailUrl && !formData.thumbnailUrl.startsWith('data:') && formData.thumbnailUrl.trim() !== '' && (
+                      <div className="mt-3 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <img src={formData.thumbnailUrl} alt="썸네일 미리보기" className="w-full h-full object-cover" />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

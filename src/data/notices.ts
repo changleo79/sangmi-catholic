@@ -2,6 +2,8 @@ export type NoticeItem = {
   title: string
   date: string // YYYY-MM-DD
   summary?: string
+  content?: string // 상세 내용
+  imageUrl?: string // 이미지 URL (선택)
   linkUrl?: string // optional detail or PDF link
 }
 

@@ -22,6 +22,8 @@ import MassManage from './pages/admin/MassManage'
 import BulletinsManage from './pages/admin/BulletinsManage'
 import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
+import NoticeDetail from './pages/NoticeDetail'
+import RecruitmentDetail from './pages/RecruitmentDetail'
 
 function ScrollToTopOnRouteChange() {
   const { pathname } = useLocation()
@@ -58,6 +60,8 @@ function App() {
                   <Route path="/about" element={<About />} />
                   <Route path="/notice" element={<Notice />} />
                   <Route path="/news" element={<News />} />
+                  <Route path="/news/:id" element={<NoticeDetail />} />
+                  <Route path="/recruitments/:id" element={<RecruitmentDetail />} />
                   <Route path="/albums" element={<Albums />} />
                   <Route path="/albums/:id" element={<AlbumDetail />} />
                   <Route path="/office" element={<Office />} />

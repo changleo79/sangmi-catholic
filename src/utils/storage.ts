@@ -7,6 +7,7 @@ export type RecruitmentItem = {
   id: string
   title: string
   summary: string
+  content?: string // 상세 내용
 }
 
 export type FAQItem = {
