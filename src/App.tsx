@@ -17,6 +17,7 @@ import NoticesManage from './pages/admin/NoticesManage'
 import RecruitmentsManage from './pages/admin/RecruitmentsManage'
 import FAQsManage from './pages/admin/FAQsManage'
 import AlbumsManage from './pages/admin/AlbumsManage'
+import MassManage from './pages/admin/MassManage'
 import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
 
@@ -98,6 +99,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <AlbumsManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/mass"
+                    element={
+                      <ProtectedRoute>
+                        <MassManage />
                       </ProtectedRoute>
                     }
                   />
