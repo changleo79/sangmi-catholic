@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getAlbums, getAlbumCategories, type AlbumWithCategory } from '../utils/storage'
+import { getAlbums, saveAlbums, getAlbumCategories, type AlbumWithCategory } from '../utils/storage'
+import img01 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
+import img02 from '../../사진파일/KakaoTalk_20251104_172439243_02.jpg'
+import img03 from '../../사진파일/KakaoTalk_20251104_172439243_03.jpg'
+import img04 from '../../사진파일/KakaoTalk_20251104_172439243_04.jpg'
 
 export default function Albums() {
   const [albums, setAlbums] = useState<AlbumWithCategory[]>([])
@@ -9,11 +13,37 @@ export default function Albums() {
 
   useEffect(() => {
     loadAlbums()
+    // 기본 앨범이 없으면 초기 데이터 생성
+    const stored = getAlbums()
+    if (stored.length === 0) {
+      initializeDefaultAlbum()
+      loadAlbums() // 다시 로드
+    }
   }, [])
 
   const loadAlbums = () => {
     const stored = getAlbums()
     setAlbums(stored)
+  }
+
+  const initializeDefaultAlbum = () => {
+    // 기본 앨범 데이터 생성 (4개 이미지)
+    const defaultAlbum: AlbumWithCategory = {
+      id: Date.now().toString(),
+      title: '상미성당 앨범',
+      date: new Date().toISOString().split('T')[0],
+      cover: img01,
+      category: '행사',
+      photos: [
+        { src: img01, alt: '성당 사진 1' },
+        { src: img02, alt: '성당 사진 2' },
+        { src: img03, alt: '성당 사진 3' },
+        { src: img04, alt: '성당 사진 4' }
+      ]
+    }
+    const albums = getAlbums()
+    albums.push(defaultAlbum)
+    saveAlbums(albums)
   }
 
   const filteredAlbums = selectedCategory === '전체' 

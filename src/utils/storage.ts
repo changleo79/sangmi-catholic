@@ -67,8 +67,13 @@ export const saveFAQs = (faqs: FAQItem[]): void => {
 export const getAlbums = (): AlbumWithCategory[] => {
   const stored = localStorage.getItem(ALBUMS_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    const parsed = JSON.parse(stored)
+    if (parsed.length > 0) {
+      return parsed
+    }
   }
+  
+  // 기본 앨범 데이터가 없으면 빈 배열 반환 (관리자가 추가할 수 있도록)
   return []
 }
 

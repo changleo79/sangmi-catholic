@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { notices as defaultNotices } from '../data/notices'
-import { getNotices } from '../utils/storage'
-import { getAlbums } from '../utils/storage'
+import { getNotices, getAlbums, saveAlbums } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
 
 import imgMain from '../../사진파일/메인이미지.jpg'
@@ -35,23 +34,41 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0)
   
   // Albums Preview Component
-  const [displayPhotos, setDisplayPhotos] = useState<string[]>([])
+  const [displayAlbums, setDisplayAlbums] = useState<Array<{id: string, cover: string, title: string}>>([])
   
   useEffect(() => {
+    // 기본 앨범이 없으면 생성
     const storedAlbums = getAlbums()
-    if (storedAlbums.length > 0) {
-      // 최근 앨범 4개의 커버 이미지 사용
-      const recentAlbums = storedAlbums.slice(0, 4)
-      const photos = recentAlbums.map(album => album.cover).filter(Boolean)
-      if (photos.length > 0) {
-        setDisplayPhotos(photos)
-      } else {
-        // 기본 이미지 사용
-        setDisplayPhotos(galleryPhotos)
+    if (storedAlbums.length === 0) {
+      // 기본 앨범 생성
+      const defaultAlbum: any = {
+        id: Date.now().toString(),
+        title: '상미성당 앨범',
+        date: new Date().toISOString().split('T')[0],
+        cover: galleryPhotos[0],
+        category: '행사',
+        photos: galleryPhotos.map((photo, i) => ({
+          src: photo,
+          alt: `성당 사진 ${i + 1}`
+        }))
       }
+      const albums = getAlbums()
+      albums.push(defaultAlbum)
+      saveAlbums(albums)
+      // 생성된 앨범으로 표시
+      setDisplayAlbums([{
+        id: defaultAlbum.id,
+        cover: defaultAlbum.cover,
+        title: defaultAlbum.title
+      }])
     } else {
-      // 기본 이미지 사용
-      setDisplayPhotos(galleryPhotos)
+      // 최근 앨범 4개 사용
+      const recentAlbums = storedAlbums.slice(0, 4).map(album => ({
+        id: album.id,
+        cover: album.cover || galleryPhotos[0],
+        title: album.title
+      }))
+      setDisplayAlbums(recentAlbums)
     }
   }, [])
   
@@ -356,15 +373,15 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {displayPhotos.map((src, i) => (
+            {displayAlbums.map((album, i) => (
               <Link
-                key={i}
-                to="/albums"
+                key={album.id || i}
+                to={album.id ? `/albums/${album.id}` : '/albums'}
                 className="group relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 active:scale-95"
               >
                 <div
                   className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110 image-placeholder"
-                  style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                  style={{ backgroundImage: `url(${album.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
