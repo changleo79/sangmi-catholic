@@ -9,7 +9,7 @@ export default function About() {
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
             성당소개
           </h1>
-          <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
+          <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
         
         {/* Main Content */}
@@ -141,17 +141,20 @@ export default function About() {
           </div>
 
           {/* Directions Link */}
-          <div className="rounded-2xl shadow-lg p-10 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
+          <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-10 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
             <h2 className="text-3xl font-bold mb-4">오시는 길</h2>
-            <p className="text-blue-100 mb-6 text-lg">
+            <p className="text-blue-100 mb-6 text-lg leading-relaxed">
               상세한 교통 안내와 지도를 확인하실 수 있습니다.
             </p>
             <Link
               to="/directions"
-              className="inline-block px-6 py-3 bg-white font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
               style={{ color: '#7B1F4B' }}
             >
-              지도 보기 →
+              지도 보기
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
           </div>
         </div>

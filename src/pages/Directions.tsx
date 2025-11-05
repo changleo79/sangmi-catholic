@@ -7,7 +7,7 @@ export default function Directions() {
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
             오시는 길
           </h1>
-          <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
+          <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
 
         <div className="max-w-6xl mx-auto">
@@ -30,7 +30,7 @@ export default function Directions() {
                 href="https://naver.me/58NxUcby"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
                 style={{ backgroundColor: '#7B1F4B' }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}

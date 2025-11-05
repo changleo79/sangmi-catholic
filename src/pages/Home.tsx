@@ -145,7 +145,7 @@ export default function Home() {
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/mass"
-                className="group px-8 py-4 rounded-xl bg-white text-gray-900 font-semibold hover:bg-gray-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1 flex items-center justify-center gap-2 min-w-[180px] relative overflow-hidden"
+                className="group px-8 py-4 rounded-xl bg-white text-gray-900 font-semibold hover:bg-gray-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 min-w-[180px] relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +155,7 @@ export default function Home() {
               </Link>
               <Link
                 to="/about"
-                className="group px-8 py-4 rounded-xl text-white font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1 flex items-center justify-center gap-2 min-w-[180px] relative overflow-hidden"
+                className="group px-8 py-4 rounded-xl text-white font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 min-w-[180px] relative overflow-hidden"
                 style={{ backgroundColor: '#7B1F4B' }}
                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
@@ -172,8 +172,12 @@ export default function Home() {
       </section>
 
       {/* Feature Cards with images (use local gallery as backgrounds) */}
-      <section ref={featureSectionRef} className="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
+      <section ref={featureSectionRef} className="py-20 md:py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-4">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">주요 안내</h2>
+            <div className="w-20 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Link
               to="/mass"
@@ -253,14 +257,17 @@ export default function Home() {
       {/* Notice Section */}
       <section ref={noticeSectionRef} className="py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">최근 공지사항</h2>
-              <div className="w-16 h-1 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
+          <div className="flex items-end justify-between mb-10">
+            <div className="flex items-center gap-4">
+              <div className="w-1 h-12 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">최근 공지사항</h2>
+                <div className="w-20 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+              </div>
             </div>
             <Link 
               to="/news" 
-              className="font-medium flex items-center gap-2 transition-colors group"
+              className="font-medium flex items-center gap-2 transition-all duration-300 group px-4 py-2 rounded-lg hover:bg-white hover:shadow-md"
               style={{ color: '#7B1F4B' }}
               onMouseEnter={(e) => { e.currentTarget.style.color = '#5a1538' }}
               onMouseLeave={(e) => { e.currentTarget.style.color = '#7B1F4B' }}
@@ -271,18 +278,19 @@ export default function Home() {
               </svg>
             </Link>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300">
             {recent.map((n, i) => (
-              <div 
-                key={i} 
-                className="p-6 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 flex items-center justify-between border-b border-gray-100 last:border-b-0 group cursor-pointer hover:pl-8"
+              <Link
+                key={i}
+                to="/news"
+                className="block p-6 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 flex items-center justify-between border-b border-gray-100 last:border-b-0 group cursor-pointer hover:pl-8 active:bg-purple-50/30"
               >
                 <div className="flex items-center gap-4 flex-1">
                   <div className="w-2 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100" style={{ backgroundColor: '#7B1F4B' }}></div>
-                  <span className="font-medium text-gray-900 transition-all duration-300 group-hover:font-semibold" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>{n.title}</span>
+                  <span className="font-medium text-gray-900 transition-all duration-300 group-hover:font-semibold group-hover:text-catholic-logo">{n.title}</span>
                 </div>
-                <span className="text-gray-400 text-sm font-medium group-hover:text-gray-500 transition-colors">{n.date}</span>
-              </div>
+                <span className="text-gray-400 text-sm font-medium group-hover:text-gray-600 transition-colors">{n.date}</span>
+              </Link>
             ))}
           </div>
         </div>
@@ -291,24 +299,27 @@ export default function Home() {
       {/* Simple Gallery using local images */}
       <section ref={gallerySectionRef} className="py-16 md:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">성당 앨범</h2>
-            <div className="w-16 h-1 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
+          <div className="mb-10 flex items-center gap-4">
+            <div className="w-1 h-12 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">성당 앨범</h2>
+              <div className="w-20 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+            </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {galleryPhotos.map((src, i) => (
               <div
                 key={i}
-                className="group relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2"
+                className="group relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 active:scale-95"
               >
                 <div
-                  className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110"
+                  className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110 image-placeholder"
                   style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300 shadow-xl">
+                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                     </svg>
                   </div>

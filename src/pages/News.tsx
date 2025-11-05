@@ -14,7 +14,7 @@ export default function News() {
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
             공지/소식
           </h1>
-          <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
+          <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
 
         <div className="max-w-6xl mx-auto space-y-12">
@@ -24,11 +24,11 @@ export default function News() {
               <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
               <h2 className="text-3xl font-bold text-gray-900">공지사항</h2>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
               {notices.map((n, i) => (
                 <div
                   key={i}
-                  className="p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 group cursor-pointer hover:pl-8"
+                  className="p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 group cursor-pointer hover:pl-8 active:bg-purple-50/30"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
