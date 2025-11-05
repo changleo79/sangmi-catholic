@@ -377,19 +377,26 @@ export default function Home() {
               <Link
                 key={album.id || i}
                 to={album.id ? `/albums/${album.id}` : '/albums'}
-                className="group relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 active:scale-95"
+                className="group flex flex-col rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 active:scale-95"
               >
-                <div
-                  className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110 image-placeholder"
-                  style={{ backgroundImage: `url(${album.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300 shadow-xl">
-                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                    </svg>
+                <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
+                  <div
+                    className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110 image-placeholder"
+                    style={{ backgroundImage: `url(${album.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300 shadow-xl">
+                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                    </div>
                   </div>
+                </div>
+                <div className="bg-white px-4 py-3 border-t border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-catholic-logo transition-colors">
+                    {album.title}
+                  </h3>
                 </div>
               </Link>
             ))}

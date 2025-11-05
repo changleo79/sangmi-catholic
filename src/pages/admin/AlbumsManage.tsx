@@ -58,16 +58,28 @@ export default function AlbumsManage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // 커버 이미지가 없으면 첫 번째 사진을 자동으로 사용
+    let finalCover = formData.cover
+    if (!finalCover && formData.photos.length > 0) {
+      finalCover = formData.photos[0].src
+    }
+    
+    const albumData = {
+      ...formData,
+      cover: finalCover || '' // 여전히 없으면 빈 문자열
+    }
+    
     const newAlbums = [...albums]
     
     if (editingId) {
       const index = newAlbums.findIndex(a => a.id === editingId)
       if (index !== -1) {
-        newAlbums[index] = formData
+        newAlbums[index] = albumData
       }
     } else {
       const newId = Date.now().toString()
-      newAlbums.unshift({ ...formData, id: newId })
+      newAlbums.unshift({ ...albumData, id: newId })
     }
     
     setAlbums(newAlbums)
@@ -188,16 +200,39 @@ export default function AlbumsManage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  커버 이미지 URL *
+                  커버 이미지 URL (선택)
+                  {(!formData.cover && formData.photos.length > 0) && (
+                    <span className="ml-2 text-xs text-gray-500">
+                      (첫 번째 사진이 자동으로 사용됩니다)
+                    </span>
+                  )}
                 </label>
                 <input
                   type="url"
                   value={formData.cover}
                   onChange={(e) => setFormData({ ...formData, cover: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                  placeholder="https://... 또는 /albums/..."
-                  required
+                  placeholder="https://... 또는 /albums/... 또는 프로젝트 내 이미지 경로 (선택사항)"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  💡 사용 방법: 외부 URL(https://...), 프로젝트 내 경로(/albums/...), 또는 로컬 이미지 경로를 입력하세요.
+                  <br />
+                  💡 비워두면 첫 번째 사진이 자동으로 커버 이미지로 사용됩니다.
+                  <br />
+                  예시: /albums/2025-11-성탄준비/001.jpg 또는 https://example.com/image.jpg
+                </p>
+                {(formData.cover || formData.photos.length > 0) && (
+                  <div className="mt-3 w-32 h-32 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                    <img 
+                      src={formData.cover || formData.photos[0]?.src || ''} 
+                      alt="커버 미리보기" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect fill="%23ddd" width="128" height="128"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3E이미지 없음%3C/text%3E%3C/svg%3E'
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               
               {/* 사진 추가 */}
@@ -205,14 +240,51 @@ export default function AlbumsManage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   사진 추가
                 </label>
+                
+                {/* 파일 업로드 */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    파일 업로드 (JPG, PNG)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || [])
+                      files.forEach((file) => {
+                        const reader = new FileReader()
+                        reader.onloadend = () => {
+                          const base64 = reader.result as string
+                          setFormData(prev => ({
+                            ...prev,
+                            photos: [...prev.photos, { src: base64, alt: file.name }]
+                          }))
+                        }
+                        reader.readAsDataURL(file)
+                      })
+                    }}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    💡 파일을 선택하면 Base64로 변환되어 저장됩니다. (브라우저에 저장됨)
+                  </p>
+                </div>
+                
                 <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    또는 URL로 추가
+                  </label>
                   <input
                     type="url"
                     value={newPhotoSrc}
                     onChange={(e) => setNewPhotoSrc(e.target.value)}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                    placeholder="이미지 URL"
+                    placeholder="이미지 URL (예: /albums/2025-11/001.jpg 또는 https://...)"
                   />
+                  <p className="text-xs text-gray-500">
+                    💡 외부 URL, 프로젝트 내 경로, 또는 로컬 이미지 경로를 입력하세요.
+                  </p>
                   <input
                     type="text"
                     value={newPhotoAlt}
@@ -225,7 +297,7 @@ export default function AlbumsManage() {
                     onClick={addPhoto}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                   >
-                    사진 추가
+                    URL로 사진 추가
                   </button>
                 </div>
                 
