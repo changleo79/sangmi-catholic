@@ -71,9 +71,9 @@ export default function Office() {
                     <p className="font-semibold text-gray-900 mb-4">운영시간</p>
                     <div className="space-y-2">
                       {[
-                        '화–금 : 09:00–19:00 (점심 12:00–13:00)',
-                        '토요일 : 09:00–17:00',
-                        '주일 : 07:00–13:00',
+                        '화–금 : 오전 9시부터 오후 6시 (점심 오후12시~오후1시)',
+                        '토요일 : 오전 9시부터 오후 5시',
+                        '주일 : 오전 9시부터 오후 4시 30분',
                         '월요일 : 휴무'
                       ].map((time, i) => (
                         <div key={i} className="flex items-center gap-2 text-gray-700">
@@ -130,7 +130,22 @@ export default function Office() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">고해성사</h3>
                 </div>
-                <p className="text-gray-600 text-sm">미사 전후 또는 사제와 약속 가능합니다.</p>
+                <p className="text-gray-600 text-sm">미사 30분 전부터 가능</p>
+              </section>
+
+              <section className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">미사예물 안내</h3>
+                </div>
+                <div className="space-y-2 text-gray-600 text-sm">
+                  <p>미사예물 신청은 사무실로 연락하시거나 미사 전후에 사무실을 방문하여 신청하실 수 있습니다.</p>
+                  <p className="pt-2 text-xs text-gray-500">※ 미사예물은 미사 전에 사무실에 제출해 주시기 바랍니다.</p>
+                </div>
               </section>
             </aside>
           </div>

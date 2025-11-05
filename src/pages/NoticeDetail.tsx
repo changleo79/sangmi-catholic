@@ -130,18 +130,14 @@ export default function NoticeDetail() {
               </div>
             )}
 
-            {notice.summary && !notice.content && (
-              <div className="mb-6 p-4 bg-gray-50 rounded-lg border-l-4" style={{ borderColor: '#7B1F4B' }}>
-                <p className="text-gray-700 leading-relaxed">{notice.summary}</p>
-              </div>
-            )}
-            
             {notice.content ? (
               <div className="prose prose-lg max-w-none">
                 <div className="text-gray-700 leading-relaxed whitespace-pre-line">{notice.content}</div>
               </div>
             ) : notice.summary ? (
-              <div className="text-gray-700 leading-relaxed">{notice.summary}</div>
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg border-l-4" style={{ borderColor: '#7B1F4B' }}>
+                <p className="text-gray-700 leading-relaxed">{notice.summary}</p>
+              </div>
             ) : (
               <div className="text-gray-500">내용이 없습니다.</div>
             )}

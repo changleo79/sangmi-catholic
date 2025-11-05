@@ -108,6 +108,11 @@ export default function Mass() {
                     ))}
                   </div>
                 </div>
+                <div className="pt-4 border-t border-gray-200">
+                  <p className="text-xs text-gray-500 text-center">
+                    업데이트 기준: {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
               </div>
             </div>
 
