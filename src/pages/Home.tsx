@@ -275,7 +275,7 @@ export default function Home() {
               </div>
               <div className="p-6">
                 <h3 className="text-xl font-bold mb-2 transition-colors duration-300 group" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>공지/소식</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">성당 소식, 단체 모집, 주보 안내</p>
+                <p className="text-gray-600 text-sm leading-relaxed">성당 소식, 단체 소식, 주보 안내</p>
               </div>
             </Link>
 

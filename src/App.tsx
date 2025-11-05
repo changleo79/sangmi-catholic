@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import Header from './components/Header'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
+import ScrollProgress from './components/ScrollProgress'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -18,6 +19,7 @@ import RecruitmentsManage from './pages/admin/RecruitmentsManage'
 import FAQsManage from './pages/admin/FAQsManage'
 import AlbumsManage from './pages/admin/AlbumsManage'
 import MassManage from './pages/admin/MassManage'
+import BulletinsManage from './pages/admin/BulletinsManage'
 import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
 
@@ -38,6 +40,7 @@ function ScrollToTopOnRouteChange() {
 function App() {
   return (
     <Router>
+      <ScrollProgress />
       <ScrollToTopOnRouteChange />
       <Routes>
         {/* Admin Login - No Header/Footer */}
@@ -107,6 +110,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <MassManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/bulletins"
+                    element={
+                      <ProtectedRoute>
+                        <BulletinsManage />
                       </ProtectedRoute>
                     }
                   />

@@ -40,6 +40,15 @@ export type CatechismInfo = {
   contact: string
 }
 
+export type BulletinItem = {
+  id: string
+  title: string // 예: "2025년 11월 주보"
+  date: string // YYYY-MM-DD
+  fileUrl: string // PDF 파일 URL
+  thumbnailUrl?: string // 썸네일 이미지 URL (선택)
+  description?: string // 설명 (선택)
+}
+
 // 공지사항 관리
 const NOTICES_KEY = 'admin_notices'
 const RECRUITMENTS_KEY = 'admin_recruitments'
@@ -48,6 +57,7 @@ const ALBUMS_KEY = 'admin_albums'
 const MASS_SCHEDULE_KEY = 'admin_mass_schedule'
 const SACRAMENTS_KEY = 'admin_sacraments'
 const CATECHISM_KEY = 'admin_catechism'
+const BULLETINS_KEY = 'admin_bulletins'
 
 export const getNotices = (): NoticeItem[] => {
   const stored = localStorage.getItem(NOTICES_KEY)
@@ -145,6 +155,19 @@ export const getCatechismInfo = (): CatechismInfo | null => {
 
 export const saveCatechismInfo = (info: CatechismInfo): void => {
   localStorage.setItem(CATECHISM_KEY, JSON.stringify(info))
+}
+
+// 주보 안내 관리
+export const getBulletins = (): BulletinItem[] => {
+  const stored = localStorage.getItem(BULLETINS_KEY)
+  if (stored) {
+    return JSON.parse(stored)
+  }
+  return []
+}
+
+export const saveBulletins = (bulletins: BulletinItem[]): void => {
+  localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
 }
 
 // 초기 데이터 로드 (기존 데이터 파일과 동기화)

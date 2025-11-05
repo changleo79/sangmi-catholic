@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import logo2 from '../../사진파일/상미성당 로고2.png'
+import SearchBar from './SearchBar'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -52,6 +53,10 @@ export default function Header() {
               ))}
             </nav>
 
+            <div className="hidden md:flex items-center gap-4">
+              <SearchBar />
+            </div>
+
             <button
               className="md:hidden text-gray-700 ml-4 relative z-50"
               onClick={toggleMenu}
@@ -90,6 +95,11 @@ export default function Header() {
             }}
           >
             <div className="h-full flex flex-col">
+              {/* 검색바 (모바일) */}
+              <div className="px-6 pt-6 pb-4 border-b border-gray-200">
+                <SearchBar />
+              </div>
+
               {/* 메뉴 항목 */}
               <nav className="flex-1 overflow-y-auto p-6 pt-8">
                 {menuItems.map((item) => {

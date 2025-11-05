@@ -211,5 +211,35 @@
   * {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  /* Print styles */
+  @media print {
+    @page {
+      margin: 1cm;
+    }
+
+    body {
+      background: white;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+
+    header,
+    footer,
+    nav,
+    button:not(.print-button) {
+      display: none !important;
+    }
+
+    .print\:hidden {
+      display: none !important;
+    }
+
+    .print\:block {
+      display: block !important;
+    }
+  }
 }
 

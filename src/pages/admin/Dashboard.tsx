@@ -33,7 +33,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Management Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
           <Link
             to="/admin/notices"
             className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
@@ -56,8 +56,8 @@ export default function AdminDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">단체 모집 관리</h2>
-            <p className="text-gray-600">단체 모집 정보를 관리할 수 있습니다.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">단체 소식 관리</h2>
+            <p className="text-gray-600">단체 소식 정보를 관리할 수 있습니다.</p>
           </Link>
 
           <Link
@@ -97,6 +97,19 @@ export default function AdminDashboard() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">미사시간 및 성사안내 관리</h2>
             <p className="text-gray-600">미사 시간과 성사 안내를 관리할 수 있습니다.</p>
+          </Link>
+
+          <Link
+            to="/admin/bulletins"
+            className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
+          >
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">주보 안내 관리</h2>
+            <p className="text-gray-600">주보를 추가, 수정, 삭제할 수 있습니다.</p>
           </Link>
         </div>
 

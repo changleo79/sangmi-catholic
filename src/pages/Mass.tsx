@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getMassSchedule, getSacraments, getCatechismInfo } from '../utils/storage'
 import type { MassScheduleItem, SacramentItem, CatechismInfo } from '../utils/storage'
+import ShareButton from '../components/ShareButton'
 
 export default function Mass() {
   const [massSchedule, setMassSchedule] = useState<MassScheduleItem[]>([])
@@ -58,9 +59,12 @@ export default function Mass() {
       <div className="container mx-auto px-4 py-16">
         {/* Page Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-            미사와 성사
-          </h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 tracking-tight">
+              미사와 성사
+            </h1>
+            <ShareButton url="/mass" title="미사와 성사" description="상미성당 미사 시간 및 성사 안내" />
+          </div>
           <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
 
@@ -68,14 +72,26 @@ export default function Mass() {
           {/* 미사 시간 & 성사 안내 Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* 미사 시간 */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1 print:shadow-none">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300 print:hidden" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900">미사 시간</h2>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">미사 시간</h2>
+                <button
+                  onClick={() => window.print()}
+                  className="hidden print:block md:block p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-catholic-logo"
+                  aria-label="인쇄하기"
+                  style={{ color: '#7B1F4B' }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                </button>
               </div>
               <div className="space-y-6">
                 <div>

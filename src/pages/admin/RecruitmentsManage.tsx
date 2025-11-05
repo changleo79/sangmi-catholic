@@ -82,7 +82,7 @@ export default function RecruitmentsManage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">단체 모집 관리</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">단체 소식 관리</h1>
               <div className="w-24 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
             </div>
             <Link
@@ -98,7 +98,7 @@ export default function RecruitmentsManage() {
           {/* Form */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              {isEditing ? '단체 모집 수정' : '새 단체 모집 추가'}
+              {isEditing ? '단체 소식 수정' : '새 단체 소식 추가'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -150,10 +150,10 @@ export default function RecruitmentsManage() {
 
           {/* List */}
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">단체 모집 목록</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">단체 소식 목록</h2>
             <div className="space-y-4">
               {recruitments.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">단체 모집 정보가 없습니다.</p>
+                <p className="text-gray-500 text-center py-8">단체 소식 정보가 없습니다.</p>
               ) : (
                 recruitments.map((item) => (
                   <div

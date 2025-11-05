@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { notices as defaultNotices } from '../data/notices'
 import { getNotices } from '../utils/storage'
-import { getRecruitments, type RecruitmentItem } from '../utils/storage'
+import { getRecruitments, getBulletins, type RecruitmentItem, type BulletinItem } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
 
 export default function News() {
   const [notices, setNotices] = useState<NoticeItem[]>([])
   const [recruit, setRecruit] = useState<RecruitmentItem[]>([])
+  const [bulletins, setBulletins] = useState<BulletinItem[]>([])
 
   useEffect(() => {
     // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
@@ -27,6 +28,9 @@ export default function News() {
         { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
       ])
     }
+
+    const storedBulletins = getBulletins()
+    setBulletins(storedBulletins)
   }, [])
 
   return (
@@ -74,11 +78,11 @@ export default function News() {
             </div>
           </section>
 
-          {/* 단체 모집 Section */}
+          {/* 단체 소식 Section */}
           <section>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
-              <h2 className="text-3xl font-bold text-gray-900">단체 모집</h2>
+              <h2 className="text-3xl font-bold text-gray-900">단체 소식</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {recruit.map((r) => (
@@ -102,6 +106,70 @@ export default function News() {
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* 주보 안내 Section */}
+          <section>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
+              <h2 className="text-3xl font-bold text-gray-900">주보 안내</h2>
+            </div>
+            {bulletins.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {bulletins.map((bulletin) => (
+                  <a
+                    key={bulletin.id}
+                    href={bulletin.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-100 hover:border-catholic-logo/20 group cursor-pointer hover:-translate-y-1"
+                  >
+                    <div className="flex flex-col h-full">
+                      {bulletin.thumbnailUrl ? (
+                        <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gray-100">
+                          <img
+                            src={bulletin.thumbnailUrl}
+                            alt={bulletin.title}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                        </div>
+                      ) : (
+                        <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center">
+                          <div className="text-center p-4">
+                            <svg className="w-16 h-16 mx-auto mb-3 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p className="text-sm text-gray-500 font-medium">PDF</p>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2 transition-colors duration-300 group-hover:text-catholic-logo line-clamp-2">
+                          {bulletin.title}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-3">{bulletin.date}</p>
+                        {bulletin.description && (
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{bulletin.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 text-catholic-logo font-medium text-sm group-hover:gap-3 transition-all">
+                          <span>주보 보기</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
+                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-gray-500 text-lg">등록된 주보가 없습니다.</p>
+              </div>
+            )}
           </section>
         </div>
       </div>
