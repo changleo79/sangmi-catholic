@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { notices } from '../data/notices'
-import { albums } from '../data/albums'
+import { notices as defaultNotices } from '../data/notices'
+import { getNotices } from '../utils/storage'
+import { getAlbums } from '../utils/storage'
+import type { NoticeItem } from '../data/notices'
 
 import imgMain from '../../사진파일/메인이미지.jpg'
 import img01 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
@@ -13,12 +15,45 @@ export default function Home() {
   const featureSectionRef = useRef<HTMLElement>(null)
   const noticeSectionRef = useRef<HTMLElement>(null)
   const gallerySectionRef = useRef<HTMLElement>(null)
-  const recent = notices.slice(0, 3)
+  const [notices, setNotices] = useState<NoticeItem[]>([])
   const galleryPhotos = [img01, img02, img03, img04]
+  
+  useEffect(() => {
+    // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
+    const storedNotices = getNotices()
+    if (storedNotices.length > 0) {
+      setNotices(storedNotices)
+    } else {
+      setNotices(defaultNotices)
+    }
+  }, [])
+  
+  const recent = notices.slice(0, 3)
   
   // 슬라이드 이미지 배열 (메인이미지가 첫 번째, 서브 이미지 2개 추가)
   const slideImages = [imgMain, img01, img02]
   const [currentSlide, setCurrentSlide] = useState(0)
+  
+  // Albums Preview Component
+  const [displayPhotos, setDisplayPhotos] = useState<string[]>([])
+  
+  useEffect(() => {
+    const storedAlbums = getAlbums()
+    if (storedAlbums.length > 0) {
+      // 최근 앨범 4개의 커버 이미지 사용
+      const recentAlbums = storedAlbums.slice(0, 4)
+      const photos = recentAlbums.map(album => album.cover).filter(Boolean)
+      if (photos.length > 0) {
+        setDisplayPhotos(photos)
+      } else {
+        // 기본 이미지 사용
+        setDisplayPhotos(galleryPhotos)
+      }
+    } else {
+      // 기본 이미지 사용
+      setDisplayPhotos(galleryPhotos)
+    }
+  }, [])
   
   // 자동 슬라이드
   useEffect(() => {
@@ -299,17 +334,32 @@ export default function Home() {
       {/* Simple Gallery using local images */}
       <section ref={gallerySectionRef} className="py-16 md:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="mb-10 flex items-center gap-4">
-            <div className="w-1 h-12 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">성당 앨범</h2>
-              <div className="w-20 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+          <div className="mb-10 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-1 h-12 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">성당 앨범</h2>
+                <div className="w-20 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+              </div>
             </div>
+            <Link
+              to="/albums"
+              className="font-medium flex items-center gap-2 transition-all duration-300 group px-4 py-2 rounded-lg hover:bg-gray-100 hover:shadow-md"
+              style={{ color: '#7B1F4B' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#5a1538' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#7B1F4B' }}
+            >
+              전체 보기
+              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {galleryPhotos.map((src, i) => (
-              <div
+            {displayPhotos.map((src, i) => (
+              <Link
                 key={i}
+                to="/albums"
                 className="group relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 active:scale-95"
               >
                 <div
@@ -324,7 +374,7 @@ export default function Home() {
                     </svg>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

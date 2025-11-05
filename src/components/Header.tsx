@@ -19,6 +19,7 @@ export default function Header() {
     { path: '/about', label: '성당소개' },
     { path: '/news', label: '공지/소식' },
     { path: '/mass', label: '미사와 성사' },
+    { path: '/albums', label: '성당앨범' },
     { path: '/office', label: '성당업무' },
     { path: '/directions', label: '오시는 길' },
   ]

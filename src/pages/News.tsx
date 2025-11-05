@@ -1,10 +1,33 @@
-import { notices } from '../data/notices'
+import { useState, useEffect } from 'react'
+import { notices as defaultNotices } from '../data/notices'
+import { getNotices } from '../utils/storage'
+import { getRecruitments, type RecruitmentItem } from '../utils/storage'
+import type { NoticeItem } from '../data/notices'
 
 export default function News() {
-  const recruit = [
-    { title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
-    { title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
-  ]
+  const [notices, setNotices] = useState<NoticeItem[]>([])
+  const [recruit, setRecruit] = useState<RecruitmentItem[]>([])
+
+  useEffect(() => {
+    // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
+    const storedNotices = getNotices()
+    if (storedNotices.length > 0) {
+      setNotices(storedNotices)
+    } else {
+      setNotices(defaultNotices)
+    }
+
+    const storedRecruitments = getRecruitments()
+    if (storedRecruitments.length > 0) {
+      setRecruit(storedRecruitments)
+    } else {
+      // 기본값
+      setRecruit([
+        { id: '1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
+        { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
+      ])
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -58,9 +81,9 @@ export default function News() {
               <h2 className="text-3xl font-bold text-gray-900">단체 모집</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {recruit.map((r, i) => (
+              {recruit.map((r) => (
                 <div
-                  key={i}
+                  key={r.id}
                   className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 group cursor-pointer hover:-translate-y-1"
                 >
                   <div className="flex items-start gap-4">

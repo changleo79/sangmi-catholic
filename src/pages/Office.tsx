@@ -1,18 +1,23 @@
+import { useState, useEffect } from 'react'
+import { getFAQs, type FAQItem } from '../utils/storage'
+
 export default function Office() {
-  const faqs = [
-    {
-      question: '세례성사는 어떻게 신청하나요?',
-      answer: '예비신자 교리학교 등록 후 사무실을 통해 안내드립니다.'
-    },
-    {
-      question: '혼인성사 준비는 어떻게 하나요?',
-      answer: '사무실로 연락하셔서 사제와 상담 일정을 잡아주세요.'
-    },
-    {
-      question: '주보는 어디서 볼 수 있나요?',
-      answer: '공지/소식 페이지에 주보 PDF가 업로드될 예정입니다.'
+  const [faqs, setFaqs] = useState<FAQItem[]>([])
+
+  useEffect(() => {
+    // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
+    const storedFAQs = getFAQs()
+    if (storedFAQs.length > 0) {
+      setFaqs(storedFAQs)
+    } else {
+      // 기본값
+      setFaqs([
+        { id: '1', question: '세례성사는 어떻게 신청하나요?', answer: '예비신자 교리학교 등록 후 사무실을 통해 안내드립니다.' },
+        { id: '2', question: '혼인성사 준비는 어떻게 하나요?', answer: '사무실로 연락하셔서 사제와 상담 일정을 잡아주세요.' },
+        { id: '3', question: '주보는 어디서 볼 수 있나요?', answer: '공지/소식 페이지에 주보 PDF가 업로드될 예정입니다.' }
+      ])
     }
-  ]
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -92,8 +97,8 @@ export default function Office() {
                   <h2 className="text-2xl font-bold text-gray-900">자주 묻는 질문</h2>
                 </div>
                 <div className="space-y-4">
-                  {faqs.map((faq, i) => (
-                    <div key={i} className="p-4 rounded-xl bg-gray-50 border border-gray-100 hover:bg-gray-100 hover:border-catholic-logo/20 transition-all duration-300 group cursor-pointer">
+                  {faqs.map((faq) => (
+                    <div key={faq.id} className="p-4 rounded-xl bg-gray-50 border border-gray-100 hover:bg-gray-100 hover:border-catholic-logo/20 transition-all duration-300 group cursor-pointer">
                       <h3 className="font-semibold text-gray-900 mb-2 transition-colors group" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>{faq.question}</h3>
                       <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
                     </div>
