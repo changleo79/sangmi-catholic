@@ -24,6 +24,7 @@ export type AlbumWithCategory = Album & {
 const NOTICES_KEY = 'admin_notices'
 const RECRUITMENTS_KEY = 'admin_recruitments'
 const FAQS_KEY = 'admin_faqs'
+const ALBUMS_KEY = 'admin_albums'
 
 export const getNotices = (): NoticeItem[] => {
   const stored = localStorage.getItem(NOTICES_KEY)
