@@ -25,6 +25,10 @@ import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
 import NoticeDetail from './pages/NoticeDetail'
 import RecruitmentDetail from './pages/RecruitmentDetail'
+import Organizations from './pages/Organizations'
+import OrganizationBoard from './pages/OrganizationBoard'
+import OrganizationPostDetail from './pages/OrganizationPostDetail'
+import OrganizationsManage from './pages/admin/OrganizationsManage'
 
 function ScrollToTopOnRouteChange() {
   const { pathname } = useLocation()
@@ -70,6 +74,9 @@ function App() {
                   <Route path="/recruitments/:id" element={<RecruitmentDetail />} />
                   <Route path="/albums" element={<Albums />} />
                   <Route path="/albums/:id" element={<AlbumDetail />} />
+                  <Route path="/organizations" element={<Organizations />} />
+                  <Route path="/organizations/:orgType" element={<OrganizationBoard />} />
+                  <Route path="/organizations/:orgType/posts/:postId" element={<OrganizationPostDetail />} />
                   <Route path="/office" element={<Office />} />
                   <Route path="/directions" element={<Directions />} />
                   <Route path="/mass" element={<Mass />} />
@@ -128,6 +135,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <BulletinsManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/organizations"
+                    element={
+                      <ProtectedRoute>
+                        <OrganizationsManage />
                       </ProtectedRoute>
                     }
                   />

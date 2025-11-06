@@ -51,6 +51,39 @@ export type BulletinItem = {
   description?: string // 설명 (선택)
 }
 
+// 단체 타입
+export type OrganizationType = 
+  | '총회장'
+  | '총무'
+  | '소공동체위원회'
+  | '전례위원회'
+  | '제분과위원회'
+  | '청소년위원회'
+  | '재정위원회'
+  | '평신도협의회'
+
+// 첨부파일 타입
+export type AttachmentFile = {
+  id: string
+  name: string // 파일명
+  url: string // 파일 URL (Base64 또는 외부 URL)
+  type: 'image' | 'pdf' | 'document' | 'other' // 파일 타입
+  size?: number // 파일 크기 (bytes)
+}
+
+// 단체 게시글 타입
+export type OrganizationPost = {
+  id: string
+  organization: OrganizationType // 단체
+  title: string // 제목
+  content: string // 내용
+  date: string // YYYY-MM-DD
+  author?: string // 작성자
+  attachments?: AttachmentFile[] // 첨부파일
+  imageUrl?: string // 대표 이미지
+  isImportant?: boolean // 중요 게시글
+}
+
 // 공지사항 관리
 const NOTICES_KEY = 'admin_notices'
 const RECRUITMENTS_KEY = 'admin_recruitments'
@@ -60,6 +93,8 @@ const MASS_SCHEDULE_KEY = 'admin_mass_schedule'
 const SACRAMENTS_KEY = 'admin_sacraments'
 const CATECHISM_KEY = 'admin_catechism'
 const BULLETINS_KEY = 'admin_bulletins'
+const ORGANIZATIONS_KEY = 'admin_organizations'
+const ORGANIZATION_POSTS_KEY = 'admin_organization_posts'
 
 // JSON 파일 로드 헬퍼 함수
 const loadJSON = async <T>(path: string, fallback: T): Promise<T> => {
@@ -84,12 +119,13 @@ let cachedData: {
   sacraments?: SacramentItem[]
   catechism?: CatechismInfo | null
   bulletins?: BulletinItem[]
+  organizationPosts?: OrganizationPost[]
 } = {}
 
 // 데이터 초기화 (페이지 로드 시 한 번만 실행)
 export const initializeData = async (): Promise<void> => {
   try {
-    const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins] = await Promise.all([
+    const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins, organizationPosts] = await Promise.all([
       loadJSON<NoticeItem[]>('/data/notices.json', []),
       loadJSON<RecruitmentItem[]>('/data/recruitments.json', []),
       loadJSON<FAQItem[]>('/data/faqs.json', []),
@@ -97,7 +133,8 @@ export const initializeData = async (): Promise<void> => {
       loadJSON<MassScheduleItem[]>('/data/mass-schedule.json', []),
       loadJSON<SacramentItem[]>('/data/sacraments.json', []),
       loadJSON<CatechismInfo | null>('/data/catechism.json', null),
-      loadJSON<BulletinItem[]>('/data/bulletins.json', [])
+      loadJSON<BulletinItem[]>('/data/bulletins.json', []),
+      loadJSON<OrganizationPost[]>('/data/organization-posts.json', [])
     ])
     
     cachedData = {
@@ -108,7 +145,8 @@ export const initializeData = async (): Promise<void> => {
       massSchedule,
       sacraments,
       catechism,
-      bulletins
+      bulletins,
+      organizationPosts
     }
     
     // localStorage에 캐시 (오프라인 지원)
@@ -120,6 +158,7 @@ export const initializeData = async (): Promise<void> => {
     if (sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
     if (catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
     if (bulletins.length > 0) localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
+    if (organizationPosts.length > 0) localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(organizationPosts))
   } catch (e) {
     console.error('데이터 초기화 실패:', e)
   }
@@ -384,6 +423,94 @@ export const exportBulletins = (): void => {
   a.download = 'bulletins.json'
   a.click()
   URL.revokeObjectURL(url)
+}
+
+// 단체 게시글 관리
+export const getOrganizationPosts = (organization?: OrganizationType): OrganizationPost[] => {
+  if (organization) {
+    const all = getOrganizationPosts()
+    return all.filter(post => post.organization === organization)
+  }
+  
+  if (cachedData.organizationPosts) return cachedData.organizationPosts
+  
+  const stored = localStorage.getItem(ORGANIZATION_POSTS_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
+  }
+  return []
+}
+
+export const saveOrganizationPosts = (posts: OrganizationPost[]): void => {
+  localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(posts))
+  cachedData.organizationPosts = posts
+}
+
+export const exportOrganizationPosts = (): void => {
+  const data = getOrganizationPosts()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'organization-posts.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// 단체 목록 및 정보
+export const getOrganizationTypes = (): OrganizationType[] => {
+  return [
+    '총회장',
+    '총무',
+    '소공동체위원회',
+    '전례위원회',
+    '제분과위원회',
+    '청소년위원회',
+    '재정위원회',
+    '평신도협의회'
+  ]
+}
+
+export const getOrganizationInfo = (type: OrganizationType): { name: string; description: string } => {
+  const info: Record<OrganizationType, { name: string; description: string }> = {
+    '총회장': {
+      name: '총회장',
+      description: '성당의 전반적인 사목 방향과 계획을 수립하고 조율하는 역할을 담당합니다. 각 위원회와 단체 간의 협력과 소통을 이끌어갑니다.'
+    },
+    '총무': {
+      name: '총무',
+      description: '성당의 행정 업무와 일상적인 운영을 관리합니다. 각종 행사와 모임의 준비 및 진행을 지원합니다.'
+    },
+    '소공동체위원회': {
+      name: '소공동체위원회',
+      description: '신자들이 작은 공동체로 모여 함께 기도하고 나눔을 실천하는 소공동체 활동을 지원하고 조율합니다.'
+    },
+    '전례위원회': {
+      name: '전례위원회',
+      description: '미사와 전례 행사를 준비하고 진행합니다. 성가대, 봉사자 배치, 전례 장식 등을 담당합니다.'
+    },
+    '제분과위원회': {
+      name: '제분과위원회',
+      description: '성당의 각종 행사와 모임을 기획하고 실행합니다. 축제, 세미나, 교육 프로그램 등을 준비합니다.'
+    },
+    '청소년위원회': {
+      name: '청소년위원회',
+      description: '청소년 신자들의 신앙 성장과 공동체 활동을 지원합니다. 청소년 미사, 모임, 캠프 등을 기획합니다.'
+    },
+    '재정위원회': {
+      name: '재정위원회',
+      description: '성당의 재정 관리와 예산 편성을 담당합니다. 투명하고 책임감 있는 재정 운영을 위해 노력합니다.'
+    },
+    '평신도협의회': {
+      name: '평신도협의회',
+      description: '평신도들의 의견을 수렴하고 성당 운영에 참여합니다. 신자들의 목소리를 대변하고 소통합니다.'
+    }
+  }
+  return info[type] || { name: type, description: '' }
 }
 
 // JSON 파일 가져오기 (업로드)
