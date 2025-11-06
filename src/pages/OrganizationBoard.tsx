@@ -10,7 +10,7 @@ export default function OrganizationBoard() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  useEffect(() => {
+  const loadPosts = () => {
     if (orgType) {
       const decoded = decodeURIComponent(orgType)
       const orgPosts = getOrganizationPosts(decoded as OrganizationType)
@@ -20,6 +20,30 @@ export default function OrganizationBoard() {
         if (!a.isImportant && b.isImportant) return 1
         return new Date(b.date).getTime() - new Date(a.date).getTime()
       }))
+    }
+  }
+
+  useEffect(() => {
+    loadPosts()
+  }, [orgType])
+
+  useEffect(() => {
+    // 데이터 업데이트 이벤트 리스너
+    const handleUpdate = () => {
+      loadPosts()
+    }
+    
+    // 페이지 포커스 시 데이터 다시 로드
+    const handleFocus = () => {
+      loadPosts()
+    }
+    
+    window.addEventListener('organizationPostsUpdated', handleUpdate)
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('organizationPostsUpdated', handleUpdate)
+      window.removeEventListener('focus', handleFocus)
     }
   }, [orgType])
 

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { 
   getOrganizationTypes, 
@@ -10,6 +11,7 @@ import {
 } from '../utils/storage'
 
 export default function Organizations() {
+  const [refreshKey, setRefreshKey] = useState(0)
   const allOrganizations = getOrganizationTypes()
   
   // 상위 위원회만 필터링
@@ -23,6 +25,26 @@ export default function Organizations() {
     '재정위원회',
     '평신도협의회'
   ]
+
+  useEffect(() => {
+    // 데이터 업데이트 이벤트 리스너
+    const handleUpdate = () => {
+      setRefreshKey(prev => prev + 1)
+    }
+    
+    // 페이지 포커스 시 데이터 다시 로드
+    const handleFocus = () => {
+      setRefreshKey(prev => prev + 1)
+    }
+    
+    window.addEventListener('organizationPostsUpdated', handleUpdate)
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('organizationPostsUpdated', handleUpdate)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">

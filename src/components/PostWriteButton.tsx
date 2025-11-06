@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getOrganizationTypes, type OrganizationType } from '../utils/storage'
+import { getOrganizationTypes, saveOrganizationPosts, initializeData, type OrganizationType } from '../utils/storage'
 
 interface PostWriteButtonProps {
   organization: OrganizationType
@@ -36,13 +36,17 @@ export default function PostWriteButton({ organization, className = '' }: PostWr
     }
     
     existingPosts.unshift(newPost)
-    localStorage.setItem('admin_organization_posts', JSON.stringify(existingPosts))
+    saveOrganizationPosts(existingPosts)
     
-    // 데이터 새로고침을 위해 페이지 리로드
+    // 캐시 업데이트
+    await initializeData()
+    
+    // 커스텀 이벤트 발생하여 다른 컴포넌트에 알림
+    window.dispatchEvent(new CustomEvent('organizationPostsUpdated'))
+    
     alert('게시글이 등록되었습니다.')
     setShowModal(false)
     setFormData({ title: '', content: '', author: '', isImportant: false })
-    window.location.reload()
   }
 
   return (
