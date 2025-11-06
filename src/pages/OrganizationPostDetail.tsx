@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getOrganizationPosts, getOrganizationInfo, type OrganizationPost, type OrganizationType } from '../utils/storage'
+import { getOrganizationPosts, getOrganizationInfo, saveOrganizationPosts, initializeData, type OrganizationPost, type OrganizationType, type AttachmentFile } from '../utils/storage'
 import { isAuthenticated } from '../utils/auth'
 import ShareButton from '../components/ShareButton'
 import ImageLightbox from '../components/ImageLightbox'
@@ -9,6 +9,10 @@ export default function OrganizationPostDetail() {
   const { orgType, postId } = useParams<{ orgType: string; postId: string }>()
   const [post, setPost] = useState<OrganizationPost | null>(null)
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [formData, setFormData] = useState<OrganizationPost | null>(null)
+  const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url')
+  const [attachmentInputType, setAttachmentInputType] = useState<'upload' | 'url'>('upload')
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -116,7 +120,19 @@ export default function OrganizationPostDetail() {
             <div className="flex items-center gap-3">
               {isAuthenticated() && (
                 <button
-                  onClick={() => navigate(`/admin/organizations?edit=${post.id}&returnTo=${encodeURIComponent(window.location.pathname)}`)}
+                  onClick={() => {
+                    setFormData({ ...post, attachments: post.attachments || [] })
+                    if (post.imageUrl && post.imageUrl.startsWith('data:')) {
+                      setImageInputType('upload')
+                    } else {
+                      setImageInputType('url')
+                    }
+                    if (post.attachments && post.attachments.length > 0) {
+                      const hasBase64 = post.attachments.some(att => att.url.startsWith('data:'))
+                      setAttachmentInputType(hasBase64 ? 'upload' : 'url')
+                    }
+                    setShowEditModal(true)
+                  }}
                   className="px-4 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
                   style={{ backgroundColor: '#7B1F4B' }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
@@ -207,6 +223,304 @@ export default function OrganizationPostDetail() {
           imageAlt={post.title}
           onClose={() => setLightboxImage(null)}
         />
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && formData && (
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowEditModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">게시글 수정</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (!formData) return
+              
+              const allPosts = getOrganizationPosts()
+              const updatedPosts = allPosts.map(p => p.id === post.id ? { ...formData, id: post.id } : p)
+              saveOrganizationPosts(updatedPosts)
+              initializeData()
+              
+              // 게시글 업데이트
+              setPost({ ...formData, id: post.id })
+              setShowEditModal(false)
+              window.dispatchEvent(new CustomEvent('organizationPostsUpdated'))
+              alert('게시글이 수정되었습니다.')
+            }} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">제목 *</label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">내용 *</label>
+                <textarea
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                  rows={10}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">작성일 *</label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">작성자</label>
+                <input
+                  type="text"
+                  value={formData.author || ''}
+                  onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.isImportant || false}
+                    onChange={(e) => setFormData({ ...formData, isImportant: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-medium text-gray-700">중요 게시글</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">대표 이미지 (선택)</label>
+                <div className="flex gap-4 mb-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="imageInputType"
+                      value="upload"
+                      checked={imageInputType === 'upload'}
+                      onChange={(e) => setImageInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">파일 업로드</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="imageInputType"
+                      value="url"
+                      checked={imageInputType === 'url'}
+                      onChange={(e) => setImageInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">URL 입력</span>
+                  </label>
+                </div>
+
+                {imageInputType === 'upload' ? (
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          const reader = new FileReader()
+                          reader.onload = (event) => {
+                            const base64 = event.target?.result as string
+                            setFormData({ ...formData, imageUrl: base64 })
+                          }
+                          reader.readAsDataURL(file)
+                        }
+                      }}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                    />
+                    {formData.imageUrl && formData.imageUrl.startsWith('data:') && (
+                      <div className="mt-3 w-full max-w-md rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <img src={formData.imageUrl} alt="이미지 미리보기" className="w-full h-auto object-contain" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="url"
+                      value={formData.imageUrl && !formData.imageUrl.startsWith('data:') ? formData.imageUrl : ''}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      placeholder="예: /images/post.jpg"
+                    />
+                    {formData.imageUrl && !formData.imageUrl.startsWith('data:') && formData.imageUrl.trim() !== '' && (
+                      <div className="mt-3 w-full max-w-md rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <img src={formData.imageUrl} alt="이미지 미리보기" className="w-full h-auto object-contain" onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23ddd" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="14"%3E이미지 없음%3C/text%3E%3C/svg%3E'
+                        }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">첨부파일</label>
+                <div className="flex gap-4 mb-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="attachmentInputType"
+                      value="upload"
+                      checked={attachmentInputType === 'upload'}
+                      onChange={(e) => setAttachmentInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">파일 업로드</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="attachmentInputType"
+                      value="url"
+                      checked={attachmentInputType === 'url'}
+                      onChange={(e) => setAttachmentInputType(e.target.value as 'upload' | 'url')}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">URL 입력</span>
+                  </label>
+                </div>
+
+                {attachmentInputType === 'upload' ? (
+                  <div>
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const files = e.target.files
+                        if (files) {
+                          const newAttachments: AttachmentFile[] = []
+                          Array.from(files).forEach((file) => {
+                            const reader = new FileReader()
+                            reader.onload = (event) => {
+                              const base64 = event.target?.result as string
+                              const fileType = file.type.startsWith('image/') ? 'image' : 
+                                            file.type === 'application/pdf' ? 'pdf' : 
+                                            file.type.startsWith('text/') || file.type.includes('document') ? 'document' : 'other'
+                              
+                              newAttachments.push({
+                                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                                name: file.name,
+                                url: base64,
+                                type: fileType,
+                                size: file.size
+                              })
+
+                              if (newAttachments.length === files.length) {
+                                setFormData({
+                                  ...formData,
+                                  attachments: [...(formData.attachments || []), ...newAttachments]
+                                })
+                              }
+                            }
+                            reader.readAsDataURL(file)
+                          })
+                        }
+                      }}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">💡 여러 파일을 선택할 수 있습니다.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      placeholder="파일 URL 입력"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          const url = e.currentTarget.value
+                          if (url.trim()) {
+                            const fileType = url.includes('.pdf') ? 'pdf' : 
+                                          url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? 'image' : 
+                                          url.match(/\.(doc|docx|txt)$/i) ? 'document' : 'other'
+                            const newAttachment: AttachmentFile = {
+                              id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                              name: url.split('/').pop() || '파일',
+                              url: url,
+                              type: fileType
+                            }
+                            setFormData({
+                              ...formData,
+                              attachments: [...(formData.attachments || []), newAttachment]
+                            })
+                            e.currentTarget.value = ''
+                          }
+                        }
+                      }}
+                    />
+                    <p className="text-xs text-gray-500">💡 URL을 입력하고 Enter를 누르세요.</p>
+                  </div>
+                )}
+
+                {formData.attachments && formData.attachments.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {formData.attachments.map((attachment) => (
+                      <div key={attachment.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                        <span className="flex-1 text-sm text-gray-700 truncate">{attachment.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, attachments: (formData.attachments || []).filter(a => a.id !== attachment.id) })}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+                  style={{ backgroundColor: '#7B1F4B' }}
+                >
+                  수정
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium transition-all duration-300 hover:bg-gray-50"
+                >
+                  취소
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   )
