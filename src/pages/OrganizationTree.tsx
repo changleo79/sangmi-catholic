@@ -188,6 +188,17 @@ export default function OrganizationTree() {
                   }}
                 ></div>
                 
+                {/* Vertical line up from horizontal line to 총무 line - 가로선 중앙에서 위로 올라가는 선 */}
+                <div 
+                  className="absolute w-0.5 bg-gray-400 z-10 hidden md:block"
+                  style={{ 
+                    left: '50%',
+                    top: '0',
+                    height: '80px',
+                    transform: 'translateX(-50%)'
+                  }}
+                ></div>
+                
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6" style={{ marginTop: '140px' }}>
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
