@@ -164,13 +164,13 @@ export default function OrganizationTree() {
                       게시글 {getPostsCount('총무')}개
                     </p>
                   </Link>
-                  {/* Vertical line down - 정확히 박스 중앙 */}
+                  {/* Vertical line down - 정확히 박스 중앙, 높이 증가 */}
                   <div 
-                    className="absolute w-0.5 h-10 bg-gray-400"
+                    className="absolute w-0.5 bg-gray-400"
                     style={{ 
-                      left: '50%',
+                      left: 'calc(50% - 0.25px)',
                       top: '100%',
-                      transform: 'translateX(-50%)',
+                      height: '48px',
                       marginTop: '0'
                     }}
                   ></div>
@@ -181,7 +181,7 @@ export default function OrganizationTree() {
               <div className="relative mb-8">
                 {/* Main horizontal line connecting all committees */}
                 <div 
-                  className="absolute h-0.5 bg-gray-400"
+                  className="absolute h-0.5 bg-gray-400 z-10"
                   style={{ 
                     top: '0',
                     left: '10%',
@@ -198,12 +198,13 @@ export default function OrganizationTree() {
 
                     return (
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
-                        {/* Vertical line up to horizontal line - 정확히 박스 중앙 */}
+                        {/* Vertical line up to horizontal line - 가로선에 정확히 연결 */}
                         <div 
-                          className="absolute w-0.5 h-10 bg-gray-400 z-0"
+                          className="absolute w-0.5 bg-gray-400 z-0"
                           style={{ 
                             left: 'calc(50% - 0.25px)',
-                            top: '-40px'
+                            top: '0',
+                            height: '40px'
                           }}
                         ></div>
                         
