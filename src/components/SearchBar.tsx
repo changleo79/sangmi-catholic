@@ -1,11 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getNotices } from '../utils/storage'
-import { getAlbums } from '../utils/storage'
+import { 
+  getNotices, 
+  getAlbums, 
+  getRecruitments, 
+  getFAQs, 
+  getOrganizationPosts,
+  getBulletins,
+  getOrganizationInfo
+} from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
 
 interface SearchResult {
-  type: 'notice' | 'album'
+  type: 'notice' | 'album' | 'recruitment' | 'faq' | 'organization' | 'bulletin'
   id: string
   title: string
   subtitle?: string
@@ -40,20 +47,22 @@ export default function SearchBar() {
     if (query.trim().length > 0) {
       setIsSearching(true)
       const searchResults: SearchResult[] = []
+      const queryLower = query.toLowerCase()
 
       // 공지사항 검색
       const notices = getNotices()
       notices.forEach((notice: NoticeItem) => {
         if (
-          notice.title.toLowerCase().includes(query.toLowerCase()) ||
-          notice.summary?.toLowerCase().includes(query.toLowerCase())
+          notice.title.toLowerCase().includes(queryLower) ||
+          notice.summary?.toLowerCase().includes(queryLower) ||
+          notice.content?.toLowerCase().includes(queryLower)
         ) {
           searchResults.push({
             type: 'notice',
             id: notice.date + notice.title,
             title: notice.title,
-            subtitle: notice.date,
-            url: '/news'
+            subtitle: `공지사항 · ${notice.date}`,
+            url: `/news/${encodeURIComponent(notice.date + '-' + notice.title)}`
           })
         }
       })
@@ -61,18 +70,89 @@ export default function SearchBar() {
       // 앨범 검색
       const albums = getAlbums()
       albums.forEach((album) => {
-        if (album.title.toLowerCase().includes(query.toLowerCase())) {
+        if (album.title.toLowerCase().includes(queryLower)) {
           searchResults.push({
             type: 'album',
             id: album.id,
             title: album.title,
-            subtitle: album.date,
+            subtitle: `앨범 · ${album.date}`,
             url: `/albums/${album.id}`
           })
         }
       })
 
-      setResults(searchResults.slice(0, 8)) // 최대 8개 결과
+      // 단체 소식 검색
+      const recruitments = getRecruitments()
+      recruitments.forEach((recruitment) => {
+        if (
+          recruitment.title.toLowerCase().includes(queryLower) ||
+          recruitment.summary?.toLowerCase().includes(queryLower) ||
+          recruitment.content?.toLowerCase().includes(queryLower)
+        ) {
+          searchResults.push({
+            type: 'recruitment',
+            id: recruitment.id,
+            title: recruitment.title,
+            subtitle: `단체 소식`,
+            url: `/recruitments/${recruitment.id}`
+          })
+        }
+      })
+
+      // FAQ 검색
+      const faqs = getFAQs()
+      faqs.forEach((faq) => {
+        if (
+          faq.question.toLowerCase().includes(queryLower) ||
+          faq.answer.toLowerCase().includes(queryLower)
+        ) {
+          searchResults.push({
+            type: 'faq',
+            id: faq.id,
+            title: faq.question,
+            subtitle: `자주 묻는 질문`,
+            url: '/office'
+          })
+        }
+      })
+
+      // 단체 게시판 검색
+      const orgPosts = getOrganizationPosts()
+      orgPosts.forEach((post) => {
+        if (
+          post.title.toLowerCase().includes(queryLower) ||
+          post.content.toLowerCase().includes(queryLower) ||
+          post.author?.toLowerCase().includes(queryLower)
+        ) {
+          const orgInfo = getOrganizationInfo(post.organization)
+          searchResults.push({
+            type: 'organization',
+            id: post.id,
+            title: post.title,
+            subtitle: `${orgInfo.name} · ${post.date}`,
+            url: `/organizations/${encodeURIComponent(post.organization)}/posts/${post.id}`
+          })
+        }
+      })
+
+      // 주보 안내 검색
+      const bulletins = getBulletins()
+      bulletins.forEach((bulletin) => {
+        if (
+          bulletin.title.toLowerCase().includes(queryLower) ||
+          bulletin.description?.toLowerCase().includes(queryLower)
+        ) {
+          searchResults.push({
+            type: 'bulletin',
+            id: bulletin.id,
+            title: bulletin.title,
+            subtitle: `주보 안내 · ${bulletin.date}`,
+            url: '/news'
+          })
+        }
+      })
+
+      setResults(searchResults.slice(0, 10)) // 최대 10개 결과
       setIsSearching(false)
     } else {
       setResults([])
@@ -109,7 +189,7 @@ export default function SearchBar() {
               setIsOpen(true)
             }}
             onFocus={() => setIsOpen(true)}
-            placeholder="공지사항, 앨범 검색..."
+            placeholder="전체 검색..."
             className="w-full px-4 py-2.5 pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
           />
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,16 +215,40 @@ export default function SearchBar() {
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                         result.type === 'notice' 
-                          ? 'bg-blue-100 text-blue-600' 
-                          : 'bg-purple-100 text-purple-600'
+                          ? 'bg-blue-100 text-blue-600'
+                          : result.type === 'album'
+                          ? 'bg-purple-100 text-purple-600'
+                          : result.type === 'recruitment'
+                          ? 'bg-green-100 text-green-600'
+                          : result.type === 'faq'
+                          ? 'bg-yellow-100 text-yellow-600'
+                          : result.type === 'organization'
+                          ? 'bg-pink-100 text-pink-600'
+                          : 'bg-orange-100 text-orange-600'
                       }`}>
                         {result.type === 'notice' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                        ) : (
+                        ) : result.type === 'album' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        ) : result.type === 'recruitment' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        ) : result.type === 'faq' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ) : result.type === 'organization' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         )}
                       </div>
@@ -176,7 +280,7 @@ export default function SearchBar() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="공지사항, 앨범 검색..."
+                placeholder="전체 검색..."
                 className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                 autoFocus
               />
@@ -204,16 +308,40 @@ export default function SearchBar() {
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                         result.type === 'notice' 
-                          ? 'bg-blue-100 text-blue-600' 
-                          : 'bg-purple-100 text-purple-600'
+                          ? 'bg-blue-100 text-blue-600'
+                          : result.type === 'album'
+                          ? 'bg-purple-100 text-purple-600'
+                          : result.type === 'recruitment'
+                          ? 'bg-green-100 text-green-600'
+                          : result.type === 'faq'
+                          ? 'bg-yellow-100 text-yellow-600'
+                          : result.type === 'organization'
+                          ? 'bg-pink-100 text-pink-600'
+                          : 'bg-orange-100 text-orange-600'
                       }`}>
                         {result.type === 'notice' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                        ) : (
+                        ) : result.type === 'album' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        ) : result.type === 'recruitment' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        ) : result.type === 'faq' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ) : result.type === 'organization' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         )}
                       </div>
@@ -252,16 +380,40 @@ export default function SearchBar() {
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                         result.type === 'notice' 
-                          ? 'bg-blue-100 text-blue-600' 
-                          : 'bg-purple-100 text-purple-600'
+                          ? 'bg-blue-100 text-blue-600'
+                          : result.type === 'album'
+                          ? 'bg-purple-100 text-purple-600'
+                          : result.type === 'recruitment'
+                          ? 'bg-green-100 text-green-600'
+                          : result.type === 'faq'
+                          ? 'bg-yellow-100 text-yellow-600'
+                          : result.type === 'organization'
+                          ? 'bg-pink-100 text-pink-600'
+                          : 'bg-orange-100 text-orange-600'
                       }`}>
                         {result.type === 'notice' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                        ) : (
+                        ) : result.type === 'album' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        ) : result.type === 'recruitment' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        ) : result.type === 'faq' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        ) : result.type === 'organization' ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         )}
                       </div>
