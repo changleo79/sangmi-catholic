@@ -182,9 +182,20 @@ export default function OrganizationTree() {
                 <div 
                   className="absolute h-0.5 bg-gray-400 z-10 hidden md:block"
                   style={{ 
-                    top: '80px',
+                    top: '0',
                     left: '10%',
                     right: '10%'
+                  }}
+                ></div>
+                
+                {/* Vertical line up from horizontal line center to 총무 line - 가로선 중앙에서 총무 선으로 올라가는 선, PC만 표시 */}
+                <div 
+                  className="absolute w-0.5 bg-gray-400 z-10 hidden md:block"
+                  style={{ 
+                    left: '50%',
+                    top: '0',
+                    height: '80px',
+                    transform: 'translateX(-50%)'
                   }}
                 ></div>
                 
@@ -203,7 +214,7 @@ export default function OrganizationTree() {
                           style={{ 
                             left: 'calc(50% - 0.25px)',
                             bottom: '100%',
-                            height: '60px',
+                            height: '140px',
                             marginBottom: '0'
                           }}
                         ></div>

@@ -226,8 +226,11 @@ export default function OrganizationPostDetail() {
       )}
 
       {/* Edit Modal */}
-      {showEditModal && formData && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowEditModal(false)}>
+      {showEditModal && formData && post && (
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => {
+          setShowEditModal(false)
+          setFormData(null)
+        }}>
           <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900">게시글 수정</h2>
@@ -243,7 +246,7 @@ export default function OrganizationPostDetail() {
             
             <form onSubmit={(e) => {
               e.preventDefault()
-              if (!formData) return
+              if (!formData || !post) return
               
               const allPosts = getOrganizationPosts()
               const updatedPosts = allPosts.map(p => p.id === post.id ? { ...formData, id: post.id } : p)
@@ -251,8 +254,10 @@ export default function OrganizationPostDetail() {
               initializeData()
               
               // 게시글 업데이트
-              setPost({ ...formData, id: post.id })
+              const updatedPost = { ...formData, id: post.id }
+              setPost(updatedPost)
               setShowEditModal(false)
+              setFormData(null)
               window.dispatchEvent(new CustomEvent('organizationPostsUpdated'))
               alert('게시글이 수정되었습니다.')
             }} className="p-6 space-y-4">
