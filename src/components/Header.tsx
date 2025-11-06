@@ -58,7 +58,7 @@ export default function Header() {
             </div>
 
             <button
-              className="md:hidden text-gray-700 ml-4 relative z-50"
+              className="md:hidden text-gray-700 ml-4 relative z-50 touch-manipulation p-2 -mr-2"
               onClick={toggleMenu}
               aria-label={isMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
             >
@@ -96,8 +96,10 @@ export default function Header() {
           >
             <div className="h-full flex flex-col">
               {/* 검색바 (모바일) */}
-              <div className="px-6 pt-6 pb-4 border-b border-gray-200">
-                <SearchBar />
+              <div className="px-4 sm:px-6 pt-6 pb-4 border-b border-gray-200">
+                <div className="w-full">
+                  <SearchBar />
+                </div>
               </div>
 
               {/* 메뉴 항목 */}

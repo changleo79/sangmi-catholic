@@ -9,49 +9,55 @@ export default function Mass() {
   const [catechismInfo, setCatechismInfo] = useState<CatechismInfo | null>(null)
 
   useEffect(() => {
-    const schedule = getMassSchedule()
-    if (schedule.length > 0) {
-      setMassSchedule(schedule)
-    } else {
-      // 기본 데이터
-      const defaultSchedule: MassScheduleItem[] = [
-        { id: '1', day: '월요일', time: '오전 6시 30분', description: '새벽미사' },
-        { id: '2', day: '화요일', time: '오후 7시 30분', description: '저녁미사' },
-        { id: '3', day: '수요일', time: '오전 10시', description: '아침미사' },
-        { id: '4', day: '목요일', time: '오후 7시 30분', description: '저녁미사' },
-        { id: '5', day: '금요일', time: '오전 10시', description: '아침미사' },
-        { id: '6', day: '토요일', time: '오후 5시', description: '청년미사', note: '매월 첫토요일 오전 10시 (성모신심미사)' },
-        { id: '7', day: '일요일', time: '오전 10시', description: '교중미사' },
-        { id: '8', day: '일요일', time: '오후 3시', description: '어린이미사' }
-      ]
-      setMassSchedule(defaultSchedule)
-    }
+    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
+    const loadData = async () => {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      const schedule = getMassSchedule()
+      if (schedule.length > 0) {
+        setMassSchedule(schedule)
+      } else {
+        // 기본 데이터
+        const defaultSchedule: MassScheduleItem[] = [
+          { id: '1', day: '월요일', time: '오전 6시 30분', description: '새벽미사' },
+          { id: '2', day: '화요일', time: '오후 7시 30분', description: '저녁미사' },
+          { id: '3', day: '수요일', time: '오전 10시', description: '아침미사' },
+          { id: '4', day: '목요일', time: '오후 7시 30분', description: '저녁미사' },
+          { id: '5', day: '금요일', time: '오전 10시', description: '아침미사' },
+          { id: '6', day: '토요일', time: '오후 5시', description: '청년미사', note: '매월 첫토요일 오전 10시 (성모신심미사)' },
+          { id: '7', day: '일요일', time: '오전 10시', description: '교중미사' },
+          { id: '8', day: '일요일', time: '오후 3시', description: '어린이미사' }
+        ]
+        setMassSchedule(defaultSchedule)
+      }
 
-    const sacramentList = getSacraments()
-    if (sacramentList.length > 0) {
-      setSacraments(sacramentList)
-    } else {
-      // 기본 데이터
-      const defaultSacraments: SacramentItem[] = [
-        { id: '1', name: '세례성사', description: '예비신자 교리 후 진행' },
-        { id: '2', name: '고해성사', description: '미사 전후 또는 사제와 약속' },
-        { id: '3', name: '견진성사', description: '연간 일정에 따라 진행' },
-        { id: '4', name: '혼인성사', description: '사제와 사전 상담 필수' },
-        { id: '5', name: '병자성사', description: '사무실로 연락 바랍니다' }
-      ]
-      setSacraments(defaultSacraments)
-    }
+      const sacramentList = getSacraments()
+      if (sacramentList.length > 0) {
+        setSacraments(sacramentList)
+      } else {
+        // 기본 데이터
+        const defaultSacraments: SacramentItem[] = [
+          { id: '1', name: '세례성사', description: '예비신자 교리 후 진행' },
+          { id: '2', name: '고해성사', description: '미사 전후 또는 사제와 약속' },
+          { id: '3', name: '견진성사', description: '연간 일정에 따라 진행' },
+          { id: '4', name: '혼인성사', description: '사제와 사전 상담 필수' },
+          { id: '5', name: '병자성사', description: '사무실로 연락 바랍니다' }
+        ]
+        setSacraments(defaultSacraments)
+      }
 
-    const catechism = getCatechismInfo()
-    if (catechism) {
-      setCatechismInfo(catechism)
-    } else {
-      setCatechismInfo({
-        title: '예비신자 교리학교',
-        description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
-        contact: '문의 : 성당 사무실 (031-282-9989)'
-      })
+      const catechism = getCatechismInfo()
+      if (catechism) {
+        setCatechismInfo(catechism)
+      } else {
+        setCatechismInfo({
+          title: '예비신자 교리학교',
+          description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
+          contact: '문의 : 성당 사무실 (031-282-9989)'
+        })
+      }
     }
+    loadData()
   }, [])
 
   return (

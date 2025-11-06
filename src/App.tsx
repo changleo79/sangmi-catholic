@@ -5,6 +5,7 @@ import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
 import ScrollProgress from './components/ScrollProgress'
 import ProtectedRoute from './components/admin/ProtectedRoute'
+import { initializeData } from './utils/storage'
 import Home from './pages/Home'
 import About from './pages/About'
 import Notice from './pages/Notice'
@@ -40,6 +41,11 @@ function ScrollToTopOnRouteChange() {
 }
 
 function App() {
+  useEffect(() => {
+    // 앱 시작 시 JSON 파일에서 데이터 로드
+    initializeData()
+  }, [])
+
   return (
     <Router>
       <ScrollProgress />

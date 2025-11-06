@@ -100,7 +100,7 @@ export default function SearchBar() {
 
       {/* Search Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+        <div className="absolute left-0 md:right-0 top-full mt-2 w-full md:w-80 lg:w-96 max-w-full md:max-w-sm bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
           <div className="p-4 border-b border-gray-200">
             <div className="relative">
               <input

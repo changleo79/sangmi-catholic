@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { NoticeItem } from '../../data/notices'
-import { getNotices, saveNotices } from '../../utils/storage'
+import { getNotices, saveNotices, exportNotices, importJSON, initializeData } from '../../utils/storage'
 import { notices as defaultNotices } from '../../data/notices'
 
 export default function NoticesManage() {
@@ -119,12 +119,51 @@ export default function NoticesManage() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Form */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              {isEditing ? '공지사항 수정' : '새 공지사항 추가'}
-            </h2>
+        <div className="max-w-6xl mx-auto">
+          {/* Export/Import 버튼 */}
+          <div className="mb-6 flex gap-4 justify-end">
+            <button
+              onClick={async () => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = 'application/json'
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) {
+                    try {
+                      const data = await importJSON<NoticeItem[]>(file)
+                      setNotices(data)
+                      saveNotices(data)
+                      await initializeData() // 데이터 다시 로드
+                      alert('데이터를 가져왔습니다.')
+                    } catch (error) {
+                      alert('JSON 파일을 불러오는데 실패했습니다.')
+                    }
+                  }
+                }}
+                input.click()
+              }}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
+            >
+              JSON 가져오기
+            </button>
+            <button
+              onClick={exportNotices}
+              className="px-4 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+              style={{ backgroundColor: '#7B1F4B' }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+            >
+              JSON 내보내기
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Form */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {isEditing ? '공지사항 수정' : '새 공지사항 추가'}
+              </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -15,27 +15,32 @@ export default function News() {
   const itemsPerPage = 10
 
   useEffect(() => {
-    // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
-    const storedNotices = getNotices()
-    if (storedNotices.length > 0) {
-      setNotices(storedNotices)
-    } else {
-      setNotices(defaultNotices)
-    }
+    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
+    const loadData = async () => {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      const storedNotices = getNotices()
+      if (storedNotices.length > 0) {
+        setNotices(storedNotices)
+      } else {
+        setNotices(defaultNotices)
+      }
 
-    const storedRecruitments = getRecruitments()
-    if (storedRecruitments.length > 0) {
-      setRecruit(storedRecruitments)
-    } else {
-      // 기본값
-      setRecruit([
-        { id: '1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
-        { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
-      ])
-    }
+      const storedRecruitments = getRecruitments()
+      if (storedRecruitments.length > 0) {
+        setRecruit(storedRecruitments)
+      } else {
+        // 기본값
+        setRecruit([
+          { id: '1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
+          { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
+        ])
+      }
 
-    const storedBulletins = getBulletins()
-    setBulletins(storedBulletins)
+      const storedBulletins = getBulletins()
+      setBulletins(storedBulletins)
+    }
+    loadData()
   }, [])
 
   return (

@@ -12,13 +12,18 @@ export default function Albums() {
   const categories = getAlbumCategories()
 
   useEffect(() => {
-    loadAlbums()
-    // 기본 앨범이 없으면 초기 데이터 생성
-    const stored = getAlbums()
-    if (stored.length === 0) {
-      initializeDefaultAlbum()
-      loadAlbums() // 다시 로드
+    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
+    const loadData = async () => {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      loadAlbums()
+      // 기본 앨범이 없으면 초기 데이터 생성
+      const stored = getAlbums()
+      if (stored.length === 0) {
+        initializeDefaultAlbum()
+        loadAlbums() // 다시 로드
+      }
     }
+    loadData()
   }, [])
 
   const loadAlbums = () => {
@@ -62,17 +67,17 @@ export default function Albums() {
         </div>
 
         {/* Category Filter */}
-        <div className="mb-12 flex flex-wrap justify-center gap-3">
+        <div className="mb-12 flex flex-wrap justify-center gap-3 px-4">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-2 rounded-full font-medium transition-all duration-300 ${
+              className={`px-4 sm:px-6 py-2.5 rounded-full font-medium transition-all duration-300 text-sm sm:text-base touch-manipulation ${
                 selectedCategory === category
                   ? 'text-white shadow-lg'
-                  : 'text-gray-700 bg-white border border-gray-200 hover:border-catholic-logo/30'
+                  : 'text-gray-700 bg-white border border-gray-200 hover:border-catholic-logo/30 active:bg-gray-50'
               }`}
-              style={selectedCategory === category ? { backgroundColor: '#7B1F4B' } : {}}
+              style={selectedCategory === category ? { backgroundColor: '#7B1F4B', color: '#ffffff' } : {}}
               onMouseEnter={(e) => {
                 if (selectedCategory !== category) {
                   e.currentTarget.style.borderColor = '#7B1F4B'
@@ -83,6 +88,16 @@ export default function Albums() {
                 if (selectedCategory !== category) {
                   e.currentTarget.style.borderColor = ''
                   e.currentTarget.style.color = ''
+                }
+              }}
+              onTouchStart={(e) => {
+                if (selectedCategory !== category) {
+                  e.currentTarget.style.backgroundColor = 'rgba(123, 31, 75, 0.05)'
+                }
+              }}
+              onTouchEnd={(e) => {
+                if (selectedCategory !== category) {
+                  e.currentTarget.style.backgroundColor = ''
                 }
               }}
             >
@@ -126,14 +141,14 @@ export default function Albums() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
+                <div className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold w-fit" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
                       {album.category}
                     </span>
-                    <span className="text-sm text-gray-500">{album.date}</span>
+                    <span className="text-xs sm:text-sm text-gray-500">{album.date}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">
                     {album.title}
                   </h3>
                 </div>

@@ -18,13 +18,18 @@ export default function Home() {
   const galleryPhotos = [img01, img02, img03, img04]
   
   useEffect(() => {
-    // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
-    const storedNotices = getNotices()
-    if (storedNotices.length > 0) {
-      setNotices(storedNotices)
-    } else {
-      setNotices(defaultNotices)
+    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
+    // 약간의 지연을 두어 initializeData가 완료되도록 함
+    const loadData = async () => {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      const storedNotices = getNotices()
+      if (storedNotices.length > 0) {
+        setNotices(storedNotices)
+      } else {
+        setNotices(defaultNotices)
+      }
     }
+    loadData()
   }, [])
   
   const recent = notices.slice(0, 3)
@@ -154,19 +159,21 @@ export default function Home() {
         {/* 슬라이드 네비게이션 화살표 */}
         <button
           onClick={goToPrevious}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center group"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 active:bg-white/40 transition-all duration-300 flex items-center justify-center group touch-manipulation"
           aria-label="이전 슬라이드"
+          style={{ marginTop: 'clamp(-100px, -10vh, -60px)' }}
         >
-          <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <button
           onClick={goToNext}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center group"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 active:bg-white/40 transition-all duration-300 flex items-center justify-center group touch-manipulation"
           aria-label="다음 슬라이드"
+          style={{ marginTop: 'clamp(-100px, -10vh, -60px)' }}
         >
-          <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
@@ -186,12 +193,12 @@ export default function Home() {
             />
           ))}
         </div>
-        <div className="relative container mx-auto px-4 text-center text-white z-10">
+        <div className="relative container mx-auto px-4 text-center text-white z-10 pt-12 md:pt-0">
           <div className="animate-fade-in">
-            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-2xl mb-6 leading-tight">
+            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-2xl mb-6 leading-tight px-2">
               상미성당에 오신 것을<br className="md:hidden" /> 환영합니다
             </h2>
-            <p className="text-lg md:text-xl text-gray-100 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-gray-100 max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed px-2">
               기도와 말씀 안에서 하나 되는 작은 공동체
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

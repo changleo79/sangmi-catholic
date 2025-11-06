@@ -9,6 +9,21 @@
 
   body {
     @apply bg-gray-50 text-gray-900 font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* 터치 최적화 */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  button, a {
+    -webkit-tap-highlight-color: rgba(123, 31, 75, 0.1);
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
   }
 }
 

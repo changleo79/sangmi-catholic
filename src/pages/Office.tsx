@@ -5,18 +5,23 @@ export default function Office() {
   const [faqs, setFaqs] = useState<FAQItem[]>([])
 
   useEffect(() => {
-    // 로컬스토리지에서 데이터 로드, 없으면 기본값 사용
-    const storedFAQs = getFAQs()
-    if (storedFAQs.length > 0) {
-      setFaqs(storedFAQs)
-    } else {
-      // 기본값
-      setFaqs([
-        { id: '1', question: '세례성사는 어떻게 신청하나요?', answer: '예비신자 교리학교 등록 후 사무실을 통해 안내드립니다.' },
-        { id: '2', question: '혼인성사 준비는 어떻게 하나요?', answer: '사무실로 연락하셔서 사제와 상담 일정을 잡아주세요.' },
-        { id: '3', question: '주보는 어디서 볼 수 있나요?', answer: '공지/소식 페이지에 주보 PDF가 업로드될 예정입니다.' }
-      ])
+    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
+    const loadData = async () => {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      const storedFAQs = getFAQs()
+      if (storedFAQs.length > 0) {
+        setFaqs(storedFAQs)
+      } else {
+        // 기본값
+        setFaqs([
+          { id: '1', question: '세례성사는 어떻게 신청하나요?', answer: '예비신자 교리학교 등록 후 사무실을 통해 안내드립니다.' },
+          { id: '2', question: '혼인성사 준비는 어떻게 하나요?', answer: '사무실로 연락하셔서 사제와 상담 일정을 잡아주세요.' },
+          { id: '3', question: '주보는 어디서 볼 수 있나요?', answer: '공지/소식 페이지에 주보 PDF가 업로드될 예정입니다.' }
+        ])
+      }
     }
+    loadData()
   }, [])
 
   return (

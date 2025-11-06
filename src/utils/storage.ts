@@ -1,4 +1,5 @@
-// 로컬스토리지 데이터 관리 유틸리티
+// JSON 파일 및 로컬스토리지 데이터 관리 유틸리티
+// 우선순위: JSON 파일 > localStorage > 기본값
 
 import { NoticeItem } from '../data/notices'
 import type { Album, AlbumPhoto } from '../data/albums'
@@ -60,59 +61,199 @@ const SACRAMENTS_KEY = 'admin_sacraments'
 const CATECHISM_KEY = 'admin_catechism'
 const BULLETINS_KEY = 'admin_bulletins'
 
+// JSON 파일 로드 헬퍼 함수
+const loadJSON = async <T>(path: string, fallback: T): Promise<T> => {
+  try {
+    const response = await fetch(path)
+    if (response.ok) {
+      return await response.json()
+    }
+  } catch (e) {
+    // JSON 파일이 없거나 로드 실패 시 무시
+  }
+  return fallback
+}
+
+// 동기식 JSON 파일 로드 (초기 로드용)
+let cachedData: {
+  notices?: NoticeItem[]
+  recruitments?: RecruitmentItem[]
+  faqs?: FAQItem[]
+  albums?: AlbumWithCategory[]
+  massSchedule?: MassScheduleItem[]
+  sacraments?: SacramentItem[]
+  catechism?: CatechismInfo | null
+  bulletins?: BulletinItem[]
+} = {}
+
+// 데이터 초기화 (페이지 로드 시 한 번만 실행)
+export const initializeData = async (): Promise<void> => {
+  try {
+    const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins] = await Promise.all([
+      loadJSON<NoticeItem[]>('/data/notices.json', []),
+      loadJSON<RecruitmentItem[]>('/data/recruitments.json', []),
+      loadJSON<FAQItem[]>('/data/faqs.json', []),
+      loadJSON<AlbumWithCategory[]>('/data/albums.json', []),
+      loadJSON<MassScheduleItem[]>('/data/mass-schedule.json', []),
+      loadJSON<SacramentItem[]>('/data/sacraments.json', []),
+      loadJSON<CatechismInfo | null>('/data/catechism.json', null),
+      loadJSON<BulletinItem[]>('/data/bulletins.json', [])
+    ])
+    
+    cachedData = {
+      notices,
+      recruitments,
+      faqs,
+      albums,
+      massSchedule,
+      sacraments,
+      catechism,
+      bulletins
+    }
+    
+    // localStorage에 캐시 (오프라인 지원)
+    if (notices.length > 0) localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
+    if (recruitments.length > 0) localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
+    if (faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
+    if (albums.length > 0) localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
+    if (massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
+    if (sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
+    if (catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
+    if (bulletins.length > 0) localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
+  } catch (e) {
+    console.error('데이터 초기화 실패:', e)
+  }
+}
+
 export const getNotices = (): NoticeItem[] => {
+  // 캐시된 데이터 우선
+  if (cachedData.notices) return cachedData.notices
+  
+  // localStorage 확인
   const stored = localStorage.getItem(NOTICES_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
   }
-  // 기본값 (기존 데이터 파일에서 가져옴)
+  
   return []
 }
 
 export const saveNotices = (notices: NoticeItem[]): void => {
+  // localStorage에 저장 (임시)
   localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
+  // 캐시 업데이트
+  cachedData.notices = notices
+}
+
+// JSON 파일 내보내기 (다운로드)
+export const exportNotices = (): void => {
+  const data = getNotices()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'notices.json'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export const getRecruitments = (): RecruitmentItem[] => {
+  if (cachedData.recruitments) return cachedData.recruitments
+  
   const stored = localStorage.getItem(RECRUITMENTS_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
   }
   return []
 }
 
 export const saveRecruitments = (recruitments: RecruitmentItem[]): void => {
   localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
+  cachedData.recruitments = recruitments
+}
+
+export const exportRecruitments = (): void => {
+  const data = getRecruitments()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'recruitments.json'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export const getFAQs = (): FAQItem[] => {
+  if (cachedData.faqs) return cachedData.faqs
+  
   const stored = localStorage.getItem(FAQS_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
   }
   return []
 }
 
 export const saveFAQs = (faqs: FAQItem[]): void => {
   localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
+  cachedData.faqs = faqs
+}
+
+export const exportFAQs = (): void => {
+  const data = getFAQs()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'faqs.json'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // 앨범 관리
 export const getAlbums = (): AlbumWithCategory[] => {
+  if (cachedData.albums) return cachedData.albums
+  
   const stored = localStorage.getItem(ALBUMS_KEY)
   if (stored) {
-    const parsed = JSON.parse(stored)
-    if (parsed.length > 0) {
-      return parsed
+    try {
+      const parsed = JSON.parse(stored)
+      if (parsed.length > 0) {
+        return parsed
+      }
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
     }
   }
   
-  // 기본 앨범 데이터가 없으면 빈 배열 반환 (관리자가 추가할 수 있도록)
   return []
 }
 
 export const saveAlbums = (albums: AlbumWithCategory[]): void => {
   localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
+  cachedData.albums = albums
+}
+
+export const exportAlbums = (): void => {
+  const data = getAlbums()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'albums.json'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export const getAlbumCategories = (): string[] => {
@@ -121,63 +262,144 @@ export const getAlbumCategories = (): string[] => {
 
 // 미사 시간 관리
 export const getMassSchedule = (): MassScheduleItem[] => {
+  if (cachedData.massSchedule) return cachedData.massSchedule
+  
   const stored = localStorage.getItem(MASS_SCHEDULE_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
   }
   return []
 }
 
 export const saveMassSchedule = (schedule: MassScheduleItem[]): void => {
   localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(schedule))
+  cachedData.massSchedule = schedule
+}
+
+export const exportMassSchedule = (): void => {
+  const data = getMassSchedule()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'mass-schedule.json'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // 성사 안내 관리
 export const getSacraments = (): SacramentItem[] => {
+  if (cachedData.sacraments) return cachedData.sacraments
+  
   const stored = localStorage.getItem(SACRAMENTS_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
   }
   return []
 }
 
 export const saveSacraments = (sacraments: SacramentItem[]): void => {
   localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
+  cachedData.sacraments = sacraments
+}
+
+export const exportSacraments = (): void => {
+  const data = getSacraments()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'sacraments.json'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // 예비신자 교리학교 정보 관리
 export const getCatechismInfo = (): CatechismInfo | null => {
+  if (cachedData.catechism !== undefined) return cachedData.catechism
+  
   const stored = localStorage.getItem(CATECHISM_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
   }
   return null
 }
 
 export const saveCatechismInfo = (info: CatechismInfo): void => {
   localStorage.setItem(CATECHISM_KEY, JSON.stringify(info))
+  cachedData.catechism = info
+}
+
+export const exportCatechismInfo = (): void => {
+  const data = getCatechismInfo()
+  if (data) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'catechism.json'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 }
 
 // 주보 안내 관리
 export const getBulletins = (): BulletinItem[] => {
+  if (cachedData.bulletins) return cachedData.bulletins
+  
   const stored = localStorage.getItem(BULLETINS_KEY)
   if (stored) {
-    return JSON.parse(stored)
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      // JSON 파싱 실패 시 무시
+    }
   }
   return []
 }
 
 export const saveBulletins = (bulletins: BulletinItem[]): void => {
   localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
+  cachedData.bulletins = bulletins
 }
 
-// 초기 데이터 로드 (기존 데이터 파일과 동기화)
-export const initializeData = (): void => {
-  // 공지사항 초기화 (기존 데이터가 있으면 유지)
-  const notices = getNotices()
-  if (notices.length === 0) {
-    // 기존 notices.ts의 데이터를 로드하려면 여기서 import
-    // 현재는 빈 배열로 시작
-  }
+export const exportBulletins = (): void => {
+  const data = getBulletins()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'bulletins.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// JSON 파일 가져오기 (업로드)
+export const importJSON = async <T>(file: File): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string)
+        resolve(data)
+      } catch (error) {
+        reject(new Error('JSON 파일 형식이 올바르지 않습니다.'))
+      }
+    }
+    reader.onerror = () => reject(new Error('파일 읽기 실패'))
+    reader.readAsText(file)
+  })
 }
 
