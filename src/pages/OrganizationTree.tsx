@@ -188,7 +188,7 @@ export default function OrganizationTree() {
                   }}
                 ></div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mt-20">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6" style={{ marginTop: '110px' }}>
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)
@@ -203,7 +203,7 @@ export default function OrganizationTree() {
                           style={{ 
                             left: 'calc(50% - 0.25px)',
                             top: '0',
-                            height: '80px'
+                            height: '110px'
                           }}
                         ></div>
                         
@@ -223,18 +223,6 @@ export default function OrganizationTree() {
                                 <p className="text-xs text-catholic-logo font-medium">단체 {subOrgs.length}개</p>
                               )}
                             </Link>
-
-                            {/* Vertical line down if has sub-orgs - 정확히 박스 중앙, PC만 표시 */}
-                            {hasSubOrgs && (
-                              <div 
-                                className="absolute w-0.5 h-6 bg-gray-300 z-0 hidden md:block"
-                                style={{ 
-                                  left: 'calc(50% - 0.25px)',
-                                  top: '100%',
-                                  marginTop: '0'
-                                }}
-                              ></div>
-                            )}
                           </div>
                         </div>
 
