@@ -122,9 +122,9 @@ export default function OrganizationTree() {
                     to={`/organizations/${encodeURIComponent('총회장')}`}
                     className="block px-8 py-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center transform hover:scale-105"
                     style={{ 
-                      background: 'linear-gradient(135deg, #8B4A6B 0%, #7B1F4B 100%)',
+                      background: 'linear-gradient(135deg, #9B5A7B 0%, #8B4A6B 100%)',
                       color: 'white',
-                      boxShadow: '0 8px 20px rgba(139, 74, 107, 0.3)',
+                      boxShadow: '0 8px 20px rgba(155, 90, 123, 0.3)',
                       minWidth: '220px'
                     }}
                   >
@@ -151,26 +151,25 @@ export default function OrganizationTree() {
                 <div className="relative inline-block">
                   <Link
                     to={`/organizations/${encodeURIComponent('총무')}`}
-                    className="block px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-center transform hover:scale-105"
+                    className="block px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-center transform hover:scale-105 bg-white border-2 border-gray-200"
                     style={{ 
-                      background: 'linear-gradient(135deg, #6B3A5B 0%, #5a1538 100%)',
-                      color: 'white',
-                      boxShadow: '0 6px 15px rgba(107, 58, 91, 0.3)',
+                      color: '#333',
+                      boxShadow: '0 6px 15px rgba(0, 0, 0, 0.08)',
                       minWidth: '180px'
                     }}
                   >
-                    <h4 className="text-lg font-bold mb-1">총무</h4>
-                    <p className="text-xs opacity-90">
+                    <h4 className="text-lg font-bold mb-1 text-gray-900">총무</h4>
+                    <p className="text-xs text-gray-600">
                       게시글 {getPostsCount('총무')}개
                     </p>
                   </Link>
-                  {/* Vertical line down - 정확히 박스 중앙, 높이 증가, PC만 표시 */}
+                  {/* Vertical line down - 가로선에 정확히 맞추기, PC만 표시 */}
                   <div 
                     className="absolute w-0.5 bg-gray-400 hidden md:block"
                     style={{ 
                       left: 'calc(50% - 0.25px)',
                       top: '100%',
-                      height: '48px',
+                      height: '80px',
                       marginTop: '0'
                     }}
                   ></div>
@@ -189,7 +188,7 @@ export default function OrganizationTree() {
                   }}
                 ></div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mt-16">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mt-20">
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)
@@ -204,7 +203,7 @@ export default function OrganizationTree() {
                           style={{ 
                             left: 'calc(50% - 0.25px)',
                             top: '0',
-                            height: '64px'
+                            height: '80px'
                           }}
                         ></div>
                         
