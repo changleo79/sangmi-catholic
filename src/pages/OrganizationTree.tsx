@@ -102,9 +102,9 @@ export default function OrganizationTree() {
                     </div>
                     <p className="text-sm opacity-90 mt-2">상미성당</p>
                   </div>
-                  {/* Vertical line down - 정확히 박스 중앙 */}
+                  {/* Vertical line down - 정확히 박스 중앙, PC만 표시 */}
                   <div 
-                    className="absolute w-0.5 h-8 bg-gray-400"
+                    className="absolute w-0.5 h-8 bg-gray-400 hidden md:block"
                     style={{ 
                       left: '50%',
                       top: '100%',
@@ -133,9 +133,9 @@ export default function OrganizationTree() {
                       게시글 {getPostsCount('총회장')}개
                     </p>
                   </Link>
-                  {/* Vertical line down - 정확히 박스 중앙 */}
+                  {/* Vertical line down - 정확히 박스 중앙, PC만 표시 */}
                   <div 
-                    className="absolute w-0.5 h-8 bg-gray-400"
+                    className="absolute w-0.5 h-8 bg-gray-400 hidden md:block"
                     style={{ 
                       left: '50%',
                       top: '100%',
@@ -164,9 +164,9 @@ export default function OrganizationTree() {
                       게시글 {getPostsCount('총무')}개
                     </p>
                   </Link>
-                  {/* Vertical line down - 정확히 박스 중앙, 높이 증가 */}
+                  {/* Vertical line down - 정확히 박스 중앙, 높이 증가, PC만 표시 */}
                   <div 
-                    className="absolute w-0.5 bg-gray-400"
+                    className="absolute w-0.5 bg-gray-400 hidden md:block"
                     style={{ 
                       left: 'calc(50% - 0.25px)',
                       top: '100%',
@@ -179,9 +179,9 @@ export default function OrganizationTree() {
 
               {/* Level 4: 위원회들 */}
               <div className="relative mb-8">
-                {/* Main horizontal line connecting all committees */}
+                {/* Main horizontal line connecting all committees - PC만 표시 */}
                 <div 
-                  className="absolute h-0.5 bg-gray-400 z-10"
+                  className="absolute h-0.5 bg-gray-400 z-10 hidden md:block"
                   style={{ 
                     top: '0',
                     left: '10%',
@@ -189,7 +189,7 @@ export default function OrganizationTree() {
                   }}
                 ></div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mt-10">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mt-16">
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)
@@ -200,11 +200,11 @@ export default function OrganizationTree() {
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
                         {/* Vertical line up to horizontal line - 가로선에 정확히 연결 */}
                         <div 
-                          className="absolute w-0.5 bg-gray-400 z-0"
+                          className="absolute w-0.5 bg-gray-400 z-0 hidden md:block"
                           style={{ 
                             left: 'calc(50% - 0.25px)',
                             top: '0',
-                            height: '40px'
+                            height: '64px'
                           }}
                         ></div>
                         
@@ -225,10 +225,10 @@ export default function OrganizationTree() {
                               )}
                             </Link>
 
-                            {/* Vertical line down if has sub-orgs - 정확히 박스 중앙 */}
+                            {/* Vertical line down if has sub-orgs - 정확히 박스 중앙, PC만 표시 */}
                             {hasSubOrgs && (
                               <div 
-                                className="absolute w-0.5 h-6 bg-gray-300 z-0"
+                                className="absolute w-0.5 h-6 bg-gray-300 z-0 hidden md:block"
                                 style={{ 
                                   left: 'calc(50% - 0.25px)',
                                   top: '100%',
@@ -250,9 +250,9 @@ export default function OrganizationTree() {
                                 return (
                                   <div key={`${subOrg}-${refreshKey}`} className="relative flex justify-center">
                                     <div className="relative" style={{ width: '160px' }}>
-                                      {/* Vertical line up - 정확히 박스 중앙 */}
+                                      {/* Vertical line up - 정확히 박스 중앙, PC만 표시 */}
                                       <div 
-                                        className="absolute w-0.5 h-6 bg-gray-300 z-0"
+                                        className="absolute w-0.5 h-6 bg-gray-300 z-0 hidden md:block"
                                         style={{ 
                                           left: 'calc(50% - 0.25px)',
                                           top: '-24px'
