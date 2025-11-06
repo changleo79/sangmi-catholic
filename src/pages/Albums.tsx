@@ -142,15 +142,17 @@ export default function Albums() {
                   </div>
                 </div>
                 <div className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                    <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold w-fit" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
-                      {album.category}
-                    </span>
-                    <span className="text-xs sm:text-sm text-gray-500">{album.date}</span>
+                  <div className="flex flex-col gap-2 mb-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold w-fit" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
+                        {album.category}
+                      </span>
+                      <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">{album.date}</span>
+                    </div>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 group-hover:text-catholic-logo transition-colors leading-tight">
+                      {album.title}
+                    </h3>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">
-                    {album.title}
-                  </h3>
                 </div>
               </Link>
             ))}

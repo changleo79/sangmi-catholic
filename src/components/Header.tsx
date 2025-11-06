@@ -97,9 +97,7 @@ export default function Header() {
             <div className="h-full flex flex-col">
               {/* 검색바 (모바일) */}
               <div className="px-4 sm:px-6 pt-6 pb-4 border-b border-gray-200">
-                <div className="w-full">
-                  <SearchBar />
-                </div>
+                <SearchBar />
               </div>
 
               {/* 메뉴 항목 */}
