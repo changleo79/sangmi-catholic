@@ -197,7 +197,7 @@ export default function OrganizationTree() {
 
                     return (
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
-                        {/* Vertical line up to horizontal line - 가로선에 정확히 연결 */}
+                        {/* Vertical line down from horizontal line to committee box - 가로선에서 위원회 박스로 */}
                         <div 
                           className="absolute w-0.5 bg-gray-400 z-0 hidden md:block"
                           style={{ 
@@ -238,7 +238,7 @@ export default function OrganizationTree() {
                           </div>
                         </div>
 
-                        {/* Sub Organizations */}
+                        {/* Sub Organizations - 모바일에서는 선 없이 깔끔하게 */}
                         {hasSubOrgs && (
                           <div className="mt-6 w-full relative">
                             <div className="space-y-2">
@@ -249,7 +249,7 @@ export default function OrganizationTree() {
                                 return (
                                   <div key={`${subOrg}-${refreshKey}`} className="relative flex justify-center">
                                     <div className="relative" style={{ width: '160px' }}>
-                                      {/* Vertical line up - 정확히 박스 중앙, PC만 표시 */}
+                                      {/* Vertical line up - 정확히 박스 중앙, PC만 표시 (모바일에서는 선 없음) */}
                                       <div 
                                         className="absolute w-0.5 h-6 bg-gray-300 z-0 hidden md:block"
                                         style={{ 
@@ -296,12 +296,8 @@ export default function OrganizationTree() {
               <span className="text-sm font-medium text-gray-700">총회장</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg" style={{ background: 'linear-gradient(135deg, #6B3A5B 0%, #5a1538 100%)' }}></div>
-              <span className="text-sm font-medium text-gray-700">총무</span>
-            </div>
-            <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-lg border-2 border-gray-200 bg-white"></div>
-              <span className="text-sm font-medium text-gray-700">위원회</span>
+              <span className="text-sm font-medium text-gray-700">총무, 위원회</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-lg bg-gray-50 border border-gray-200"></div>
