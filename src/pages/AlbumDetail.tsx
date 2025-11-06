@@ -73,13 +73,15 @@ export default function AlbumDetail() {
         {album.photos.length > 0 ? (
           <div className="mb-8">
             <div 
-              className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
+              className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
+              style={{ height: 'calc(100vh - 400px)', minHeight: '500px' }}
               onClick={() => setIsLightboxOpen(true)}
             >
               <img
                 src={album.photos[currentPhotoIndex].src}
                 alt={album.photos[currentPhotoIndex].alt || `${album.title} - ${currentPhotoIndex + 1}`}
                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                style={{ objectPosition: 'center' }}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">

@@ -56,12 +56,16 @@ export default function ImageLightbox({
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 z-[100] bg-black flex items-center justify-center animate-fade-in"
       onClick={onClose}
+      style={{ top: 0, left: 0, right: 0, bottom: 0 }}
     >
       {/* Close Button */}
       <button
-        onClick={onClose}
+        onClick={(e) => {
+          e.stopPropagation()
+          onClose()
+        }}
         className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all duration-300 z-10"
         aria-label="닫기"
       >
@@ -101,16 +105,22 @@ export default function ImageLightbox({
         </button>
       )}
 
-      {/* Image */}
+      {/* Image Container - 화면을 꽉 채우도록 */}
       <div
-        className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center overflow-auto"
+        className="absolute inset-0 flex items-center justify-center overflow-auto"
         onClick={(e) => e.stopPropagation()}
+        style={{ top: 0, left: 0, right: 0, bottom: 0 }}
       >
         <img
           src={imageSrc}
           alt={imageAlt}
-          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-          style={{ maxWidth: '100vw', maxHeight: '90vh' }}
+          className="w-full h-full object-contain"
+          style={{ 
+            maxWidth: '100vw', 
+            maxHeight: '100vh',
+            width: 'auto',
+            height: 'auto'
+          }}
         />
       </div>
     </div>
