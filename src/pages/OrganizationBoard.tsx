@@ -13,7 +13,20 @@ export default function OrganizationBoard() {
   const loadPosts = () => {
     if (orgType) {
       const decoded = decodeURIComponent(orgType)
-      const orgPosts = getOrganizationPosts(decoded as OrganizationType)
+      // 캐시를 무시하고 localStorage에서 직접 가져오기
+      const stored = localStorage.getItem('admin_organization_posts')
+      let allPosts: OrganizationPost[] = []
+      if (stored) {
+        try {
+          allPosts = JSON.parse(stored)
+        } catch (e) {
+          console.error('Failed to parse organization posts:', e)
+        }
+      }
+      
+      // 해당 단체의 게시글 필터링
+      const orgPosts = allPosts.filter(post => post.organization === decoded)
+      
       setPosts(orgPosts.sort((a, b) => {
         // 중요 게시글 우선, 그 다음 날짜순
         if (a.isImportant && !b.isImportant) return -1
@@ -30,7 +43,10 @@ export default function OrganizationBoard() {
   useEffect(() => {
     // 데이터 업데이트 이벤트 리스너
     const handleUpdate = () => {
-      loadPosts()
+      // 약간의 지연을 두어 저장이 완료된 후 로드
+      setTimeout(() => {
+        loadPosts()
+      }, 100)
     }
     
     // 페이지 포커스 시 데이터 다시 로드

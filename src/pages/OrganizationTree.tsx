@@ -32,7 +32,27 @@ export default function OrganizationTree() {
 
   // refreshKey가 변경될 때마다 데이터를 다시 가져옴
   const getPostsCount = (org: string) => {
-    return getOrganizationPosts(org as any).length
+    // localStorage에서 직접 가져와서 정확한 카운트 계산
+    const stored = localStorage.getItem('admin_organization_posts')
+    if (!stored) return 0
+    
+    try {
+      const allPosts: any[] = JSON.parse(stored)
+      const directPosts = allPosts.filter((post: any) => post.organization === org)
+      
+      // 상위 위원회인 경우 하위 단체 게시글도 포함
+      const subOrgs = getSubOrganizations(org as ParentOrganizationType)
+      if (subOrgs.length > 0) {
+        const subOrgPosts = subOrgs.flatMap(subOrg => 
+          allPosts.filter((post: any) => post.organization === subOrg)
+        )
+        return directPosts.length + subOrgPosts.length
+      }
+      
+      return directPosts.length
+    } catch (e) {
+      return 0
+    }
   }
 
   const parentOrganizations: ParentOrganizationType[] = [
@@ -177,28 +197,24 @@ export default function OrganizationTree() {
                     const hasSubOrgs = subOrgs.length > 0
 
                     return (
-                      <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center">
+                      <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
                         {/* Vertical line up to horizontal line - 정확히 박스 중앙 */}
                         <div 
-                          className="absolute w-0.5 h-10 bg-gray-400"
+                          className="absolute w-0.5 h-10 bg-gray-400 z-0"
                           style={{ 
-                            left: '50%',
-                            top: '-40px',
-                            transform: 'translateX(-50%)'
+                            left: 'calc(50% - 0.25px)',
+                            top: '-40px'
                           }}
                         ></div>
                         
                         {/* Committee Box */}
-                        <div className="relative w-full flex justify-center">
-                          <div className="relative inline-block">
+                        <div className="relative w-full flex justify-center z-10">
+                          <div className="relative" style={{ width: '180px' }}>
                             <Link
                               to={`/organizations/${encodeURIComponent(org)}`}
-                              className="block px-4 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center bg-white border-2 border-gray-200 hover:border-catholic-logo transform hover:scale-105"
+                              className="block px-4 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center bg-white border-2 border-gray-200 hover:border-catholic-logo transform hover:scale-105 w-full"
                               style={{ 
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                                minWidth: '160px',
-                                maxWidth: '200px',
-                                width: '100%'
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
                               }}
                             >
                               <h4 className="text-base md:text-lg font-bold text-gray-900 mb-2">{info.name}</h4>
@@ -211,11 +227,10 @@ export default function OrganizationTree() {
                             {/* Vertical line down if has sub-orgs - 정확히 박스 중앙 */}
                             {hasSubOrgs && (
                               <div 
-                                className="absolute w-0.5 h-6 bg-gray-300"
+                                className="absolute w-0.5 h-6 bg-gray-300 z-0"
                                 style={{ 
-                                  left: '50%',
+                                  left: 'calc(50% - 0.25px)',
                                   top: '100%',
-                                  transform: 'translateX(-50%)',
                                   marginTop: '0'
                                 }}
                               ></div>
@@ -225,7 +240,7 @@ export default function OrganizationTree() {
 
                         {/* Sub Organizations */}
                         {hasSubOrgs && (
-                          <div className="mt-6 w-full">
+                          <div className="mt-6 w-full relative">
                             <div className="space-y-2">
                               {subOrgs.map((subOrg) => {
                                 const subInfo = getOrganizationInfo(subOrg)
@@ -233,25 +248,21 @@ export default function OrganizationTree() {
 
                                 return (
                                   <div key={`${subOrg}-${refreshKey}`} className="relative flex justify-center">
-                                    <div className="relative inline-block">
+                                    <div className="relative" style={{ width: '160px' }}>
                                       {/* Vertical line up - 정확히 박스 중앙 */}
                                       <div 
-                                        className="absolute w-0.5 h-6 bg-gray-300"
+                                        className="absolute w-0.5 h-6 bg-gray-300 z-0"
                                         style={{ 
-                                          left: '50%',
-                                          top: '-24px',
-                                          transform: 'translateX(-50%)'
+                                          left: 'calc(50% - 0.25px)',
+                                          top: '-24px'
                                         }}
                                       ></div>
                                       
                                       <Link
                                         to={`/organizations/${encodeURIComponent(subOrg)}`}
-                                        className="block px-3 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-center bg-gray-50 border border-gray-200 hover:border-catholic-logo/50 transform hover:scale-105"
+                                        className="block px-3 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-center bg-gray-50 border border-gray-200 hover:border-catholic-logo/50 transform hover:scale-105 w-full z-10 relative"
                                         style={{ 
-                                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
-                                          minWidth: '140px',
-                                          maxWidth: '200px',
-                                          width: '100%'
+                                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
                                         }}
                                       >
                                         <span className="text-sm font-semibold text-gray-800 block">{subInfo.name}</span>

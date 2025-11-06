@@ -49,7 +49,27 @@ export default function Organizations() {
 
   // refreshKey가 변경될 때마다 데이터를 다시 가져옴
   const getPostsCount = (org: ParentOrganizationType | OrganizationType) => {
-    return getOrganizationPosts(org).length
+    // localStorage에서 직접 가져와서 정확한 카운트 계산
+    const stored = localStorage.getItem('admin_organization_posts')
+    if (!stored) return 0
+    
+    try {
+      const allPosts: any[] = JSON.parse(stored)
+      const directPosts = allPosts.filter((post: any) => post.organization === org)
+      
+      // 상위 위원회인 경우 하위 단체 게시글도 포함
+      const subOrgs = getSubOrganizations(org as ParentOrganizationType)
+      if (subOrgs.length > 0) {
+        const subOrgPosts = subOrgs.flatMap(subOrg => 
+          allPosts.filter((post: any) => post.organization === subOrg)
+        )
+        return directPosts.length + subOrgPosts.length
+      }
+      
+      return directPosts.length
+    } catch (e) {
+      return 0
+    }
   }
 
   return (

@@ -462,27 +462,50 @@ export const exportBulletins = (): void => {
 
 // 단체 게시글 관리
 export const getOrganizationPosts = (organization?: OrganizationType): OrganizationPost[] => {
-  if (organization) {
-    const all = getOrganizationPosts()
-    return all.filter(post => post.organization === organization)
-  }
+  // 전체 게시글 가져오기
+  let allPosts: OrganizationPost[] = []
   
-  if (cachedData.organizationPosts) return cachedData.organizationPosts
-  
-  const stored = localStorage.getItem(ORGANIZATION_POSTS_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
+  if (cachedData.organizationPosts) {
+    allPosts = cachedData.organizationPosts
+  } else {
+    const stored = localStorage.getItem(ORGANIZATION_POSTS_KEY)
+    if (stored) {
+      try {
+        allPosts = JSON.parse(stored)
+        // 캐시 업데이트
+        cachedData.organizationPosts = allPosts
+      } catch (e) {
+        // JSON 파싱 실패 시 무시
+      }
     }
   }
-  return []
+  
+  // organization이 지정되지 않으면 전체 반환
+  if (!organization) {
+    return allPosts
+  }
+  
+  // 특정 단체의 게시글 필터링
+  const directPosts = allPosts.filter(post => post.organization === organization)
+  
+  // 상위 위원회인 경우 하위 단체 게시글도 포함
+  const subOrgs = getSubOrganizations(organization as ParentOrganizationType)
+  if (subOrgs.length > 0) {
+    const subOrgPosts = subOrgs.flatMap(subOrg => 
+      allPosts.filter(post => post.organization === subOrg)
+    )
+    return [...directPosts, ...subOrgPosts]
+  }
+  
+  return directPosts
 }
 
 export const saveOrganizationPosts = (posts: OrganizationPost[]): void => {
   localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(posts))
+  // 캐시 즉시 업데이트
   cachedData.organizationPosts = posts
+  // 이벤트 발생하여 모든 컴포넌트에 알림
+  window.dispatchEvent(new CustomEvent('organizationPostsUpdated'))
 }
 
 export const exportOrganizationPosts = (): void => {
