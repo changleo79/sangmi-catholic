@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { AlbumWithCategory, getAlbums, saveAlbums, getAlbumCategories } from '../../utils/storage'
+import { AlbumWithCategory, getAlbums, saveAlbums, getAlbumCategories, initializeData } from '../../utils/storage'
 import type { AlbumPhoto } from '../../data/albums'
 import img01 from '../../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
 import img02 from '../../../사진파일/KakaoTalk_20251104_172439243_02.jpg'
@@ -84,6 +84,8 @@ export default function AlbumsManage() {
     
     setAlbums(newAlbums)
     saveAlbums(newAlbums)
+    // 캐시 업데이트를 위해 initializeData 호출
+    initializeData()
     resetForm()
   }
 
@@ -99,6 +101,8 @@ export default function AlbumsManage() {
       const newAlbums = albums.filter(a => a.id !== id)
       setAlbums(newAlbums)
       saveAlbums(newAlbums)
+      // 캐시 업데이트를 위해 initializeData 호출
+      initializeData()
     }
   }
 

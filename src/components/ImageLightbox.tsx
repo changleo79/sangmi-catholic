@@ -103,13 +103,14 @@ export default function ImageLightbox({
 
       {/* Image */}
       <div
-        className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center"
+        className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center overflow-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <img
           src={imageSrc}
           alt={imageAlt}
           className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+          style={{ maxWidth: '100vw', maxHeight: '90vh' }}
         />
       </div>
     </div>

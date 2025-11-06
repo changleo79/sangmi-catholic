@@ -12,6 +12,11 @@ export default function Albums() {
   const categories = getAlbumCategories()
 
   useEffect(() => {
+    // 페이지 포커스 시 데이터 다시 로드
+    const handleFocus = () => {
+      loadAlbums()
+    }
+    
     // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
     const loadData = async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -24,6 +29,13 @@ export default function Albums() {
       }
     }
     loadData()
+    
+    // 페이지 포커스 시 데이터 다시 로드 (다른 탭에서 관리자가 수정한 경우)
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [])
 
   const loadAlbums = () => {
@@ -72,10 +84,10 @@ export default function Albums() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 sm:px-6 py-2.5 rounded-full font-medium transition-all duration-300 text-sm sm:text-base touch-manipulation ${
+              className={`px-4 sm:px-6 py-2.5 rounded-full font-medium transition-all duration-300 text-sm sm:text-base touch-manipulation focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                 selectedCategory === category
-                  ? 'text-white shadow-lg'
-                  : 'text-gray-700 bg-white border border-gray-200 hover:border-catholic-logo/30 active:bg-gray-50'
+                  ? 'text-white shadow-lg focus:ring-catholic-logo'
+                  : 'text-gray-700 bg-white border border-gray-200 hover:border-catholic-logo/30 active:bg-gray-50 focus:ring-catholic-logo/50'
               }`}
               style={selectedCategory === category ? { backgroundColor: '#7B1F4B', color: '#ffffff' } : {}}
               onMouseEnter={(e) => {
