@@ -102,16 +102,55 @@ export default function Mass() {
               <div className="space-y-6">
                 <div>
                   <div className="space-y-4">
-                    {massSchedule.map((item) => (
-                      <div key={item.id} className="flex items-start gap-3">
-                        <div className="w-2 h-2 rounded-full mt-2" style={{ backgroundColor: '#7B1F4B' }}></div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{item.day}</p>
-                          <p className="text-gray-600">{item.time} {item.description && `(${item.description})`}</p>
-                          {item.note && <p className="text-gray-500 text-sm mt-1">{item.note}</p>}
-                        </div>
-                      </div>
-                    ))}
+                    {(() => {
+                      // 일요일 항목들을 그룹화
+                      const groupedSchedule: { [key: string]: MassScheduleItem[] } = {}
+                      massSchedule.forEach(item => {
+                        if (item.day === '일요일') {
+                          if (!groupedSchedule['일요일']) {
+                            groupedSchedule['일요일'] = []
+                          }
+                          groupedSchedule['일요일'].push(item)
+                        } else {
+                          groupedSchedule[item.id] = [item]
+                        }
+                      })
+
+                      return Object.values(groupedSchedule).map((items, groupIndex) => {
+                        const firstItem = items[0]
+                        if (items.length === 1) {
+                          // 단일 항목
+                          return (
+                            <div key={firstItem.id} className="flex items-start gap-3">
+                              <div className="w-2 h-2 rounded-full mt-2" style={{ backgroundColor: '#7B1F4B' }}></div>
+                              <div>
+                                <p className="font-semibold text-gray-900">{firstItem.day}</p>
+                                <p className="text-gray-600">{firstItem.time} {firstItem.description && `(${firstItem.description})`}</p>
+                                {firstItem.note && <p className="text-gray-500 text-sm mt-1">{firstItem.note}</p>}
+                              </div>
+                            </div>
+                          )
+                        } else {
+                          // 일요일 통합 표시
+                          return (
+                            <div key={`sunday-${groupIndex}`} className="flex items-start gap-3">
+                              <div className="w-2 h-2 rounded-full mt-2" style={{ backgroundColor: '#7B1F4B' }}></div>
+                              <div>
+                                <p className="font-semibold text-gray-900">일요일</p>
+                                <div className="space-y-1">
+                                  {items.map((item, idx) => (
+                                    <p key={item.id} className="text-gray-600">
+                                      {item.time} {item.description && `(${item.description})`}
+                                    </p>
+                                  ))}
+                                </div>
+                                {firstItem.note && <p className="text-gray-500 text-sm mt-1">{firstItem.note}</p>}
+                              </div>
+                            </div>
+                          )
+                        }
+                      })
+                    })()}
                   </div>
                 </div>
                 <div className="pt-4 border-t border-gray-200">
