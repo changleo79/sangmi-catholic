@@ -17,12 +17,19 @@ export default function OrganizationPostDetail() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    setIsAuth(isAuthenticated())
+    const checkAuth = () => {
+      const auth = isAuthenticated()
+      setIsAuth(auth)
+    }
+    checkAuth()
     // 인증 상태를 주기적으로 확인
-    const interval = setInterval(() => {
-      setIsAuth(isAuthenticated())
-    }, 1000)
-    return () => clearInterval(interval)
+    const interval = setInterval(checkAuth, 500)
+    // storage 이벤트 리스너 추가 (다른 탭에서 로그인/로그아웃 시)
+    window.addEventListener('storage', checkAuth)
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('storage', checkAuth)
+    }
   }, [])
 
   useEffect(() => {
@@ -128,7 +135,7 @@ export default function OrganizationPostDetail() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {isAuth && (
+              {isAuth && post && (
                 <button
                   onClick={() => {
                     if (!post) return

@@ -197,14 +197,13 @@ export default function OrganizationTree() {
 
                     return (
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
-                        {/* Vertical line up from committee box to horizontal line - 위원회 박스에서 가로선으로 위로 올라가는 선, PC만 표시 */}
+                        {/* Vertical line down from horizontal line to committee box - 가로선에서 위원회 박스로 내려가는 선, PC만 표시 */}
                         <div 
                           className="absolute w-0.5 bg-gray-400 z-0 hidden md:block"
                           style={{ 
                             left: 'calc(50% - 0.25px)',
-                            bottom: '100%',
-                            height: '60px',
-                            marginBottom: '0'
+                            top: '80px',
+                            height: '60px'
                           }}
                         ></div>
                         
