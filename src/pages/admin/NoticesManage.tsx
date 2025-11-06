@@ -134,13 +134,13 @@ export default function NoticesManage() {
                       const data = await importJSON<NoticeItem[]>(file)
                       setNotices(data)
                       saveNotices(data)
-                      await initializeData() // 데이터 다시 로드
+                      await initializeData()
                       alert('데이터를 가져왔습니다.')
                     } catch (error) {
                       alert('JSON 파일을 불러오는데 실패했습니다.')
                     }
                   }
-                }}
+                }
                 input.click()
               }}
               className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
@@ -164,7 +164,7 @@ export default function NoticesManage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 {isEditing ? '공지사항 수정' : '새 공지사항 추가'}
               </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   제목 *
@@ -363,6 +363,7 @@ export default function NoticesManage() {
                 ))
               )}
             </div>
+          </div>
           </div>
         </div>
       </div>
