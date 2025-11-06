@@ -1,8 +1,28 @@
 import { Link } from 'react-router-dom'
-import { getOrganizationTypes, getOrganizationInfo, getOrganizationPosts, type OrganizationType } from '../utils/storage'
+import { 
+  getOrganizationTypes, 
+  getOrganizationInfo, 
+  getOrganizationPosts, 
+  getParentOrganization,
+  getSubOrganizations,
+  type OrganizationType,
+  type ParentOrganizationType
+} from '../utils/storage'
 
 export default function Organizations() {
-  const organizations = getOrganizationTypes()
+  const allOrganizations = getOrganizationTypes()
+  
+  // 상위 위원회만 필터링
+  const parentOrganizations: ParentOrganizationType[] = [
+    '총회장',
+    '총무',
+    '소공동체위원회',
+    '전례위원회',
+    '제분과위원회',
+    '청소년위원회',
+    '재정위원회',
+    '평신도협의회'
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -18,49 +38,87 @@ export default function Organizations() {
           </p>
         </div>
 
-        {/* Organizations Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {organizations.map((orgType) => {
-            const info = getOrganizationInfo(orgType)
-            const posts = getOrganizationPosts(orgType)
-            const recentPost = posts.length > 0 ? posts[0] : null
+        {/* Organizations by Parent */}
+        <div className="space-y-12">
+          {parentOrganizations.map((parentOrg) => {
+            const parentInfo = getOrganizationInfo(parentOrg)
+            const subOrgs = getSubOrganizations(parentOrg)
+            const parentPosts = getOrganizationPosts(parentOrg)
+            const hasSubOrgs = subOrgs.length > 0
 
             return (
-              <Link
-                key={orgType}
-                to={`/organizations/${encodeURIComponent(orgType)}`}
-                className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">
-                      {info.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-                      {info.description}
-                    </p>
+              <div key={parentOrg} className="bg-white rounded-2xl shadow-lg p-8">
+                {/* Parent Organization Header */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex-1">
+                      <h2 className="text-3xl font-bold text-gray-900 mb-2">{parentInfo.name}</h2>
+                      <p className="text-gray-600 leading-relaxed">{parentInfo.description}</p>
+                    </div>
+                    <Link
+                      to={`/organizations/${encodeURIComponent(parentOrg)}`}
+                      className="ml-4 px-6 py-3 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                      style={{ backgroundColor: '#7B1F4B' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                    >
+                      게시판 보기 ({parentPosts.length})
+                    </Link>
                   </div>
                 </div>
-                
-                {recentPost && (
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-xs text-gray-500 mb-1">최근 게시글</p>
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {recentPost.title}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">{recentPost.date}</p>
+
+                {/* Sub Organizations */}
+                {hasSubOrgs && (
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">하위 단체</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {subOrgs.map((subOrg) => {
+                        const subInfo = getOrganizationInfo(subOrg)
+                        const subPosts = getOrganizationPosts(subOrg)
+                        const recentPost = subPosts.length > 0 ? subPosts[0] : null
+
+                        return (
+                          <Link
+                            key={subOrg}
+                            to={`/organizations/${encodeURIComponent(subOrg)}`}
+                            className="group bg-gray-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-5 border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <h4 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-catholic-logo transition-colors">
+                                  {subInfo.name}
+                                </h4>
+                                <p className="text-xs text-gray-600 leading-relaxed line-clamp-2">
+                                  {subInfo.description}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {recentPost && (
+                              <div className="mt-3 pt-3 border-t border-gray-200">
+                                <p className="text-xs text-gray-500 mb-1">최근 게시글</p>
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {recentPost.title}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">{recentPost.date}</p>
+                              </div>
+                            )}
+
+                            <div className="mt-3 flex items-center justify-between">
+                              <span className="text-xs text-catholic-logo font-medium">
+                                게시판 보기 →
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {subPosts.length}개
+                              </span>
+                            </div>
+                          </Link>
+                        )
+                      })}
+                    </div>
                   </div>
                 )}
-
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-sm text-catholic-logo font-medium">
-                    게시판 보기 →
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    게시글 {posts.length}개
-                  </span>
-                </div>
-              </Link>
+              </div>
             )
           })}
         </div>
