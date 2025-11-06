@@ -56,6 +56,8 @@ export default function OrganizationPostDetail() {
         }
       }
     }
+    // 게시글 로드 후 인증 상태 다시 확인
+    setIsAuth(isAuthenticated())
   }, [orgType, postId])
 
   if (!post) {
@@ -135,30 +137,36 @@ export default function OrganizationPostDetail() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {isAuth && post && (
-                <button
-                  onClick={() => {
-                    if (!post) return
-                    setFormData({ ...post, attachments: post.attachments || [] })
-                    if (post.imageUrl && post.imageUrl.startsWith('data:')) {
-                      setImageInputType('upload')
-                    } else {
-                      setImageInputType('url')
-                    }
-                    if (post.attachments && post.attachments.length > 0) {
-                      const hasBase64 = post.attachments.some(att => att.url.startsWith('data:'))
-                      setAttachmentInputType(hasBase64 ? 'upload' : 'url')
-                    }
-                    setShowEditModal(true)
-                  }}
-                  className="px-4 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
-                  style={{ backgroundColor: '#7B1F4B' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-                >
-                  수정
-                </button>
-              )}
+              {(() => {
+                const auth = isAuthenticated()
+                if (auth && post) {
+                  return (
+                    <button
+                      onClick={() => {
+                        if (!post) return
+                        setFormData({ ...post, attachments: post.attachments || [] })
+                        if (post.imageUrl && post.imageUrl.startsWith('data:')) {
+                          setImageInputType('upload')
+                        } else {
+                          setImageInputType('url')
+                        }
+                        if (post.attachments && post.attachments.length > 0) {
+                          const hasBase64 = post.attachments.some(att => att.url.startsWith('data:'))
+                          setAttachmentInputType(hasBase64 ? 'upload' : 'url')
+                        }
+                        setShowEditModal(true)
+                      }}
+                      className="px-4 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+                      style={{ backgroundColor: '#7B1F4B' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                    >
+                      수정
+                    </button>
+                  )
+                }
+                return null
+              })()}
               <ShareButton url={window.location.pathname} title={post.title} description={post.content.substring(0, 100)} />
             </div>
           </div>

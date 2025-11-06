@@ -305,7 +305,7 @@ export default function OrganizationTree() {
 
                     return (
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
-                        {/* Vertical line down from horizontal line to committee box - 가로선에서 위원회 박스로 내려가는 선, PC만 표시 */}
+                        {/* Vertical line down from horizontal line to committee box - 가로선(80px)에서 위원회 박스(140px)로 내려가는 선, PC만 표시 */}
                         <div 
                           className="absolute w-0.5 bg-gray-400 z-0 hidden md:block"
                           style={{ 
