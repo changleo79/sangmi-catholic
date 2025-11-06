@@ -178,17 +178,17 @@ export default function OrganizationTree() {
 
               {/* Level 4: 위원회들 */}
               <div className="relative mb-8">
-                {/* Main horizontal line connecting all committees - PC만 표시 */}
+                {/* Main horizontal line connecting all committees - 총무 선과 연결, PC만 표시 */}
                 <div 
                   className="absolute h-0.5 bg-gray-400 z-10 hidden md:block"
                   style={{ 
-                    top: '0',
+                    top: '80px',
                     left: '10%',
                     right: '10%'
                   }}
                 ></div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6" style={{ marginTop: '110px' }}>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6" style={{ marginTop: '140px' }}>
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)
@@ -202,8 +202,8 @@ export default function OrganizationTree() {
                           className="absolute w-0.5 bg-gray-400 z-0 hidden md:block"
                           style={{ 
                             left: 'calc(50% - 0.25px)',
-                            top: '0',
-                            height: '110px'
+                            top: '80px',
+                            height: '60px'
                           }}
                         ></div>
                         
@@ -223,6 +223,18 @@ export default function OrganizationTree() {
                                 <p className="text-xs text-catholic-logo font-medium">단체 {subOrgs.length}개</p>
                               )}
                             </Link>
+                            
+                            {/* 위원회 박스에서 하위 단체로 내려가는 선 - 재정위원회는 단체가 없으므로 선 없음 */}
+                            {hasSubOrgs && (
+                              <div 
+                                className="absolute w-0.5 h-6 bg-gray-300 z-0 hidden md:block"
+                                style={{ 
+                                  left: 'calc(50% - 0.25px)',
+                                  top: '100%',
+                                  marginTop: '0'
+                                }}
+                              ></div>
+                            )}
                           </div>
                         </div>
 
