@@ -34,7 +34,7 @@ export default function OrganizationTree() {
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 overflow-x-auto">
             <div className="min-w-[800px]">
-              {/* Level 1: 본당 주임신부님 */}
+              {/* Level 1: 주임신부님 */}
               <div className="flex justify-center mb-12">
                 <div className="relative">
                   <div className="px-10 py-6 rounded-2xl shadow-xl text-center min-w-[280px] transform hover:scale-105 transition-transform duration-300"
@@ -48,12 +48,12 @@ export default function OrganizationTree() {
                       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
-                      <h2 className="text-2xl md:text-3xl font-bold">본당 주임신부님</h2>
+                      <h2 className="text-2xl md:text-3xl font-bold">주임신부님</h2>
                     </div>
                     <p className="text-sm opacity-90 mt-2">상미성당</p>
                   </div>
-                  {/* Vertical line down */}
-                  <div className="absolute left-1/2 top-full w-1 h-12 bg-gradient-to-b from-gray-400 to-gray-300 transform -translate-x-1/2"></div>
+                  {/* Vertical line down - 정확히 중앙 정렬 */}
+                  <div className="absolute left-1/2 top-full w-1 h-12 bg-gradient-to-b from-gray-400 to-gray-300 transform -translate-x-1/2" style={{ transform: 'translateX(-50%)' }}></div>
                 </div>
               </div>
 
@@ -64,9 +64,9 @@ export default function OrganizationTree() {
                     to={`/organizations/${encodeURIComponent('총회장')}`}
                     className="block px-8 py-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center min-w-[220px] transform hover:scale-105"
                     style={{ 
-                      backgroundColor: '#7B1F4B', 
+                      background: 'linear-gradient(135deg, #8B4A6B 0%, #7B1F4B 100%)',
                       color: 'white',
-                      boxShadow: '0 8px 20px rgba(123, 31, 75, 0.25)'
+                      boxShadow: '0 8px 20px rgba(139, 74, 107, 0.3)'
                     }}
                   >
                     <h3 className="text-xl font-bold mb-1">총회장</h3>
@@ -74,8 +74,8 @@ export default function OrganizationTree() {
                       게시글 {getOrganizationPosts('총회장').length}개
                     </p>
                   </Link>
-                  {/* Vertical line down */}
-                  <div className="absolute left-1/2 top-full w-1 h-10 bg-gradient-to-b from-gray-400 to-gray-300 transform -translate-x-1/2"></div>
+                  {/* Vertical line down - 정확히 중앙 정렬 */}
+                  <div className="absolute left-1/2 top-full w-1 h-10 bg-gradient-to-b from-gray-400 to-gray-300 transform -translate-x-1/2" style={{ transform: 'translateX(-50%)' }}></div>
                 </div>
               </div>
 
@@ -86,9 +86,9 @@ export default function OrganizationTree() {
                     to={`/organizations/${encodeURIComponent('총무')}`}
                     className="block px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-center min-w-[180px] transform hover:scale-105"
                     style={{ 
-                      backgroundColor: '#5a1538', 
+                      background: 'linear-gradient(135deg, #6B3A5B 0%, #5a1538 100%)',
                       color: 'white',
-                      boxShadow: '0 6px 15px rgba(90, 21, 56, 0.25)'
+                      boxShadow: '0 6px 15px rgba(107, 58, 91, 0.3)'
                     }}
                   >
                     <h4 className="text-lg font-bold mb-1">총무</h4>
@@ -96,15 +96,20 @@ export default function OrganizationTree() {
                       게시글 {getOrganizationPosts('총무').length}개
                     </p>
                   </Link>
-                  {/* Vertical line down */}
-                  <div className="absolute left-1/2 top-full w-1 h-10 bg-gradient-to-b from-gray-400 to-gray-300 transform -translate-x-1/2"></div>
+                  {/* Vertical line down - 정확히 중앙 정렬 */}
+                  <div className="absolute left-1/2 top-full w-1 h-10 bg-gradient-to-b from-gray-400 to-gray-300 transform -translate-x-1/2" style={{ transform: 'translateX(-50%)' }}></div>
                 </div>
               </div>
 
-              {/* Level 4: 위원회들 - Horizontal line connecting all */}
+              {/* Level 4: 위원회들 */}
               <div className="relative mb-8">
-                {/* Main horizontal line */}
-                <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                {/* Main horizontal line - 정확히 중앙 정렬 */}
+                <div className="absolute left-1/2 top-0 h-1 w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent transform -translate-x-1/2" style={{ 
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 'calc(100% - 200px)',
+                  maxWidth: '800px'
+                }}></div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mt-10">
                   {parentOrganizations.map((org, index) => {
@@ -115,8 +120,8 @@ export default function OrganizationTree() {
 
                     return (
                       <div key={org} className="relative flex flex-col items-center">
-                        {/* Vertical line up */}
-                        <div className="absolute left-1/2 -top-10 w-1 h-10 bg-gradient-to-b from-gray-300 to-gray-400 transform -translate-x-1/2"></div>
+                        {/* Vertical line up - 정확히 중앙 정렬 */}
+                        <div className="absolute left-1/2 -top-10 w-1 h-10 bg-gradient-to-b from-gray-300 to-gray-400 transform -translate-x-1/2" style={{ transform: 'translateX(-50%)' }}></div>
                         
                         {/* Committee Box */}
                         <div className="relative w-full">
@@ -134,17 +139,20 @@ export default function OrganizationTree() {
                             )}
                           </Link>
 
-                          {/* Vertical line down if has sub-orgs */}
+                          {/* Vertical line down if has sub-orgs - 정확히 중앙 정렬 */}
                           {hasSubOrgs && (
-                            <div className="absolute left-1/2 top-full w-1 h-6 bg-gradient-to-b from-gray-300 to-gray-200 transform -translate-x-1/2"></div>
+                            <div className="absolute left-1/2 top-full w-1 h-6 bg-gradient-to-b from-gray-300 to-gray-200 transform -translate-x-1/2" style={{ transform: 'translateX(-50%)' }}></div>
                           )}
                         </div>
 
                         {/* Sub Organizations */}
                         {hasSubOrgs && (
                           <div className="mt-6 w-full">
-                            {/* Horizontal line connecting sub-orgs */}
-                            <div className="absolute left-0 right-0 top-full mt-3 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                            {/* Horizontal line connecting sub-orgs - 정확히 중앙 정렬 */}
+                            <div className="absolute left-1/2 top-full mt-3 h-0.5 w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent transform -translate-x-1/2" style={{ 
+                              transform: 'translateX(-50%)',
+                              width: 'calc(100% + 20px)'
+                            }}></div>
                             
                             <div className="space-y-2 pt-6">
                               {subOrgs.map((subOrg, subIndex) => {
@@ -152,13 +160,13 @@ export default function OrganizationTree() {
                                 const subPosts = getOrganizationPosts(subOrg)
 
                                 return (
-                                  <div key={subOrg} className="relative">
-                                    {/* Vertical line up */}
-                                    <div className="absolute left-1/2 -top-6 w-0.5 h-6 bg-gray-200 transform -translate-x-1/2"></div>
+                                  <div key={subOrg} className="relative flex justify-center">
+                                    {/* Vertical line up - 정확히 중앙 정렬 */}
+                                    <div className="absolute left-1/2 -top-6 w-0.5 h-6 bg-gray-200 transform -translate-x-1/2" style={{ transform: 'translateX(-50%)' }}></div>
                                     
                                     <Link
                                       to={`/organizations/${encodeURIComponent(subOrg)}`}
-                                      className="block px-3 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-center bg-gray-50 border border-gray-200 hover:border-catholic-logo/50 transform hover:scale-105"
+                                      className="block px-3 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-center bg-gray-50 border border-gray-200 hover:border-catholic-logo/50 transform hover:scale-105 w-full max-w-[200px]"
                                       style={{ 
                                         boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
                                       }}
@@ -186,14 +194,14 @@ export default function OrganizationTree() {
           <div className="inline-flex flex-wrap items-center justify-center gap-6 px-8 py-4 bg-white rounded-xl shadow-lg">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-lg" style={{ background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)' }}></div>
-              <span className="text-sm font-medium text-gray-700">본당 주임신부님</span>
+              <span className="text-sm font-medium text-gray-700">주임신부님</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg" style={{ backgroundColor: '#7B1F4B' }}></div>
+              <div className="w-5 h-5 rounded-lg" style={{ background: 'linear-gradient(135deg, #8B4A6B 0%, #7B1F4B 100%)' }}></div>
               <span className="text-sm font-medium text-gray-700">총회장</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg" style={{ backgroundColor: '#5a1538' }}></div>
+              <div className="w-5 h-5 rounded-lg" style={{ background: 'linear-gradient(135deg, #6B3A5B 0%, #5a1538 100%)' }}></div>
               <span className="text-sm font-medium text-gray-700">총무</span>
             </div>
             <div className="flex items-center gap-2">
