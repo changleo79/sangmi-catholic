@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getOrganizationTypes, saveOrganizationPosts, initializeData, type OrganizationType } from '../utils/storage'
+import { getOrganizationTypes, saveOrganizationPosts, getOrganizationPosts, type OrganizationType } from '../utils/storage'
 
 interface PostWriteButtonProps {
   organization: OrganizationType
@@ -20,8 +20,8 @@ export default function PostWriteButton({ organization, className = '' }: PostWr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // localStorage에서 기존 게시글 가져오기
-    const existingPosts = JSON.parse(localStorage.getItem('admin_organization_posts') || '[]')
+    // getOrganizationPosts로 기존 게시글 가져오기 (캐시 우선)
+    const existingPosts = getOrganizationPosts()
     
     const newPost = {
       id: Date.now().toString(),
@@ -35,11 +35,8 @@ export default function PostWriteButton({ organization, className = '' }: PostWr
       isImportant: formData.isImportant
     }
     
-    existingPosts.unshift(newPost)
-    saveOrganizationPosts(existingPosts)
-    
-    // 캐시 업데이트
-    await initializeData()
+    const updatedPosts = [newPost, ...existingPosts]
+    saveOrganizationPosts(updatedPosts)
     
     // 커스텀 이벤트 발생하여 다른 컴포넌트에 알림
     window.dispatchEvent(new CustomEvent('organizationPostsUpdated'))
