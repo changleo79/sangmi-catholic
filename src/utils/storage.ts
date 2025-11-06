@@ -555,7 +555,7 @@ export const getOrganizationTypes = (): OrganizationType[] => {
   ]
 }
 
-// 상위 위원회와 하위 단체 매핑
+// 상위 위원회와 단체 매핑
 export const getParentOrganization = (org: OrganizationType): ParentOrganizationType | null => {
   const mapping: Record<OrganizationType, ParentOrganizationType | null> = {
     '총회장': null,
@@ -604,7 +604,7 @@ export const getParentOrganization = (org: OrganizationType): ParentOrganization
   return mapping[org] || null
 }
 
-// 하위 단체 목록 가져오기
+// 단체 목록 가져오기
 export const getSubOrganizations = (parent: ParentOrganizationType): OrganizationType[] => {
   const allOrgs = getOrganizationTypes()
   return allOrgs.filter(org => getParentOrganization(org) === parent)
@@ -674,10 +674,10 @@ export const getOrganizationInfo = (type: OrganizationType): { name: string; des
     '사회복지분과': { name: '사회복지분과', description: '지역 사회 봉사와 복지 활동을 담당하는 제분과위원회 소속 분과입니다.' },
     '가정분과': { name: '가정분과', description: '가정의 신앙 생활과 가정 사목을 지원하는 제분과위원회 소속 분과입니다.' },
     // 평신도협의회 하위
-    '울뜨레야': { name: '울뜨레야', description: '평신도 사도직 단체로, 복음화와 사회 정의 실현을 위한 활동을 합니다.' },
-    '꾸리아': { name: '꾸리아', description: '평신도 사도직 단체로, 복음화와 사회 정의 실현을 위한 활동을 합니다.' },
-    'ME': { name: 'ME', description: '평신도 사도직 단체로, 복음화와 사회 정의 실현을 위한 활동을 합니다.' },
-    '꾸르실료': { name: '꾸르실료', description: '평신도 사도직 단체로, 복음화와 사회 정의 실현을 위한 활동을 합니다.' }
+    '울뜨레야': { name: '울뜨레야', description: '꾸리아를 마친 신자들이 정기적으로 모여 신앙을 나누고 격려하며 함께 성장하는 모임입니다. 꾸리아 정신을 지속적으로 실천하고 공동체 의식을 강화합니다.' },
+    '꾸리아': { name: '꾸리아', description: '3일간의 집중적인 신앙 체험을 통해 그리스도 중심의 삶을 배우고 실천하는 평신도 사도직 단체입니다. 복음화와 사회 정의 실현을 위한 활동을 합니다.' },
+    'ME': { name: 'ME', description: 'Marriage Encounter(부부 만남)의 약자로, 부부가 함께 모여 부부 관계와 가정의 신앙을 깊이 나누고 성장하는 모임입니다. 부부 사도직을 실천합니다.' },
+    '꾸르실료': { name: '꾸르실료', description: 'Cursillo de Cristiandad(그리스도교 단기 강좌)로, 평신도들이 신앙을 깊이 배우고 실천하며 복음화 사도직을 수행하는 단체입니다.' }
   }
   return info[type] || { name: type, description: '' }
 }

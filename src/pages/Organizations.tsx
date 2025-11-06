@@ -81,7 +81,7 @@ export default function Organizations() {
                 {/* Sub Organizations */}
                 {hasSubOrgs && (
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">하위 단체</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">단체</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {subOrgs.map((subOrg) => {
                         const subInfo = getOrganizationInfo(subOrg)
