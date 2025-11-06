@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { 
   getOrganizationPosts, 
   saveOrganizationPosts, 
@@ -15,6 +15,7 @@ import {
 
 export default function OrganizationsManage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [posts, setPosts] = useState<OrganizationPost[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -34,7 +35,17 @@ export default function OrganizationsManage() {
 
   useEffect(() => {
     loadPosts()
-  }, [])
+    
+    // URL 쿼리 파라미터에서 edit ID 확인
+    const editId = searchParams.get('edit')
+    if (editId) {
+      const allPosts = getOrganizationPosts()
+      const postToEdit = allPosts.find(p => p.id === editId)
+      if (postToEdit) {
+        handleEdit(postToEdit)
+      }
+    }
+  }, [searchParams])
 
   const loadPosts = () => {
     const stored = getOrganizationPosts()
@@ -65,17 +76,34 @@ export default function OrganizationsManage() {
     setPosts(newPosts)
     saveOrganizationPosts(newPosts)
     initializeData()
+    
+    // 수정 완료 후 원래 페이지로 돌아가기 (URL에 returnTo가 있는 경우)
+    const returnTo = searchParams.get('returnTo')
+    if (returnTo && editingId) {
+      resetForm()
+      navigate(decodeURIComponent(returnTo))
+      return
+    }
+    
     resetForm()
   }
 
   const handleEdit = (post: OrganizationPost) => {
-    setFormData(post)
+    setFormData({
+      ...post,
+      attachments: post.attachments || []
+    })
     setIsEditing(true)
     setEditingId(post.id)
     if (post.imageUrl && post.imageUrl.startsWith('data:')) {
       setImageInputType('upload')
     } else {
       setImageInputType('url')
+    }
+    // 첨부파일 입력 타입 설정
+    if (post.attachments && post.attachments.length > 0) {
+      const hasBase64 = post.attachments.some(att => att.url.startsWith('data:'))
+      setAttachmentInputType(hasBase64 ? 'upload' : 'url')
     }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }

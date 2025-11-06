@@ -178,24 +178,13 @@ export default function OrganizationTree() {
 
               {/* Level 4: 위원회들 */}
               <div className="relative mb-8">
-                {/* Main horizontal line connecting all committees - 총무 선과 연결, PC만 표시 */}
+                {/* Main horizontal line connecting all committees - 총무 선과 연결 */}
                 <div 
-                  className="absolute h-0.5 bg-gray-400 z-10 hidden md:block"
+                  className="absolute h-0.5 bg-gray-400 z-10"
                   style={{ 
                     top: '80px',
                     left: '10%',
                     right: '10%'
-                  }}
-                ></div>
-                
-                {/* Vertical line up from horizontal line to 총무 line - 가로선 중앙에서 위로 올라가는 선 */}
-                <div 
-                  className="absolute w-0.5 bg-gray-400 z-10 hidden md:block"
-                  style={{ 
-                    left: '50%',
-                    top: '0',
-                    height: '80px',
-                    transform: 'translateX(-50%)'
                   }}
                 ></div>
                 
@@ -208,13 +197,13 @@ export default function OrganizationTree() {
 
                     return (
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
-                        {/* Vertical line down from horizontal line to committee box - 가로선에서 위원회 박스로 */}
+                        {/* Vertical line up from committee box to horizontal line - 위원회 박스에서 가로선으로 위로 올라가는 선 */}
                         <div 
-                          className="absolute w-0.5 bg-gray-400 z-0 hidden md:block"
+                          className="absolute w-0.5 bg-gray-400 z-0"
                           style={{ 
                             left: 'calc(50% - 0.25px)',
-                            top: '80px',
-                            height: '60px'
+                            top: '0',
+                            height: '80px'
                           }}
                         ></div>
                         
@@ -238,7 +227,7 @@ export default function OrganizationTree() {
                             {/* 위원회 박스에서 하위 단체로 내려가는 선 - 재정위원회는 단체가 없으므로 선 없음 */}
                             {hasSubOrgs && (
                               <div 
-                                className="absolute w-0.5 h-6 bg-gray-300 z-0 hidden md:block"
+                                className="absolute w-0.5 h-6 bg-gray-300 z-0"
                                 style={{ 
                                   left: 'calc(50% - 0.25px)',
                                   top: '100%',
@@ -249,7 +238,7 @@ export default function OrganizationTree() {
                           </div>
                         </div>
 
-                        {/* Sub Organizations - 모바일에서는 선 없이 깔끔하게 */}
+                        {/* Sub Organizations */}
                         {hasSubOrgs && (
                           <div className="mt-6 w-full relative">
                             <div className="space-y-2">
@@ -260,9 +249,9 @@ export default function OrganizationTree() {
                                 return (
                                   <div key={`${subOrg}-${refreshKey}`} className="relative flex justify-center">
                                     <div className="relative" style={{ width: '160px' }}>
-                                      {/* Vertical line up - 정확히 박스 중앙, PC만 표시 (모바일에서는 선 없음) */}
+                                      {/* Vertical line up - 정확히 박스 중앙 */}
                                       <div 
-                                        className="absolute w-0.5 h-6 bg-gray-300 z-0 hidden md:block"
+                                        className="absolute w-0.5 h-6 bg-gray-300 z-0"
                                         style={{ 
                                           left: 'calc(50% - 0.25px)',
                                           top: '-24px'

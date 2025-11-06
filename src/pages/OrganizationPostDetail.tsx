@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getOrganizationPosts, getOrganizationInfo, type OrganizationPost, type OrganizationType } from '../utils/storage'
+import { isAuthenticated } from '../utils/auth'
 import ShareButton from '../components/ShareButton'
 import ImageLightbox from '../components/ImageLightbox'
 
@@ -8,13 +9,31 @@ export default function OrganizationPostDetail() {
   const { orgType, postId } = useParams<{ orgType: string; postId: string }>()
   const [post, setPost] = useState<OrganizationPost | null>(null)
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (orgType && postId) {
-      const decodedOrgType = decodeURIComponent(orgType) as OrganizationType
-      const posts = getOrganizationPosts(decodedOrgType)
-      const found = posts.find(p => p.id === postId)
-      setPost(found || null)
+      // 전체 게시글 목록에서 찾기 (organization 필터 없이)
+      const allPosts = getOrganizationPosts()
+      const found = allPosts.find(p => p.id === postId)
+      
+      if (found) {
+        setPost(found)
+      } else {
+        // localStorage에서 직접 찾기 (캐시 문제 대비)
+        const stored = localStorage.getItem('admin_organization_posts')
+        if (stored) {
+          try {
+            const posts: OrganizationPost[] = JSON.parse(stored)
+            const foundPost = posts.find(p => p.id === postId)
+            if (foundPost) {
+              setPost(foundPost)
+            }
+          } catch (e) {
+            console.error('Failed to parse organization posts:', e)
+          }
+        }
+      }
     }
   }, [orgType, postId])
 
@@ -94,7 +113,20 @@ export default function OrganizationPostDetail() {
                 {post.author && <span>작성자: {post.author}</span>}
               </div>
             </div>
-            <ShareButton url={window.location.pathname} title={post.title} description={post.content.substring(0, 100)} />
+            <div className="flex items-center gap-3">
+              {isAuthenticated() && (
+                <button
+                  onClick={() => navigate(`/admin/organizations?edit=${post.id}&returnTo=${encodeURIComponent(window.location.pathname)}`)}
+                  className="px-4 py-2 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+                  style={{ backgroundColor: '#7B1F4B' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                >
+                  수정
+                </button>
+              )}
+              <ShareButton url={window.location.pathname} title={post.title} description={post.content.substring(0, 100)} />
+            </div>
           </div>
           <div className="w-24 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
