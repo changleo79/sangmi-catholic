@@ -13,7 +13,17 @@ export default function OrganizationPostDetail() {
   const [formData, setFormData] = useState<OrganizationPost | null>(null)
   const [imageInputType, setImageInputType] = useState<'upload' | 'url'>('url')
   const [attachmentInputType, setAttachmentInputType] = useState<'upload' | 'url'>('upload')
+  const [isAuth, setIsAuth] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    setIsAuth(isAuthenticated())
+    // 인증 상태를 주기적으로 확인
+    const interval = setInterval(() => {
+      setIsAuth(isAuthenticated())
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     if (orgType && postId) {
@@ -118,9 +128,10 @@ export default function OrganizationPostDetail() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {isAuthenticated() && (
+              {isAuth && (
                 <button
                   onClick={() => {
+                    if (!post) return
                     setFormData({ ...post, attachments: post.attachments || [] })
                     if (post.imageUrl && post.imageUrl.startsWith('data:')) {
                       setImageInputType('upload')
