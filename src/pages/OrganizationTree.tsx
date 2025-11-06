@@ -311,7 +311,8 @@ export default function OrganizationTree() {
                           style={{ 
                             left: 'calc(50% - 0.25px)',
                             top: '80px',
-                            height: '60px'
+                            height: '60px',
+                            zIndex: 0
                           }}
                         ></div>
                         
