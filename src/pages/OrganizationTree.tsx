@@ -78,8 +78,116 @@ export default function OrganizationTree() {
           </p>
         </div>
 
-        {/* Organization Chart */}
-        <div className="max-w-7xl mx-auto">
+        {/* Mobile View - List Style */}
+        <div className="md:hidden space-y-6">
+          {/* 주임신부님 */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+              <h2 className="text-xl font-bold text-gray-900">주임신부님</h2>
+            </div>
+            <p className="text-sm text-gray-600 ml-6">상미성당</p>
+          </div>
+
+          {/* 총회장 */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+              <h2 className="text-xl font-bold text-gray-900">총회장</h2>
+              <span className="text-sm text-gray-500">({getPostsCount('총회장')}개)</span>
+            </div>
+            <div className="ml-6 mt-2">
+              <Link
+                to={`/organizations/${encodeURIComponent('총회장')}`}
+                className="inline-block px-4 py-2 rounded-lg text-white text-sm font-medium"
+                style={{ backgroundColor: '#7B1F4B' }}
+              >
+                게시판
+              </Link>
+            </div>
+          </div>
+
+          {/* 총무 */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+              <h2 className="text-xl font-bold text-gray-900">총무</h2>
+              <span className="text-sm text-gray-500">({getPostsCount('총무')}개)</span>
+            </div>
+            <div className="ml-6 mt-2">
+              <Link
+                to={`/organizations/${encodeURIComponent('총무')}`}
+                className="inline-block px-4 py-2 rounded-lg text-white text-sm font-medium"
+                style={{ backgroundColor: '#7B1F4B' }}
+              >
+                게시판
+              </Link>
+            </div>
+          </div>
+
+          {/* 위원회 및 하위 단체 */}
+          {parentOrganizations.map((org) => {
+            const info = getOrganizationInfo(org)
+            const postsCount = getPostsCount(org)
+            const subOrgs = getSubOrganizations(org)
+            const hasSubOrgs = subOrgs.length > 0
+
+            return (
+              <div key={`${org}-${refreshKey}`} className="space-y-4">
+                {/* 위원회 */}
+                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-3 h-3 rounded-full bg-gray-300"></div>
+                    <h2 className="text-xl font-bold text-gray-900">{info.name}</h2>
+                    <span className="text-sm text-gray-500">({postsCount}개)</span>
+                  </div>
+                  <p className="text-xs text-gray-600 ml-6 mb-3">{info.description}</p>
+                  <div className="ml-6">
+                    <Link
+                      to={`/organizations/${encodeURIComponent(org)}`}
+                      className="inline-block px-4 py-2 rounded-lg text-white text-sm font-medium"
+                      style={{ backgroundColor: '#7B1F4B' }}
+                    >
+                      게시판
+                    </Link>
+                  </div>
+                </div>
+
+                {/* 하위 단체 - 줄 없이 */}
+                {hasSubOrgs && (
+                  <div className="ml-4 space-y-3">
+                    {subOrgs.map((subOrg) => {
+                      const subInfo = getOrganizationInfo(subOrg)
+                      const subPostsCount = getPostsCount(subOrg)
+
+                      return (
+                        <div key={`${subOrg}-${refreshKey}`} className="bg-white rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-base font-bold text-gray-900">{subInfo.name}</h3>
+                              <span className="text-xs text-gray-500">({subPostsCount}개)</span>
+                            </div>
+                            <Link
+                              to={`/organizations/${encodeURIComponent(subOrg)}`}
+                              className="px-3 py-1.5 rounded-lg text-white text-xs font-medium"
+                              style={{ backgroundColor: '#7B1F4B' }}
+                            >
+                              게시판
+                            </Link>
+                          </div>
+                          <p className="text-xs text-gray-600">{subInfo.description}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* PC View - Organization Chart */}
+        <div className="hidden md:block max-w-7xl mx-auto">
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 overflow-x-auto">
             <div className="min-w-[800px]">
               {/* Level 1: 주임신부님 */}
