@@ -138,8 +138,25 @@ export default function OrganizationPostDetail() {
             </div>
             <div className="flex items-center gap-3">
               {(() => {
-                const auth = isAuthenticated()
-                if (auth && post) {
+                // localStorage에서 직접 확인
+                const authToken = localStorage.getItem('admin_auth_token')
+                const authTime = localStorage.getItem('admin_auth_time')
+                let isAuth = false
+                
+                if (authToken && authTime) {
+                  const now = Date.now()
+                  const loginTime = parseInt(authTime, 10)
+                  const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60)
+                  
+                  if (hoursSinceLogin <= 24 && authToken === 'authenticated') {
+                    isAuth = true
+                  }
+                }
+                
+                // isAuth state도 확인
+                const finalAuth = isAuth || isAuthenticated()
+                
+                if (finalAuth && post) {
                   return (
                     <button
                       onClick={() => {

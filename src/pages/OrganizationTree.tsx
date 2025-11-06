@@ -285,18 +285,18 @@ export default function OrganizationTree() {
               </div>
 
               {/* Level 4: 위원회들 */}
-              <div className="relative mb-8">
+              <div className="relative mb-8" style={{ paddingTop: '80px' }}>
                 {/* Main horizontal line connecting all committees - 총무 선 끝(80px 아래)에 위치, PC만 표시 */}
                 <div 
                   className="absolute h-0.5 bg-gray-400 z-10 hidden md:block"
                   style={{ 
-                    top: '80px',
+                    top: '0px',
                     left: '10%',
                     right: '10%'
                   }}
                 ></div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6" style={{ marginTop: '140px' }}>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6" style={{ marginTop: '60px' }}>
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)
@@ -305,12 +305,12 @@ export default function OrganizationTree() {
 
                     return (
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
-                        {/* Vertical line down from horizontal line to committee box - 가로선(80px)에서 위원회 박스(140px)로 내려가는 선, PC만 표시 */}
+                        {/* Vertical line down from horizontal line to committee box - 가로선(0px)에서 위원회 박스(60px)로 내려가는 선, PC만 표시 */}
                         <div 
                           className="absolute w-0.5 bg-gray-400 z-0 hidden md:block"
                           style={{ 
                             left: 'calc(50% - 0.25px)',
-                            top: '80px',
+                            top: '-60px',
                             height: '60px',
                             zIndex: 0
                           }}
