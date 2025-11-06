@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getOrganizationInfo, getOrganizationPosts, getOrganizationTypes, type OrganizationType, type OrganizationPost } from '../utils/storage'
 import ShareButton from '../components/ShareButton'
+import PostWriteButton from '../components/PostWriteButton'
 
 export default function OrganizationBoard() {
   const { orgType } = useParams<{ orgType: string }>()
@@ -57,12 +58,15 @@ export default function OrganizationBoard() {
             </svg>
             단체 목록으로
           </Link>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">{info.name}</h1>
-              <p className="text-gray-600 mb-4">{info.description}</p>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">{info.name}</h1>
+              <p className="text-sm md:text-base text-gray-600 mb-4">{info.description}</p>
             </div>
-            <ShareButton url={window.location.pathname} title={`${info.name} 게시판`} />
+            <div className="flex items-center gap-3">
+              <PostWriteButton organization={decodedOrgType} />
+              <ShareButton url={window.location.pathname} title={`${info.name} 게시판`} />
+            </div>
           </div>
           <div className="w-24 h-1.5 rounded-full mt-4" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>

@@ -107,19 +107,20 @@ export default function ImageLightbox({
 
       {/* Image Container - 화면을 꽉 채우도록 */}
       <div
-        className="absolute inset-0 flex items-center justify-center overflow-auto"
+        className="absolute inset-0 flex items-center justify-center"
         onClick={(e) => e.stopPropagation()}
-        style={{ top: 0, left: 0, right: 0, bottom: 0 }}
+        style={{ top: 0, left: 0, right: 0, bottom: 0, overflow: 'auto' }}
       >
         <img
           src={imageSrc}
           alt={imageAlt}
-          className="w-full h-full object-contain"
+          className="object-contain"
           style={{ 
             maxWidth: '100vw', 
             maxHeight: '100vh',
             width: 'auto',
-            height: 'auto'
+            height: 'auto',
+            display: 'block'
           }}
         />
       </div>

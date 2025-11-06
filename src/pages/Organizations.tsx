@@ -36,6 +36,17 @@ export default function Organizations() {
           <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
             상미성당의 각 단체와 위원회를 소개합니다. 각 단체의 게시판에서 활동 소식을 확인하실 수 있습니다.
           </p>
+          <div className="mt-6">
+            <Link
+              to="/organizations/tree"
+              className="inline-block px-6 py-3 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105"
+              style={{ backgroundColor: '#7B1F4B' }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+            >
+              조직도 보기
+            </Link>
+          </div>
         </div>
 
         {/* Organizations by Parent */}
@@ -50,14 +61,14 @@ export default function Organizations() {
               <div key={parentOrg} className="bg-white rounded-2xl shadow-lg p-8">
                 {/* Parent Organization Header */}
                 <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
                     <div className="flex-1">
-                      <h2 className="text-3xl font-bold text-gray-900 mb-2">{parentInfo.name}</h2>
-                      <p className="text-gray-600 leading-relaxed">{parentInfo.description}</p>
+                      <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{parentInfo.name}</h2>
+                      <p className="text-sm md:text-base text-gray-600 leading-relaxed">{parentInfo.description}</p>
                     </div>
                     <Link
                       to={`/organizations/${encodeURIComponent(parentOrg)}`}
-                      className="ml-4 px-6 py-3 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                      className="md:ml-4 px-6 py-3 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105 whitespace-nowrap text-center md:text-left flex-shrink-0"
                       style={{ backgroundColor: '#7B1F4B' }}
                       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}

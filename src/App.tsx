@@ -28,6 +28,7 @@ import RecruitmentDetail from './pages/RecruitmentDetail'
 import Organizations from './pages/Organizations'
 import OrganizationBoard from './pages/OrganizationBoard'
 import OrganizationPostDetail from './pages/OrganizationPostDetail'
+import OrganizationTree from './pages/OrganizationTree'
 import OrganizationsManage from './pages/admin/OrganizationsManage'
 
 function ScrollToTopOnRouteChange() {
@@ -75,6 +76,7 @@ function App() {
                   <Route path="/albums" element={<Albums />} />
                   <Route path="/albums/:id" element={<AlbumDetail />} />
                   <Route path="/organizations" element={<Organizations />} />
+                  <Route path="/organizations/tree" element={<OrganizationTree />} />
                   <Route path="/organizations/:orgType" element={<OrganizationBoard />} />
                   <Route path="/organizations/:orgType/posts/:postId" element={<OrganizationPostDetail />} />
                   <Route path="/office" element={<Office />} />
