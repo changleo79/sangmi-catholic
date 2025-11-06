@@ -30,6 +30,11 @@ export default function OrganizationTree() {
     }
   }, [])
 
+  // refreshKey가 변경될 때마다 데이터를 다시 가져옴
+  const getPostsCount = (org: string) => {
+    return getOrganizationPosts(org as any).length
+  }
+
   const parentOrganizations: ParentOrganizationType[] = [
     '소공동체위원회',
     '전례위원회',
@@ -59,7 +64,7 @@ export default function OrganizationTree() {
             <div className="min-w-[800px]">
               {/* Level 1: 주임신부님 */}
               <div className="flex justify-center mb-8">
-                <div className="relative">
+                <div className="relative inline-block">
                   <div 
                     className="px-10 py-6 rounded-2xl shadow-xl text-center transform hover:scale-105 transition-transform duration-300"
                     style={{ 
@@ -77,17 +82,22 @@ export default function OrganizationTree() {
                     </div>
                     <p className="text-sm opacity-90 mt-2">상미성당</p>
                   </div>
-                  {/* Vertical line down */}
+                  {/* Vertical line down - 정확히 박스 중앙 */}
                   <div 
-                    className="absolute left-1/2 top-full w-0.5 h-8 bg-gray-400"
-                    style={{ transform: 'translateX(-50%)' }}
+                    className="absolute w-0.5 h-8 bg-gray-400"
+                    style={{ 
+                      left: '50%',
+                      top: '100%',
+                      transform: 'translateX(-50%)',
+                      marginTop: '0'
+                    }}
                   ></div>
                 </div>
               </div>
 
               {/* Level 2: 총회장 */}
               <div className="flex justify-center mb-8">
-                <div className="relative">
+                <div className="relative inline-block">
                   <Link
                     to={`/organizations/${encodeURIComponent('총회장')}`}
                     className="block px-8 py-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center transform hover:scale-105"
@@ -100,20 +110,25 @@ export default function OrganizationTree() {
                   >
                     <h3 className="text-xl font-bold mb-1">총회장</h3>
                     <p className="text-sm opacity-90">
-                      게시글 {getOrganizationPosts('총회장').length}개
+                      게시글 {getPostsCount('총회장')}개
                     </p>
                   </Link>
-                  {/* Vertical line down */}
+                  {/* Vertical line down - 정확히 박스 중앙 */}
                   <div 
-                    className="absolute left-1/2 top-full w-0.5 h-8 bg-gray-400"
-                    style={{ transform: 'translateX(-50%)' }}
+                    className="absolute w-0.5 h-8 bg-gray-400"
+                    style={{ 
+                      left: '50%',
+                      top: '100%',
+                      transform: 'translateX(-50%)',
+                      marginTop: '0'
+                    }}
                   ></div>
                 </div>
               </div>
 
               {/* Level 3: 총무 */}
               <div className="flex justify-center mb-12">
-                <div className="relative">
+                <div className="relative inline-block">
                   <Link
                     to={`/organizations/${encodeURIComponent('총무')}`}
                     className="block px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-center transform hover:scale-105"
@@ -126,13 +141,18 @@ export default function OrganizationTree() {
                   >
                     <h4 className="text-lg font-bold mb-1">총무</h4>
                     <p className="text-xs opacity-90">
-                      게시글 {getOrganizationPosts('총무').length}개
+                      게시글 {getPostsCount('총무')}개
                     </p>
                   </Link>
-                  {/* Vertical line down */}
+                  {/* Vertical line down - 정확히 박스 중앙 */}
                   <div 
-                    className="absolute left-1/2 top-full w-0.5 h-10 bg-gray-400"
-                    style={{ transform: 'translateX(-50%)' }}
+                    className="absolute w-0.5 h-10 bg-gray-400"
+                    style={{ 
+                      left: '50%',
+                      top: '100%',
+                      transform: 'translateX(-50%)',
+                      marginTop: '0'
+                    }}
                   ></div>
                 </div>
               </div>
@@ -141,7 +161,7 @@ export default function OrganizationTree() {
               <div className="relative mb-8">
                 {/* Main horizontal line connecting all committees */}
                 <div 
-                  className="absolute left-0 right-0 h-0.5 bg-gray-400"
+                  className="absolute h-0.5 bg-gray-400"
                   style={{ 
                     top: '0',
                     left: '10%',
@@ -152,41 +172,55 @@ export default function OrganizationTree() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 mt-10">
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
-                    const posts = getOrganizationPosts(org)
+                    const postsCount = getPostsCount(org)
                     const subOrgs = getSubOrganizations(org)
                     const hasSubOrgs = subOrgs.length > 0
 
                     return (
-                      <div key={org} className="relative flex flex-col items-center">
-                        {/* Vertical line up to horizontal line */}
+                      <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center">
+                        {/* Vertical line up to horizontal line - 정확히 박스 중앙 */}
                         <div 
-                          className="absolute left-1/2 -top-10 w-0.5 h-10 bg-gray-400"
-                          style={{ transform: 'translateX(-50%)' }}
+                          className="absolute w-0.5 h-10 bg-gray-400"
+                          style={{ 
+                            left: '50%',
+                            top: '-40px',
+                            transform: 'translateX(-50%)'
+                          }}
                         ></div>
                         
                         {/* Committee Box */}
-                        <div className="relative w-full">
-                          <Link
-                            to={`/organizations/${encodeURIComponent(org)}`}
-                            className="block px-4 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center bg-white border-2 border-gray-200 hover:border-catholic-logo transform hover:scale-105"
-                            style={{ 
-                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
-                            }}
-                          >
-                            <h4 className="text-base md:text-lg font-bold text-gray-900 mb-2">{info.name}</h4>
-                            <p className="text-xs text-gray-500 mb-1">게시글 {posts.length}개</p>
-                            {hasSubOrgs && (
-                              <p className="text-xs text-catholic-logo font-medium">단체 {subOrgs.length}개</p>
-                            )}
-                          </Link>
+                        <div className="relative w-full flex justify-center">
+                          <div className="relative inline-block">
+                            <Link
+                              to={`/organizations/${encodeURIComponent(org)}`}
+                              className="block px-4 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center bg-white border-2 border-gray-200 hover:border-catholic-logo transform hover:scale-105"
+                              style={{ 
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                                minWidth: '160px',
+                                maxWidth: '200px',
+                                width: '100%'
+                              }}
+                            >
+                              <h4 className="text-base md:text-lg font-bold text-gray-900 mb-2">{info.name}</h4>
+                              <p className="text-xs text-gray-500 mb-1">게시글 {postsCount}개</p>
+                              {hasSubOrgs && (
+                                <p className="text-xs text-catholic-logo font-medium">단체 {subOrgs.length}개</p>
+                              )}
+                            </Link>
 
-                          {/* Vertical line down if has sub-orgs */}
-                          {hasSubOrgs && (
-                            <div 
-                              className="absolute left-1/2 top-full w-0.5 h-6 bg-gray-300"
-                              style={{ transform: 'translateX(-50%)' }}
-                            ></div>
-                          )}
+                            {/* Vertical line down if has sub-orgs - 정확히 박스 중앙 */}
+                            {hasSubOrgs && (
+                              <div 
+                                className="absolute w-0.5 h-6 bg-gray-300"
+                                style={{ 
+                                  left: '50%',
+                                  top: '100%',
+                                  transform: 'translateX(-50%)',
+                                  marginTop: '0'
+                                }}
+                              ></div>
+                            )}
+                          </div>
                         </div>
 
                         {/* Sub Organizations */}
@@ -195,26 +229,35 @@ export default function OrganizationTree() {
                             <div className="space-y-2">
                               {subOrgs.map((subOrg) => {
                                 const subInfo = getOrganizationInfo(subOrg)
-                                const subPosts = getOrganizationPosts(subOrg)
+                                const subPostsCount = getPostsCount(subOrg)
 
                                 return (
-                                  <div key={subOrg} className="relative flex justify-center">
-                                    {/* Vertical line up */}
-                                    <div 
-                                      className="absolute left-1/2 -top-6 w-0.5 h-6 bg-gray-300"
-                                      style={{ transform: 'translateX(-50%)' }}
-                                    ></div>
-                                    
-                                    <Link
-                                      to={`/organizations/${encodeURIComponent(subOrg)}`}
-                                      className="block px-3 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-center bg-gray-50 border border-gray-200 hover:border-catholic-logo/50 transform hover:scale-105 w-full max-w-[200px]"
-                                      style={{ 
-                                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
-                                      }}
-                                    >
-                                      <span className="text-sm font-semibold text-gray-800 block">{subInfo.name}</span>
-                                      <span className="text-xs text-gray-500">({subPosts.length})</span>
-                                    </Link>
+                                  <div key={`${subOrg}-${refreshKey}`} className="relative flex justify-center">
+                                    <div className="relative inline-block">
+                                      {/* Vertical line up - 정확히 박스 중앙 */}
+                                      <div 
+                                        className="absolute w-0.5 h-6 bg-gray-300"
+                                        style={{ 
+                                          left: '50%',
+                                          top: '-24px',
+                                          transform: 'translateX(-50%)'
+                                        }}
+                                      ></div>
+                                      
+                                      <Link
+                                        to={`/organizations/${encodeURIComponent(subOrg)}`}
+                                        className="block px-3 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-center bg-gray-50 border border-gray-200 hover:border-catholic-logo/50 transform hover:scale-105"
+                                        style={{ 
+                                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
+                                          minWidth: '140px',
+                                          maxWidth: '200px',
+                                          width: '100%'
+                                        }}
+                                      >
+                                        <span className="text-sm font-semibold text-gray-800 block">{subInfo.name}</span>
+                                        <span className="text-xs text-gray-500">({subPostsCount})</span>
+                                      </Link>
+                                    </div>
                                   </div>
                                 )
                               })}

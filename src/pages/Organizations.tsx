@@ -29,6 +29,7 @@ export default function Organizations() {
   useEffect(() => {
     // 데이터 업데이트 이벤트 리스너
     const handleUpdate = () => {
+      // 강제 리렌더링을 위해 refreshKey 업데이트
       setRefreshKey(prev => prev + 1)
     }
     
@@ -45,6 +46,11 @@ export default function Organizations() {
       window.removeEventListener('focus', handleFocus)
     }
   }, [])
+
+  // refreshKey가 변경될 때마다 데이터를 다시 가져옴
+  const getPostsCount = (org: ParentOrganizationType | OrganizationType) => {
+    return getOrganizationPosts(org).length
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -76,11 +82,11 @@ export default function Organizations() {
           {parentOrganizations.map((parentOrg) => {
             const parentInfo = getOrganizationInfo(parentOrg)
             const subOrgs = getSubOrganizations(parentOrg)
-            const parentPosts = getOrganizationPosts(parentOrg)
+            const parentPostsCount = getPostsCount(parentOrg)
             const hasSubOrgs = subOrgs.length > 0
 
             return (
-              <div key={parentOrg} className="bg-white rounded-2xl shadow-lg p-8">
+              <div key={`${parentOrg}-${refreshKey}`} className="bg-white rounded-2xl shadow-lg p-8">
                 {/* Parent Organization Header */}
                 <div className="mb-6">
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
@@ -95,7 +101,7 @@ export default function Organizations() {
                       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
                     >
-                      게시판 보기 ({parentPosts.length})
+                      게시판 보기 ({parentPostsCount})
                     </Link>
                   </div>
                 </div>
@@ -108,11 +114,12 @@ export default function Organizations() {
                       {subOrgs.map((subOrg) => {
                         const subInfo = getOrganizationInfo(subOrg)
                         const subPosts = getOrganizationPosts(subOrg)
+                        const subPostsCount = getPostsCount(subOrg)
                         const recentPost = subPosts.length > 0 ? subPosts[0] : null
 
                         return (
                           <Link
-                            key={subOrg}
+                            key={`${subOrg}-${refreshKey}`}
                             to={`/organizations/${encodeURIComponent(subOrg)}`}
                             className="group bg-gray-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 p-5 border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1"
                           >
@@ -142,7 +149,7 @@ export default function Organizations() {
                                 게시판 보기 →
                               </span>
                               <span className="text-xs text-gray-500">
-                                {subPosts.length}개
+                                {subPostsCount}개
                               </span>
                             </div>
                           </Link>
