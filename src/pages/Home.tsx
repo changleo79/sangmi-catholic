@@ -281,7 +281,7 @@ export default function Home() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 md:bottom-8">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 md:bottom-10 lg:bottom-16">
           {slideImages.map((_, index) => (
             <button
               key={index}

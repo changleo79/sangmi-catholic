@@ -317,6 +317,7 @@ export const getAlbums = (): AlbumWithCategory[] => {
 export const saveAlbums = (albums: AlbumWithCategory[]): void => {
   localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
   cachedData.albums = albums
+  window.dispatchEvent(new CustomEvent('albumsUpdated'))
 }
 
 export const exportAlbums = (): void => {

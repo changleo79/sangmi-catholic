@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getAlbums, type AlbumWithCategory } from '../utils/storage'
+import { getAlbums, initializeData, type AlbumWithCategory } from '../utils/storage'
 import ImageLightbox from '../components/ImageLightbox'
 
 export default function AlbumDetail() {
@@ -11,10 +11,51 @@ export default function AlbumDetail() {
   const [isAutoPlay, setIsAutoPlay] = useState(false)
 
   useEffect(() => {
-    if (id) {
+    if (!id) {
+      setAlbum(null)
+      return
+    }
+
+    let cancelled = false
+
+    const resolveAlbum = async (attempt = 0): Promise<void> => {
+      if (cancelled) return
       const albums = getAlbums()
-      const found = albums.find(a => a.id === id)
-      setAlbum(found || null)
+      const found = albums.find(a => a.id === id) || null
+
+      if (found) {
+        if (!cancelled) {
+          setAlbum(found)
+          setCurrentPhotoIndex(0)
+        }
+        return
+      }
+
+      if (attempt === 0) {
+        await initializeData()
+      }
+
+      if (attempt < 4) {
+        await new Promise(resolve => setTimeout(resolve, 150 * (attempt + 1)))
+        await resolveAlbum(attempt + 1)
+      } else if (!cancelled) {
+        setAlbum(null)
+      }
+    }
+
+    resolveAlbum()
+
+    const handleAlbumsUpdate = () => {
+      resolveAlbum()
+    }
+
+    window.addEventListener('albumsUpdated', handleAlbumsUpdate)
+    window.addEventListener('focus', handleAlbumsUpdate)
+
+    return () => {
+      cancelled = true
+      window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
+      window.removeEventListener('focus', handleAlbumsUpdate)
     }
   }, [id])
 

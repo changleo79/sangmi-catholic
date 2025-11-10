@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sangmi-catholic-v1'
+const CACHE_NAME = 'sangmi-catholic-v3'
 const OFFLINE_URLS = [
   '/',
   '/index.html',
