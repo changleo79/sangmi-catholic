@@ -136,7 +136,7 @@ export default function Home() {
   const quickLinks = [
     {
       title: '공지 / 소식',
-      description: '본당과 단체의 최신 안내',
+      description: '본당·단체 최신 안내',
       to: '/news',
       accent: '#7B1F4B',
       background: 'linear-gradient(135deg, rgba(123, 31, 75, 0.14) 0%, rgba(123, 31, 75, 0.04) 100%)',
@@ -148,7 +148,7 @@ export default function Home() {
     },
     {
       title: '성당단체 둘러보기',
-      description: '위원회와 단체 소개, 게시판',
+      description: '위원회 · 단체 게시판',
       to: '/organizations',
       accent: '#8B4A6B',
       background: 'linear-gradient(135deg, rgba(139, 74, 107, 0.14) 0%, rgba(139, 74, 107, 0.04) 100%)',
@@ -160,7 +160,7 @@ export default function Home() {
     },
     {
       title: '성당 앨범',
-      description: '행사와 추억을 사진으로',
+      description: '행사 사진 모음',
       to: '/albums',
       accent: '#4C9C84',
       background: 'linear-gradient(135deg, rgba(76, 156, 132, 0.14) 0%, rgba(76, 156, 132, 0.04) 100%)',
@@ -172,7 +172,7 @@ export default function Home() {
     },
     {
       title: '성당 업무 안내',
-      description: '행정, 미사예물, 사무실 연락',
+      description: '사무실 · 행정 안내',
       to: '/office',
       accent: '#D0864C',
       background: 'linear-gradient(135deg, rgba(208, 134, 76, 0.14) 0%, rgba(208, 134, 76, 0.04) 100%)',
@@ -306,24 +306,24 @@ export default function Home() {
               <p className="text-base md:text-lg text-white/80 leading-relaxed">
                 본당 소식과 단체 활동, 신앙 삶을 풍성하게 하는 모든 안내를 한 자리에서 만나보세요.
               </p>
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:gap-3 pt-2 max-w-xs sm:max-w-none">
                 <Link
                   to="/mass"
-                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white text-gray-900 font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 min-w-[170px]"
+                  className="group inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/85 text-gray-900 font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  미사 시간 보기
+                  미사 안내
                 </Link>
                 <Link
                   to="/news"
-                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/10 text-white font-semibold border border-white/20 hover:bg-white/15 hover:-translate-y-1 transition-all duration-300 min-w-[170px]"
+                  className="group inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/15 text-white font-semibold border border-white/40 hover:bg-white/25 hover:-translate-y-1 transition-all duration-300"
                 >
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v15z" />
                   </svg>
-                  공지/소식 모아보기
+                  공지 / 소식
                 </Link>
               </div>
             </div>
@@ -362,7 +362,7 @@ export default function Home() {
       <section ref={quickSectionRef} className="-mt-16 md:-mt-24 pb-20">
         <div className="container mx-auto px-4">
           <div className="bg-white/85 backdrop-blur rounded-3xl shadow-2xl border border-white/60 p-6 md:p-8">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
               {quickLinks.map(link => (
                 <Link
                   key={link.title}
@@ -391,14 +391,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </div>
-        <div className="container mx-auto px-4 mt-6">
-          <Link
-            to="/organizations"
-            className="block md:hidden bg-white rounded-2xl shadow-lg border border-gray-100 px-6 py-4 text-center text-sm font-semibold text-catholic-logo hover:text-catholic-logo-dark transition-colors"
-          >
-            성당단체 둘러보기 →
-          </Link>
         </div>
       </section>
 
