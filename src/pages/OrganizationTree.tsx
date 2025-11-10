@@ -116,49 +116,8 @@ export default function OrganizationTree() {
             </div>
           </div>
 
-          <div className="flex justify-center">
-            <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m0 0l-4-4m4 4l4-4" />
-            </svg>
-          </div>
-
-          {/* 총회장 */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, #9B5A7B 0%, #7B1F4B 100%)' }}>
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4 4 4-4m-6 8h4a2 2 0 002-2V7a2 2 0 00-2-2H10a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-gray-500">게시글 {getPostsCount('총회장')}개</span>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">총회장</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  본당의 주요 결정 사항을 협의하고 각 위원회를 조율합니다.
-                </p>
-                <Link
-                  to={`/organizations/${encodeURIComponent('총회장')}`}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo"
-                >
-                  위원회 게시판 바로가기
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m0 0l-4-4m4 4l4-4" />
-            </svg>
-          </div>
-
           {/* 총무 */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mt-6">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner" style={{ backgroundColor: 'rgba(123, 31, 75, 0.12)' }}>
                 <svg className="w-6 h-6 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,14 +142,6 @@ export default function OrganizationTree() {
                   </svg>
                 </Link>
               </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center shadow-sm">
-              <svg className="w-6 h-6 text-catholic-logo/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0l3-3m-3 3l-3-3m-6 9h18" />
-              </svg>
             </div>
           </div>
 
@@ -297,69 +248,6 @@ export default function OrganizationTree() {
               </div>
             )
           })}
-
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            {/* 주임신부님 */}
-            <div className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-catholic-logo/10">
-                <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">주임신부님</p>
-                <p className="text-xs text-gray-500 leading-relaxed">상미성당 공동체를 이끄는 영적 지도자입니다.</p>
-              </div>
-            </div>
-            {/* 총회장 */}
-            <div className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-catholic-logo/10">
-                <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17l5-5 5 5M7 7h10" />
-                </svg>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">총회장</p>
-                <p className="text-xs text-gray-500 leading-relaxed">본당의 주요 결정 사항을 협의하고 각 위원회를 조율합니다.</p>
-              </div>
-            </div>
-            {/* 총무 */}
-            <div className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-catholic-logo/10">
-                <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h9" />
-                </svg>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">총무</p>
-                <p className="text-xs text-gray-500 leading-relaxed">각 위원회 운영을 지원하고 전반적인 행정 업무를 담당합니다.</p>
-              </div>
-            </div>
-            {/* 위원회 */}
-            <div className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-catholic-logo/10">
-                <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">위원회</p>
-                <p className="text-xs text-gray-500 leading-relaxed">분야별 사목 활동</p>
-              </div>
-            </div>
-            {/* 단체 */}
-            <div className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-catholic-logo/10">
-                <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
-                </svg>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-900">단체</p>
-                <p className="text-xs text-gray-500 leading-relaxed">신자들의 소모임</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* PC View - Organization Chart */}
@@ -386,21 +274,11 @@ export default function OrganizationTree() {
                     </div>
                     <p className="text-sm opacity-90 mt-2">상미성당</p>
                   </div>
-                  {/* Vertical line down - 정확히 박스 중앙, PC만 표시 */}
-                  <div 
-                    className="absolute w-0.5 h-8 bg-gray-400 hidden md:block"
-                    style={{ 
-                      left: '50%',
-                      top: '100%',
-                      transform: 'translateX(-50%)',
-                      marginTop: '0'
-                    }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Level 2: 총회장 */}
-              <div className="flex justify-center mb-8">
+                 </div>
+               </div>
+ 
+               {/* Level 2: 총회장 */}
+              <div className="flex justify-center mb-6">
                 <div className="relative inline-block">
                   <Link
                     to={`/organizations/${encodeURIComponent('총회장')}`}
@@ -417,21 +295,11 @@ export default function OrganizationTree() {
                       게시글 {getPostsCount('총회장')}개
                     </p>
                   </Link>
-                  {/* Vertical line down - 정확히 박스 중앙, PC만 표시 */}
-                  <div 
-                    className="absolute w-0.5 h-8 bg-gray-400 hidden md:block"
-                    style={{ 
-                      left: '50%',
-                      top: '100%',
-                      transform: 'translateX(-50%)',
-                      marginTop: '0'
-                    }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Level 3: 총무 */}
-              <div className="flex justify-center mb-12">
+                 </div>
+               </div>
+ 
+               {/* Level 3: 총무 */}
+              <div className="flex justify-center mb-6">
                 <div className="relative inline-block">
                   <Link
                     to={`/organizations/${encodeURIComponent('총무')}`}
@@ -447,21 +315,11 @@ export default function OrganizationTree() {
                       게시글 {getPostsCount('총무')}개
                     </p>
                   </Link>
-                  {/* Vertical line down - 가로선에 정확히 맞추기, PC만 표시 */}
-                  <div 
-                    className="absolute w-0.5 bg-gray-400 hidden md:block"
-                    style={{ 
-                      left: 'calc(50% - 0.25px)',
-                      top: '100%',
-                      height: '78px',
-                      marginTop: '0'
-                    }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Level 4: 위원회들 */}
-              <div className="relative mb-6 md:px-[90px]" style={{ paddingTop: '40px' }}>
+                 </div>
+               </div>
+ 
+               {/* Level 4: 위원회들 */}
+               <div className="relative mb-6 md:px-[90px]" style={{ paddingTop: '40px' }}>
                 {/* 상단 연결선 제거 (요청에 따라 숨김) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" style={{ marginTop: '35px' }}>
                   {parentOrganizations.map((org) => {
@@ -531,28 +389,6 @@ export default function OrganizationTree() {
                   })}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-12 text-center">
-          <div className="inline-flex flex-wrap items-center justify-center gap-6 px-8 py-4 bg-white rounded-xl shadow-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg" style={{ background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)' }}></div>
-              <span className="text-sm font-medium text-gray-700">주임신부님</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg" style={{ background: 'linear-gradient(135deg, #8B4A6B 0%, #7B1F4B 100%)' }}></div>
-              <span className="text-sm font-medium text-gray-700">총회장</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg border-2 border-gray-200 bg-white"></div>
-              <span className="text-sm font-medium text-gray-700">총무, 위원회</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-lg bg-gray-50 border border-gray-200"></div>
-              <span className="text-sm font-medium text-gray-700">단체</span>
             </div>
           </div>
         </div>

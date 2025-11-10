@@ -2,7 +2,11 @@
 // 우선순위: JSON 파일 > localStorage > 기본값
 
 import { NoticeItem } from '../data/notices'
-import type { Album, AlbumPhoto } from '../data/albums'
+import type { Album } from '../data/albums'
+import defaultAlbumImg1 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
+import defaultAlbumImg2 from '../../사진파일/KakaoTalk_20251104_172439243_02.jpg'
+import defaultAlbumImg3 from '../../사진파일/KakaoTalk_20251104_172439243_03.jpg'
+import defaultAlbumImg4 from '../../사진파일/KakaoTalk_20251104_172439243_04.jpg'
 
 export type RecruitmentItem = {
   id: string
@@ -131,7 +135,7 @@ const BULLETINS_KEY = 'admin_bulletins'
 const ORGANIZATIONS_KEY = 'admin_organizations'
 const ORGANIZATION_POSTS_KEY = 'admin_organization_posts'
 
-const DEFAULT_ALBUM_ID = 'default-album'
+const DEFAULT_ALBUM_ID = '1762757851120'
 
 const createDefaultAlbum = (): AlbumWithCategory => {
   const today = new Date().toISOString().split('T')[0]
@@ -139,10 +143,13 @@ const createDefaultAlbum = (): AlbumWithCategory => {
     id: DEFAULT_ALBUM_ID,
     title: '상미성당 앨범',
     date: today,
-    cover: '/images/main-og.jpg',
+    cover: defaultAlbumImg1,
     category: '행사',
     photos: [
-      { src: '/images/main-og.jpg', alt: '상미성당 전경', tags: ['본당', '외관'] }
+      { src: defaultAlbumImg1, alt: '성당 사진 1', tags: ['본당', '외관'] },
+      { src: defaultAlbumImg2, alt: '성당 사진 2', tags: ['내부', '전례'] },
+      { src: defaultAlbumImg3, alt: '성당 사진 3', tags: ['행사', '전례'] },
+      { src: defaultAlbumImg4, alt: '성당 사진 4', tags: ['공동체', '행사'] }
     ]
   }
 }
@@ -324,15 +331,18 @@ export const getAlbums = (): AlbumWithCategory[] => {
   if (stored) {
     try {
       const parsed = JSON.parse(stored)
-      if (parsed.length > 0) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        cachedData.albums = parsed
         return parsed
       }
     } catch (e) {
       // JSON 파싱 실패 시 무시
     }
   }
-  
-  return []
+  const defaultAlbum = createDefaultAlbum()
+  localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
+  cachedData.albums = [defaultAlbum]
+  return [defaultAlbum]
 }
 
 export const saveAlbums = (albums: AlbumWithCategory[]): void => {

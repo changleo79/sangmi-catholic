@@ -1,10 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { getAlbums, saveAlbums, getAlbumCategories, initializeData, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
-import img01 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
-import img02 from '../../사진파일/KakaoTalk_20251104_172439243_02.jpg'
-import img03 from '../../사진파일/KakaoTalk_20251104_172439243_03.jpg'
-import img04 from '../../사진파일/KakaoTalk_20251104_172439243_04.jpg'
+import { getAlbums, getAlbumCategories, initializeData, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
 
 export default function Albums() {
   const [albums, setAlbums] = useState<AlbumWithCategory[]>([])

@@ -4,7 +4,6 @@ import { notices as defaultNotices } from '../data/notices'
 import {
   getNotices,
   getAlbums,
-  saveAlbums,
   getRecruitments,
   getBulletins,
   type RecruitmentItem,
