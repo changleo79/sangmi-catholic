@@ -264,7 +264,7 @@ export default function Home() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 md:bottom-16 lg:bottom-20">
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 flex gap-2 sm:bottom-14 md:bottom-18 lg:bottom-24">
           {slideImages.map((_, index) => (
             <button
               key={index}
@@ -295,7 +295,7 @@ export default function Home() {
                   className="group inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/85 text-gray-900 font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V4m8 3V4m-9 9h10M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2" />
                   </svg>
                   미사 안내
                 </Link>
@@ -313,7 +313,7 @@ export default function Home() {
             <div className="hidden md:block md:w-full md:max-w-md lg:max-w-sm bg-white/12 backdrop-blur-lg border border-white/20 rounded-3xl p-6 text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V4m8 3V4m-9 9h10M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2" />
                 </svg>
                 미사 안내
               </h3>
@@ -342,7 +342,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={quickSectionRef} className="-mt-12 md:-mt-20 pb-20">
+      <section ref={quickSectionRef} className="mt-12 md:-mt-18 pb-20">
         <div className="container mx-auto px-4">
           <div className="bg-white/85 backdrop-blur rounded-3xl shadow-2xl border border-white/60 p-6 md:p-8">
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">

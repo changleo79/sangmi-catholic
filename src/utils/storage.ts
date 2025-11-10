@@ -100,6 +100,7 @@ export type OrganizationType =
   | '꾸리아'
   | 'ME'
   | '꾸르실료'
+  | '연령회'
 
 // 첨부파일 타입
 export type AttachmentFile = {
@@ -614,7 +615,8 @@ export const getOrganizationTypes = (): OrganizationType[] => {
     '울뜨레야',
     '꾸리아',
     'ME',
-    '꾸르실료'
+    '꾸르실료',
+    '연령회'
   ]
 }
 
@@ -662,7 +664,8 @@ export const getParentOrganization = (org: OrganizationType): ParentOrganization
     '울뜨레야': '평신도협의회',
     '꾸리아': '평신도협의회',
     'ME': '평신도협의회',
-    '꾸르실료': '평신도협의회'
+    '꾸르실료': '평신도협의회',
+    '연령회': '평신도협의회'
   }
   return mapping[org] || null
 }
@@ -740,7 +743,8 @@ export const getOrganizationInfo = (type: OrganizationType): { name: string; des
     '울뜨레야': { name: '울뜨레야', description: '꾸리아를 마친 신자들이 정기적으로 모여 신앙을 나누고 격려하며 함께 성장하는 모임입니다. 꾸리아 정신을 지속적으로 실천하고 공동체 의식을 강화합니다.' },
     '꾸리아': { name: '꾸리아', description: '3일간의 집중적인 신앙 체험을 통해 그리스도 중심의 삶을 배우고 실천하는 평신도 사도직 단체입니다. 복음화와 사회 정의 실현을 위한 활동을 합니다.' },
     'ME': { name: 'ME', description: 'Marriage Encounter(부부 만남)의 약자로, 부부가 함께 모여 부부 관계와 가정의 신앙을 깊이 나누고 성장하는 모임입니다. 부부 사도직을 실천합니다.' },
-    '꾸르실료': { name: '꾸르실료', description: 'Cursillo de Cristiandad(그리스도교 단기 강좌)로, 평신도들이 신앙을 깊이 배우고 실천하며 복음화 사도직을 수행하는 단체입니다.' }
+    '꾸르실료': { name: '꾸르실료', description: 'Cursillo de Cristiandad(그리스도교 단기 강좌)로, 평신도들이 신앙을 깊이 배우고 실천하며 복음화 사도직을 수행하는 단체입니다.' },
+    '연령회': { name: '연령회', description: '장례 미사와 연도를 준비하고, 유가족을 위로하며 장례 절차가 경건하게 진행되도록 돕는 평신도 사도직 단체입니다. 상가를 방문하여 기도하고 연령회 미사를 함께 봉헌합니다.' }
   }
   return info[type] || { name: type, description: '' }
 }

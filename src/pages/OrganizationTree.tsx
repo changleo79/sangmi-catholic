@@ -116,8 +116,38 @@ export default function OrganizationTree() {
             </div>
           </div>
 
+          {/* 총회장 */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-5 mt-5">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner" style={{ backgroundColor: 'rgba(155, 90, 123, 0.16)' }}>
+                <svg className="w-6 h-6 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17l5-5 5 5M7 7h10" />
+                </svg>
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-gray-500">게시글 {getPostsCount('총회장')}개</span>
+                  <span className="text-xs font-semibold text-catholic-logo/80">위원회 6개</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">총회장</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  본당의 주요 사목과 단체를 조율하며, 각 위원회가 유기적으로 협력하도록 이끕니다.
+                </p>
+                <Link
+                  to={`/organizations/${encodeURIComponent('총회장')}`}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo"
+                >
+                  총회장 게시판 보기
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {/* 총무 */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 mt-6">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-5 mt-5">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner" style={{ backgroundColor: 'rgba(123, 31, 75, 0.12)' }}>
                 <svg className="w-6 h-6 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +186,7 @@ export default function OrganizationTree() {
             return (
               <div
                 key={`${org}-${refreshKey}`}
-                className="group relative rounded-3xl border border-gray-100 bg-white shadow-xl overflow-hidden"
+                className="group relative rounded-3xl border border-gray-100 bg-white shadow-xl overflow-hidden mt-5"
                 style={{ background: `linear-gradient(180deg, ${accent.light}, rgba(255, 255, 255, 0.98))` }}
               >
               <div
@@ -319,9 +349,9 @@ export default function OrganizationTree() {
                </div>
  
                {/* Level 4: 위원회들 */}
-               <div className="relative mb-6 md:px-[90px]" style={{ paddingTop: '40px' }}>
+               <div className="relative mb-4 md:px-[80px]" style={{ paddingTop: '24px' }}>
                 {/* 상단 연결선 제거 (요청에 따라 숨김) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" style={{ marginTop: '35px' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5" style={{ marginTop: '20px' }}>
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)

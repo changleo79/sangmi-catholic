@@ -49,19 +49,19 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[200] md:hidden">
-      <div className="mx-auto max-w-md px-3 pb-2">
-        <div className="grid grid-cols-4 gap-1.5 rounded-3xl bg-white/90 backdrop-blur-xl border border-white shadow-2xl p-1.5">
+      <div className="mx-auto max-w-md px-2.5 pb-1.5">
+        <div className="grid grid-cols-4 gap-1.5 rounded-[22px] bg-white/90 backdrop-blur-xl border border-white shadow-2xl p-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to))
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex flex-col items-center gap-0.5 py-1.5 rounded-2xl text-[11px] font-semibold transition-all duration-200 ${
+                className={`flex flex-col items-center gap-0.5 py-1 rounded-xl text-[10px] font-semibold transition-all duration-200 ${
                   isActive ? 'bg-catholic-logo text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <span className="flex items-center justify-center w-7 h-7">{item.icon}</span>
+                <span className="flex items-center justify-center w-6 h-6">{item.icon}</span>
                 {item.label}
               </Link>
             )
