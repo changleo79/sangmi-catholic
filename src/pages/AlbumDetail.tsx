@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { getAlbums, initializeData, type AlbumWithCategory } from '../utils/storage'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { getAlbums, initializeData, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
 import ImageLightbox from '../components/ImageLightbox'
 
 export default function AlbumDetail() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [album, setAlbum] = useState<AlbumWithCategory | null>(null)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [isAutoPlay, setIsAutoPlay] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (!id) {
       setAlbum(null)
+      setIsLoading(false)
       return
     }
 
@@ -20,6 +23,7 @@ export default function AlbumDetail() {
 
     const resolveAlbum = async (attempt = 0): Promise<void> => {
       if (cancelled) return
+      ensureDefaultAlbumExists()
       const albums = getAlbums()
       const found = albums.find(a => a.id === id) || null
 
@@ -27,25 +31,40 @@ export default function AlbumDetail() {
         if (!cancelled) {
           setAlbum(found)
           setCurrentPhotoIndex(0)
+          setIsLoading(false)
         }
         return
       }
 
       if (attempt === 0) {
         await initializeData()
+        ensureDefaultAlbumExists()
       }
 
       if (attempt < 4) {
         await new Promise(resolve => setTimeout(resolve, 150 * (attempt + 1)))
         await resolveAlbum(attempt + 1)
       } else if (!cancelled) {
-        setAlbum(null)
+        ensureDefaultAlbumExists()
+        const fallbackAlbums = getAlbums()
+        const fallback = fallbackAlbums.find(a => a.id === id)
+        if (fallback) {
+          setAlbum(fallback)
+          setCurrentPhotoIndex(0)
+        } else if (fallbackAlbums.length > 0) {
+          setAlbum(fallbackAlbums[0])
+          setCurrentPhotoIndex(0)
+        } else {
+          setAlbum(null)
+        }
+        setIsLoading(false)
       }
     }
 
     resolveAlbum()
 
     const handleAlbumsUpdate = () => {
+      ensureDefaultAlbumExists()
       resolveAlbum()
     }
 
@@ -59,6 +78,14 @@ export default function AlbumDetail() {
     }
   }, [id])
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+        <div className="text-center text-gray-500">앨범 정보를 불러오는 중입니다...</div>
+      </div>
+    )
+  }
+
   if (!album) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
@@ -71,6 +98,12 @@ export default function AlbumDetail() {
           >
             앨범 목록으로 돌아가기
           </Link>
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-4 inline-block px-6 py-3 rounded-lg text-gray-600 font-semibold transition-all duration-300 hover:scale-105 border border-gray-200"
+          >
+            이전 페이지로 가기
+          </button>
         </div>
       </div>
     )
@@ -149,15 +182,26 @@ export default function AlbumDetail() {
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            to="/albums"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-catholic-logo transition-colors mb-4"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            앨범 목록으로
-          </Link>
+          <div className="flex items-center gap-3 mb-4">
+            <Link
+              to="/albums"
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-catholic-logo transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              앨범 목록으로
+            </Link>
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 text-gray-500 hover:text-catholic-logo transition-colors text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              이전 페이지
+            </button>
+          </div>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">{album.title}</h1>
@@ -174,7 +218,7 @@ export default function AlbumDetail() {
         {/* Photo Viewer */}
         {photos.length > 0 ? (
           <div className="mb-8">
-            <div 
+            <div
               className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
               style={{ height: 'calc(100vh - 400px)', minHeight: '500px' }}
               onClick={() => setIsLightboxOpen(true)}
@@ -192,7 +236,7 @@ export default function AlbumDetail() {
                   </svg>
                 </div>
               </div>
-              
+
               {/* Navigation Arrows */}
               {photos.length > 1 && (
                 <>
