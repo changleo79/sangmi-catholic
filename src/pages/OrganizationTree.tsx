@@ -64,6 +64,21 @@ export default function OrganizationTree() {
     '평신도협의회'
   ]
 
+  const horizontalOffset = parentOrganizations.length > 0
+    ? `${100 / (parentOrganizations.length * 2)}%`
+    : '10%'
+
+  const mobileAccentStyles: Record<ParentOrganizationType, { primary: string; secondary: string; light: string }> = {
+    '총회장': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.16)' },
+    '총무': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.12)' },
+    '소공동체위원회': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.16)' },
+    '전례위원회': { primary: '#8B4A6B', secondary: '#6c3450', light: 'rgba(139, 74, 107, 0.16)' },
+    '제분과위원회': { primary: '#A75F76', secondary: '#87415a', light: 'rgba(167, 95, 118, 0.16)' },
+    '청소년위원회': { primary: '#5C6AC4', secondary: '#3f4aa8', light: 'rgba(92, 106, 196, 0.16)' },
+    '재정위원회': { primary: '#4C9C84', secondary: '#327964', light: 'rgba(76, 156, 132, 0.16)' },
+    '평신도협의회': { primary: '#D0864C', secondary: '#b5682f', light: 'rgba(208, 134, 76, 0.18)' }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
@@ -78,50 +93,98 @@ export default function OrganizationTree() {
           </p>
         </div>
 
-        {/* Mobile View - List Style */}
-        <div className="md:hidden space-y-6">
+        {/* Mobile View - Optimized Tree */}
+        <div className="md:hidden space-y-10">
           {/* 주임신부님 */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-              <h2 className="text-xl font-bold text-gray-900">주임신부님</h2>
+          <div
+            className="relative overflow-hidden rounded-3xl p-8 text-white shadow-xl"
+            style={{ background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)' }}
+          >
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at top, rgba(255,255,255,0.7), transparent 55%)' }}></div>
+            <div className="relative space-y-3">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 rounded-full text-sm font-semibold tracking-wide">
+                최상위
+              </span>
+              <h2 className="text-2xl font-bold">주임신부님</h2>
+              <p className="text-sm text-white/80 leading-relaxed">
+                상미성당 공동체를 이끄는 영적 지도자입니다.
+              </p>
             </div>
-            <p className="text-sm text-gray-600 ml-6">상미성당</p>
+          </div>
+
+          <div className="flex justify-center">
+            <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m0 0l-4-4m4 4l4-4" />
+            </svg>
           </div>
 
           {/* 총회장 */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-              <h2 className="text-xl font-bold text-gray-900">총회장</h2>
-              <span className="text-sm text-gray-500">({getPostsCount('총회장')}개)</span>
-            </div>
-            <div className="ml-6 mt-2">
-              <Link
-                to={`/organizations/${encodeURIComponent('총회장')}`}
-                className="inline-block px-4 py-2 rounded-lg text-white text-sm font-medium"
-                style={{ backgroundColor: '#7B1F4B' }}
-              >
-                게시판
-              </Link>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-semibold text-lg shadow-lg" style={{ background: 'linear-gradient(135deg, #9B5A7B 0%, #7B1F4B 100%)' }}>
+                총
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: 'rgba(123, 31, 75, 0.12)', color: '#7B1F4B' }}>중간리더</span>
+                  <span className="text-xs text-gray-500">게시글 {getPostsCount('총회장')}개</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">총회장</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  본당의 주요 결정 사항을 협의하고 각 위원회를 조율합니다.
+                </p>
+                <Link
+                  to={`/organizations/${encodeURIComponent('총회장')}`}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo"
+                >
+                  위원회 게시판 바로가기
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           </div>
 
+          <div className="flex justify-center">
+            <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m0 0l-4-4m4 4l4-4" />
+            </svg>
+          </div>
+
           {/* 총무 */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-              <h2 className="text-xl font-bold text-gray-900">총무</h2>
-              <span className="text-sm text-gray-500">({getPostsCount('총무')}개)</span>
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-catholic-logo font-semibold text-lg shadow-inner" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                무
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-100 text-gray-700">총괄</span>
+                  <span className="text-xs text-gray-500">게시글 {getPostsCount('총무')}개</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">총무</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  각 위원회 운영을 지원하고 전반적인 행정 업무를 담당합니다.
+                </p>
+                <Link
+                  to={`/organizations/${encodeURIComponent('총무')}`}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo"
+                >
+                  총무 게시판 보기
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
             </div>
-            <div className="ml-6 mt-2">
-              <Link
-                to={`/organizations/${encodeURIComponent('총무')}`}
-                className="inline-block px-4 py-2 rounded-lg text-white text-sm font-medium"
-                style={{ backgroundColor: '#7B1F4B' }}
-              >
-                게시판
-              </Link>
+          </div>
+
+          <div className="flex justify-center">
+            <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center shadow-sm">
+              <svg className="w-6 h-6 text-catholic-logo/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0l3-3m-3 3l-3-3m-6 9h18" />
+              </svg>
             </div>
           </div>
 
@@ -131,56 +194,99 @@ export default function OrganizationTree() {
             const postsCount = getPostsCount(org)
             const subOrgs = getSubOrganizations(org)
             const hasSubOrgs = subOrgs.length > 0
+            const accent = mobileAccentStyles[org]
 
             return (
-              <div key={`${org}-${refreshKey}`} className="space-y-4">
-                {/* 위원회 */}
-                <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-                    <h2 className="text-xl font-bold text-gray-900">{info.name}</h2>
-                    <span className="text-sm text-gray-500">({postsCount}개)</span>
-                  </div>
-                  <p className="text-xs text-gray-600 ml-6 mb-3">{info.description}</p>
-                  <div className="ml-6">
-                    <Link
-                      to={`/organizations/${encodeURIComponent(org)}`}
-                      className="inline-block px-4 py-2 rounded-lg text-white text-sm font-medium"
-                      style={{ backgroundColor: '#7B1F4B' }}
+              <div
+                key={`${org}-${refreshKey}`}
+                className="group relative rounded-3xl border border-gray-100 bg-white shadow-xl overflow-hidden"
+              >
+                <div
+                  className="absolute inset-x-0 top-0 h-1.5"
+                  style={{ background: `linear-gradient(90deg, ${accent.primary}, ${accent.secondary})` }}
+                ></div>
+                <div className="p-6 space-y-5">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-white font-semibold text-lg shadow-lg"
+                      style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }}
                     >
-                      게시판
-                    </Link>
+                      {info.name.replace('위원회', '')[0]}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <span
+                          className="text-xs font-semibold px-2 py-1 rounded-full"
+                          style={{ backgroundColor: accent.light, color: accent.primary }}
+                        >
+                          위원회
+                        </span>
+                        <span className="text-xs text-gray-500">게시글 {postsCount}개</span>
+                        {hasSubOrgs && (
+                          <span className="text-xs font-semibold text-catholic-logo/80">단체 {subOrgs.length}개</span>
+                        )}
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900">{info.name}</h3>
+                      <p className="text-sm text-gray-600 mt-2 leading-relaxed">{info.description}</p>
+                    </div>
                   </div>
-                </div>
+                  <Link
+                    to={`/organizations/${encodeURIComponent(org)}`}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo"
+                  >
+                    위원회 게시판 보기
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
 
-                {/* 하위 단체 - 줄 없이 */}
-                {hasSubOrgs && (
-                  <div className="ml-4 space-y-3">
-                    {subOrgs.map((subOrg) => {
-                      const subInfo = getOrganizationInfo(subOrg)
-                      const subPostsCount = getPostsCount(subOrg)
+                  {hasSubOrgs && (
+                    <div className="mt-6 space-y-4">
+                      {subOrgs.map((subOrg, idx) => {
+                        const subInfo = getOrganizationInfo(subOrg)
+                        const subPostsCount = getPostsCount(subOrg)
+                        const isLast = idx === subOrgs.length - 1
 
-                      return (
-                        <div key={`${subOrg}-${refreshKey}`} className="bg-white rounded-lg p-4 border border-gray-200">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <h3 className="text-base font-bold text-gray-900">{subInfo.name}</h3>
-                              <span className="text-xs text-gray-500">({subPostsCount}개)</span>
-                            </div>
+                        return (
+                          <div key={`${subOrg}-${refreshKey}`} className="relative pl-6">
+                            {!isLast && (
+                              <div
+                                className="absolute left-[11px] top-5 border-l border-dashed"
+                                style={{
+                                  borderColor: accent.light,
+                                  height: 'calc(100% + 16px)'
+                                }}
+                              ></div>
+                            )}
+                            <div
+                              className="absolute left-[7px] top-4 w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: accent.primary }}
+                            ></div>
                             <Link
                               to={`/organizations/${encodeURIComponent(subOrg)}`}
-                              className="px-3 py-1.5 rounded-lg text-white text-xs font-medium"
-                              style={{ backgroundColor: '#7B1F4B' }}
+                              className="block rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-catholic-logo/40 hover:shadow-lg"
                             >
-                              게시판
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <p className="text-sm font-semibold text-gray-900">{subInfo.name}</p>
+                                  <p className="text-xs text-gray-600 mt-1 leading-relaxed line-clamp-2">
+                                    {subInfo.description}
+                                  </p>
+                                </div>
+                                <span
+                                  className="text-xs font-semibold"
+                                  style={{ color: accent.primary }}
+                                >
+                                  {subPostsCount}개
+                                </span>
+                              </div>
                             </Link>
                           </div>
-                          <p className="text-xs text-gray-600">{subInfo.description}</p>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             )
           })}
@@ -277,7 +383,7 @@ export default function OrganizationTree() {
                     style={{ 
                       left: 'calc(50% - 0.25px)',
                       top: '100%',
-                      height: '80px',
+                      height: '78px',
                       marginTop: '0'
                     }}
                   ></div>
@@ -291,12 +397,15 @@ export default function OrganizationTree() {
                   className="absolute h-0.5 bg-gray-400 z-10 hidden md:block"
                   style={{ 
                     top: '0px',
-                    left: '10%',
-                    right: '10%'
+                    left: horizontalOffset,
+                    right: horizontalOffset
                   }}
                 ></div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6" style={{ marginTop: '60px' }}>
+                <div
+                  className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6 md:gap-x-0 md:gap-y-12 md:justify-items-center"
+                  style={{ marginTop: '60px' }}
+                >
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)
