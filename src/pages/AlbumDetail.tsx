@@ -56,23 +56,36 @@ export default function AlbumDetail() {
   }, [isAutoPlay, photos])
 
   const handleDownload = async () => {
-    if (!album) return
-    const photo = album.photos[currentPhotoIndex]
+    const photo = photos[currentPhotoIndex]
     if (!photo) return
-    const response = await fetch(photo.src)
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    const baseName = photo.alt || `${album.title}-${currentPhotoIndex + 1}`
-    link.download = `${baseName.replace(/\s+/g, '_')}.jpg`
-    link.click()
-    URL.revokeObjectURL(url)
+
+    try {
+      if (photo.src.startsWith('data:')) {
+        const link = document.createElement('a')
+        link.href = photo.src
+        link.download = `${(photo.alt || `${album?.title || 'image'}`).replace(/\s+/g, '_')}.png`
+        link.click()
+        return
+      }
+
+      const response = await fetch(photo.src, { mode: 'cors' })
+      if (!response.ok) throw new Error('다운로드 실패')
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      const baseName = photo.alt || `${album?.title || 'image'}-${currentPhotoIndex + 1}`
+      link.download = `${baseName.replace(/\s+/g, '_')}.jpg`
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('이미지 다운로드 실패:', error)
+      window.open(photo.src, '_blank', 'noopener,noreferrer')
+    }
   }
 
   const handleShare = async () => {
-    if (!album) return
-    const photo = album.photos[currentPhotoIndex]
+    const photo = photos[currentPhotoIndex]
     if (!photo) return
 
     if (navigator.share) {
@@ -118,7 +131,7 @@ export default function AlbumDetail() {
         </div>
 
         {/* Photo Viewer */}
-        {album.photos.length > 0 ? (
+        {photos.length > 0 ? (
           <div className="mb-8">
             <div 
               className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
@@ -126,8 +139,8 @@ export default function AlbumDetail() {
               onClick={() => setIsLightboxOpen(true)}
             >
               <img
-                src={album.photos[currentPhotoIndex].src}
-                alt={album.photos[currentPhotoIndex].alt || `${album.title} - ${currentPhotoIndex + 1}`}
+                src={photos[currentPhotoIndex]?.src}
+                alt={photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                 style={{ objectPosition: 'center' }}
               />
@@ -140,7 +153,7 @@ export default function AlbumDetail() {
               </div>
               
               {/* Navigation Arrows */}
-              {album.photos.length > 1 && (
+              {photos.length > 1 && (
                 <>
                   <button
                     onClick={goToPrevious}
@@ -180,7 +193,7 @@ export default function AlbumDetail() {
             </div>
 
             {/* Photo Thumbnails */}
-            {album.photos.length > 1 && (
+            {photos.length > 1 && (
               <div className="mt-6 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {album.photos.map((photo, index) => (
                   <button
@@ -212,18 +225,18 @@ export default function AlbumDetail() {
         {/* Image Lightbox */}
         <ImageLightbox
           isOpen={isLightboxOpen}
-          imageSrc={album.photos[currentPhotoIndex]?.src || ''}
-          imageAlt={album.photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
+          imageSrc={photos[currentPhotoIndex]?.src || ''}
+          imageAlt={photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
           onClose={() => setIsLightboxOpen(false)}
-          onPrevious={album.photos.length > 1 ? goToPrevious : undefined}
-          onNext={album.photos.length > 1 ? goToNext : undefined}
-          hasPrevious={album.photos.length > 1}
-          hasNext={album.photos.length > 1}
+          onPrevious={photos.length > 1 ? goToPrevious : undefined}
+          onNext={photos.length > 1 ? goToNext : undefined}
+          hasPrevious={photos.length > 1}
+          hasNext={photos.length > 1}
           onDownload={handleDownload}
           onShare={handleShare}
           onToggleAutoPlay={() => setIsAutoPlay((prev) => !prev)}
           isAutoPlaying={isAutoPlay}
-          tags={album.photos[currentPhotoIndex]?.tags}
+          tags={photos[currentPhotoIndex]?.tags}
         />
       </div>
     </div>

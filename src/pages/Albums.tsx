@@ -65,11 +65,12 @@ export default function Albums() {
   }
 
   const filteredAlbums = useMemo(() => {
+    const query = tagQuery.trim().toLowerCase()
     return albums.filter((album) => {
       const categoryMatch = selectedCategory === '전체' || album.category === selectedCategory
-      const tagMatch = tagQuery.trim()
+      const tagMatch = query
         ? album.photos.some((photo) =>
-            photo.tags?.some((tag) => tag.includes(tagQuery.trim()))
+            photo.tags?.some((tag) => tag.toLowerCase().includes(query))
           )
         : true
       return categoryMatch && tagMatch

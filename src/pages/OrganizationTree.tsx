@@ -67,12 +67,12 @@ export default function OrganizationTree() {
   const mobileAccentStyles: Record<ParentOrganizationType, { primary: string; secondary: string; light: string }> = {
     '총회장': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.16)' },
     '총무': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.12)' },
-    '소공동체위원회': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.16)' },
-    '전례위원회': { primary: '#8B4A6B', secondary: '#6c3450', light: 'rgba(139, 74, 107, 0.16)' },
+    '소공동체위원회': { primary: '#4C9C84', secondary: '#327964', light: 'rgba(76, 156, 132, 0.16)' },
+    '전례위원회': { primary: '#6A5ACD', secondary: '#4a3a9a', light: 'rgba(106, 90, 205, 0.16)' },
     '제분과위원회': { primary: '#A75F76', secondary: '#87415a', light: 'rgba(167, 95, 118, 0.16)' },
     '청소년위원회': { primary: '#5C6AC4', secondary: '#3f4aa8', light: 'rgba(92, 106, 196, 0.16)' },
-    '재정위원회': { primary: '#4C9C84', secondary: '#327964', light: 'rgba(76, 156, 132, 0.16)' },
-    '평신도협의회': { primary: '#D0864C', secondary: '#b5682f', light: 'rgba(208, 134, 76, 0.18)' }
+    '재정위원회': { primary: '#D0864C', secondary: '#b5682f', light: 'rgba(208, 134, 76, 0.18)' },
+    '평신도협의회': { primary: '#F28482', secondary: '#d36a66', light: 'rgba(242, 132, 130, 0.18)' }
   }
 
   const horizontalPadding = parentOrganizations.length > 0

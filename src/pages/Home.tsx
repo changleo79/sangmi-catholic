@@ -281,7 +281,7 @@ export default function Home() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 md:bottom-8">
           {slideImages.map((_, index) => (
             <button
               key={index}
@@ -359,7 +359,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={quickSectionRef} className="-mt-16 md:-mt-24 pb-20">
+      <section ref={quickSectionRef} className="-mt-12 md:-mt-20 pb-20">
         <div className="container mx-auto px-4">
           <div className="bg-white/85 backdrop-blur rounded-3xl shadow-2xl border border-white/60 p-6 md:p-8">
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
