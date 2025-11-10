@@ -135,14 +135,14 @@ export default function Home() {
 
   const quickLinks = [
     {
-      title: '공지 / 소식',
-      description: '본당·단체 최신 안내',
-      to: '/news',
+      title: '성당 소개',
+      description: '본당 역사와 소개',
+      to: '/about',
       accent: '#7B1F4B',
       background: 'linear-gradient(135deg, rgba(123, 31, 75, 0.14) 0%, rgba(123, 31, 75, 0.04) 100%)',
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v15z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9.75L12 4l9 5.75M4.5 19.5h15M6 19.5V10.5m12 9v-9" />
         </svg>
       )
     },
@@ -237,9 +237,9 @@ export default function Home() {
 
   const activeNoticeContent = noticeTabs[activeNoticeTab]
   const massHighlights = [
-    { title: '주일 미사', time: '오전 9시 / 오전 11시 / 오후 7시 30분' },
-    { title: '평일 미사 (화–금)', time: '오후 7시 30분' },
-    { title: '토요일 미사', time: '오후 6시 (주일미사)' }
+    { title: '주일 미사', time: '오전 10시 (교중) · 오후 3시 (어린이)' },
+    { title: '평일 미사', time: '월 6:30 새벽 · 화/목 7:30 저녁 · 수/금 10:00 아침' },
+    { title: '토요일 미사', time: '오후 5시 청년 · 매월 첫토 오전 10시 성모신심' }
   ]
 
   return (
@@ -323,7 +323,7 @@ export default function Home() {
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v15z" />
                   </svg>
-                  공지 / 소식
+                  공지 · 소식
                 </Link>
               </div>
             </div>
@@ -332,7 +332,7 @@ export default function Home() {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
                 </svg>
-                이번 주 미사 안내
+                미사 안내
               </h3>
               <ul className="space-y-3 mb-6">
                 {massHighlights.map(item => (
