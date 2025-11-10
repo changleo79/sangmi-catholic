@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { notices as defaultNotices } from '../data/notices'
 import { getNotices } from '../utils/storage'
 import { getRecruitments, getBulletins, type RecruitmentItem, type BulletinItem } from '../utils/storage'
+import PdfViewerModal from '../components/PdfViewerModal'
 import type { NoticeItem } from '../data/notices'
 
 export default function News() {
@@ -12,6 +13,8 @@ export default function News() {
   const [noticesPage, setNoticesPage] = useState(1)
   const [recruitPage, setRecruitPage] = useState(1)
   const [bulletinsPage, setBulletinsPage] = useState(1)
+  const [selectedBulletin, setSelectedBulletin] = useState<BulletinItem | null>(null)
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
   const itemsPerPage = 10
 
   useEffect(() => {
@@ -162,23 +165,8 @@ export default function News() {
                   <div
                     key={bulletin.id}
                     onClick={() => {
-                      if (bulletin.fileUrl.startsWith('data:')) {
-                        // Base64 PDF인 경우 새 창에서 열기
-                        const newWindow = window.open()
-                        if (newWindow) {
-                          newWindow.document.write(`
-                            <html>
-                              <head><title>${bulletin.title}</title></head>
-                              <body style="margin:0;padding:0;">
-                                <embed src="${bulletin.fileUrl}" type="application/pdf" width="100%" height="100%" style="position:absolute;top:0;left:0;width:100%;height:100%;" />
-                              </body>
-                            </html>
-                          `)
-                        }
-                      } else {
-                        // URL인 경우 일반 링크
-                        window.open(bulletin.fileUrl, '_blank', 'noopener,noreferrer')
-                      }
+                      setSelectedBulletin(bulletin)
+                      setIsPdfModalOpen(true)
                     }}
                     className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-100 hover:border-catholic-logo/20 group cursor-pointer hover:-translate-y-1"
                   >
@@ -245,6 +233,18 @@ export default function News() {
           </section>
         </div>
       </div>
+      {selectedBulletin && (
+        <PdfViewerModal
+          isOpen={isPdfModalOpen}
+          title={selectedBulletin.title}
+          description={selectedBulletin.description}
+          fileUrl={selectedBulletin.fileUrl}
+          onClose={() => {
+            setIsPdfModalOpen(false)
+            setTimeout(() => setSelectedBulletin(null), 300)
+          }}
+        />
+      )}
     </div>
   )
 }

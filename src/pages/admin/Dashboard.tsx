@@ -124,6 +124,19 @@ export default function AdminDashboard() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">단체 게시판 관리</h2>
             <p className="text-gray-600">각 단체별 게시글을 관리할 수 있습니다.</p>
           </Link>
+
+          <Link
+            to="/admin/backups"
+            className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
+          >
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12v8m0-8l-3 3m3-3l3 3m3-11H6a2 2 0 00-2 2v10a2 2 0 002 2h3" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">데이터 백업</h2>
+            <p className="text-gray-600">모든 데이터 세트를 백업·복원·다운로드할 수 있습니다.</p>
+          </Link>
         </div>
 
         {/* Quick Links */}

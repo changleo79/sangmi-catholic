@@ -21,6 +21,7 @@ export default function AlbumsManage() {
   })
   const [newPhotoSrc, setNewPhotoSrc] = useState('')
   const [newPhotoAlt, setNewPhotoAlt] = useState('')
+  const [newPhotoTags, setNewPhotoTags] = useState('')
   const categories = getAlbumCategories().filter(c => c !== '전체')
 
   useEffect(() => {
@@ -106,14 +107,17 @@ export default function AlbumsManage() {
     }
   }
 
+  const parseTags = (value: string) => value.split(',').map(tag => tag.trim()).filter(Boolean)
+
   const addPhoto = () => {
     if (newPhotoSrc.trim()) {
       setFormData({
         ...formData,
-        photos: [...formData.photos, { src: newPhotoSrc, alt: newPhotoAlt || undefined }]
+        photos: [...formData.photos, { src: newPhotoSrc, alt: newPhotoAlt || undefined, tags: parseTags(newPhotoTags) }]
       })
       setNewPhotoSrc('')
       setNewPhotoAlt('')
+      setNewPhotoTags('')
     }
   }
 
@@ -135,6 +139,7 @@ export default function AlbumsManage() {
     setEditingId(null)
     setNewPhotoSrc('')
     setNewPhotoAlt('')
+    setNewPhotoTags('')
   }
 
   return (
@@ -289,13 +294,30 @@ export default function AlbumsManage() {
                   <p className="text-xs text-gray-500">
                     💡 외부 URL, 프로젝트 내 경로, 또는 로컬 이미지 경로를 입력하세요.
                   </p>
-                  <input
-                    type="text"
-                    value={newPhotoAlt}
-                    onChange={(e) => setNewPhotoAlt(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                    placeholder="설명 (선택)"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      이미지 ALT 텍스트 (선택)
+                    </label>
+                    <input
+                      type="text"
+                      value={newPhotoAlt}
+                      onChange={(e) => setNewPhotoAlt(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      placeholder="예: 부활대축일 미사"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      태그 (쉼표)
+                    </label>
+                    <input
+                      type="text"
+                      value={newPhotoTags}
+                      onChange={(e) => setNewPhotoTags(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                      placeholder="예: 부활, 전례, 합창"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={addPhoto}
@@ -307,18 +329,51 @@ export default function AlbumsManage() {
                 
                 {/* 추가된 사진 목록 */}
                 {formData.photos.length > 0 && (
-                  <div className="mt-4 space-y-2">
+                  <div className="mt-4 space-y-4">
                     <p className="text-sm font-medium text-gray-700">사진 목록 ({formData.photos.length}개)</p>
                     {formData.photos.map((photo, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                        <span className="flex-1 text-sm text-gray-600 truncate">{photo.src}</span>
-                        <button
-                          type="button"
-                          onClick={() => removePhoto(index)}
-                          className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                        >
-                          삭제
-                        </button>
+                      <div key={index} className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                        <p className="text-xs text-gray-500 mb-2 truncate">{photo.src}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">ALT 텍스트</label>
+                            <input
+                              type="text"
+                              value={photo.alt || ''}
+                              onChange={(e) => {
+                                const updated = [...formData.photos]
+                                updated[index] = { ...photo, alt: e.target.value || undefined }
+                                setFormData({ ...formData, photos: updated })
+                              }}
+                              className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-catholic-logo focus:border-transparent text-sm"
+                              placeholder="사진 설명"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">태그 (쉼표)</label>
+                            <input
+                              type="text"
+                              value={photo.tags?.join(', ') || ''}
+                              onChange={(e) => {
+                                const updated = [...formData.photos]
+                                updated[index] = { ...photo, tags: parseTags(e.target.value) }
+                                setFormData({ ...formData, photos: updated })
+                              }}
+                              className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-1 focus:ring-catholic-logo focus:border-transparent text-sm"
+                              placeholder="예: 전례, 청년"
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-3 flex justify-between items-center">
+                          <span className="text-xs text-gray-500">태그: {photo.tags?.length ? photo.tags.join(', ') : '없음'}</span>
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(index)}
+                            className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                          >
+                            삭제
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

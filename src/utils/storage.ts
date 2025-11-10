@@ -722,3 +722,133 @@ export const importJSON = async <T>(file: File): Promise<T> => {
   })
 }
 
+export type StorageDatasetKey =
+  | 'notices'
+  | 'recruitments'
+  | 'faqs'
+  | 'albums'
+  | 'massSchedule'
+  | 'sacraments'
+  | 'catechism'
+  | 'bulletins'
+  | 'organizationPosts'
+
+export type BackupEntry = {
+  id: string
+  key: StorageDatasetKey
+  label: string
+  createdAt: string
+  data: unknown
+}
+
+const BACKUPS_KEY = 'admin_backups'
+
+const datasetRegistry: Record<StorageDatasetKey, {
+  label: string
+  getter: () => unknown
+  saver: (data: any) => void
+}> = {
+  notices: { label: '공지사항', getter: () => getNotices(), saver: saveNotices },
+  recruitments: { label: '단체 소식', getter: () => getRecruitments(), saver: saveRecruitments },
+  faqs: { label: '자주 묻는 질문', getter: () => getFAQs(), saver: saveFAQs },
+  albums: { label: '성당 앨범', getter: () => getAlbums(), saver: saveAlbums },
+  massSchedule: { label: '미사 시간표', getter: () => getMassSchedule(), saver: saveMassSchedule },
+  sacraments: { label: '성사 안내', getter: () => getSacraments(), saver: saveSacraments },
+  catechism: { label: '예비신자 교리', getter: () => getCatechismInfo(), saver: (data) => data && saveCatechismInfo(data) },
+  bulletins: { label: '주보 안내', getter: () => getBulletins(), saver: saveBulletins },
+  organizationPosts: { label: '단체 게시판', getter: () => getOrganizationPosts(), saver: saveOrganizationPosts }
+}
+
+const readBackups = (): BackupEntry[] => {
+  const stored = localStorage.getItem(BACKUPS_KEY)
+  if (!stored) return []
+  try {
+    return JSON.parse(stored) as BackupEntry[]
+  } catch (error) {
+    console.error('백업 데이터 파싱 실패:', error)
+    return []
+  }
+}
+
+const writeBackups = (entries: BackupEntry[]): void => {
+  localStorage.setItem(BACKUPS_KEY, JSON.stringify(entries))
+  window.dispatchEvent(new CustomEvent('storageBackupUpdated'))
+}
+
+export const getBackups = (): BackupEntry[] => {
+  return readBackups().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+}
+
+export const createBackup = (key: StorageDatasetKey): BackupEntry | null => {
+  const registry = datasetRegistry[key]
+  if (!registry) return null
+
+  const data = registry.getter()
+  const backup: BackupEntry = {
+    id: `${key}-${Date.now()}`,
+    key,
+    label: registry.label,
+    createdAt: new Date().toISOString(),
+    data
+  }
+
+  const backups = [backup, ...readBackups()].slice(0, 20)
+  writeBackups(backups)
+  return backup
+}
+
+export const restoreBackup = (backupId: string): boolean => {
+  const backups = readBackups()
+  const target = backups.find((entry) => entry.id === backupId)
+  if (!target) return false
+
+  const registry = datasetRegistry[target.key]
+  if (!registry) return false
+
+  registry.saver(target.data)
+  createBackup(target.key) // 복원 전 상태를 백업으로 남기기 위해 새 백업 생성
+
+  switch (target.key) {
+    case 'notices':
+      cachedData.notices = target.data as NoticeItem[]
+      break
+    case 'recruitments':
+      cachedData.recruitments = target.data as RecruitmentItem[]
+      break
+    case 'faqs':
+      cachedData.faqs = target.data as FAQItem[]
+      break
+    case 'albums':
+      cachedData.albums = target.data as AlbumWithCategory[]
+      break
+    case 'massSchedule':
+      cachedData.massSchedule = target.data as MassScheduleItem[]
+      break
+    case 'sacraments':
+      cachedData.sacraments = target.data as SacramentItem[]
+      break
+    case 'catechism':
+      cachedData.catechism = (target.data as CatechismInfo) ?? null
+      break
+    case 'bulletins':
+      cachedData.bulletins = target.data as BulletinItem[]
+      break
+    case 'organizationPosts':
+      cachedData.organizationPosts = target.data as OrganizationPost[]
+      break
+    default:
+      break
+  }
+
+  if (target.key === 'catechism' && !target.data) {
+    localStorage.removeItem(CATECHISM_KEY)
+    cachedData.catechism = null
+  }
+  return true
+}
+
+export const deleteBackup = (backupId: string): void => {
+  const backups = readBackups().filter((entry) => entry.id !== backupId)
+  writeBackups(backups)
+}
+

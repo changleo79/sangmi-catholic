@@ -26,20 +26,34 @@ export default function Directions() {
               <div className="mb-6">
                 <p className="text-gray-700 text-lg mb-2">경기도 용인시 기흥구 상미로 29</p>
               </div>
-              <a
-                href="https://naver.me/58NxUcby"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
-                style={{ backgroundColor: '#7B1F4B' }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                네이버 지도에서 보기
-              </a>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="https://naver.me/58NxUcby"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: '#7B1F4B' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  네이버 지도
+                </a>
+                <a
+                  href="kakaomap://route?ep=37.247936,127.105992&by=CAR"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                  style={{ backgroundColor: '#4C9C84' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#397863' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#4C9C84' }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a4 4 0 106 0 4 4 0 00-6 0zm0 0H5a2 2 0 01-2-2v-6a2 2 0 012-2h.586a1 1 0 00.707-.293l1.414-1.414A1 1 0 018.414 5H15a2 2 0 012 2v3" />
+                  </svg>
+                  카카오맵 길찾기
+                </a>
+              </div>
             </section>
 
             {/* 교통 안내 Section */}

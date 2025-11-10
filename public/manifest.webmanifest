@@ -1,0 +1,21 @@
+{
+  "name": "수원교구 상미성당",
+  "short_name": "상미성당",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7B1F4B",
+  "description": "수원교구 상미성당 본당 안내, 미사 시간, 공지, 단체 활동을 한곳에서 확인할 수 있습니다.",
+  "icons": [
+    {
+      "src": "/images/main-og.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/main-og.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

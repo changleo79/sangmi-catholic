@@ -534,7 +534,7 @@ export default function Home() {
                   하나의 신앙, 다양한 사도직 활동
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  위원회와 단체의 소개, 활동 게시판, 조직도를 한 곳에서 확인하세요. 실시간으로 연동되는 게시판을 통해 단체 소식도 바로 공유할 수 있습니다.
+                  위원회·단체 소개와 게시판, 조직도를 한눈에 확인하세요. 실시간으로 연동되는 게시판으로 단체 소식을 빠르게 공유할 수 있습니다.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Link
@@ -573,7 +573,7 @@ export default function Home() {
                   <div className="space-y-4">
                     <h4 className="text-2xl font-semibold">성당단체 한 눈에</h4>
                     <p className="text-sm text-white/80 leading-relaxed">
-                      소공동체위원회부터 청소년위원회까지, 6개의 상임 위원회와 24개의 단체가 신앙으로 하나 됩니다. 각 단체의 소개와 활동 사진을 확인하고 게시판에서 소통해보세요.
+                      6개 위원회와 24개 단체가 신앙으로 함께합니다. 단체 소개와 활동 사진을 보고 게시판에서 바로 소통해보세요.
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">

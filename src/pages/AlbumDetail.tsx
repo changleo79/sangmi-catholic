@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getAlbums, type AlbumWithCategory } from '../utils/storage'
 import ImageLightbox from '../components/ImageLightbox'
@@ -8,6 +8,7 @@ export default function AlbumDetail() {
   const [album, setAlbum] = useState<AlbumWithCategory | null>(null)
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+  const [isAutoPlay, setIsAutoPlay] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -34,12 +35,59 @@ export default function AlbumDetail() {
     )
   }
 
-  const goToPrevious = () => {
-    setCurrentPhotoIndex((prev) => (prev - 1 + album.photos.length) % album.photos.length)
+  const photos = album?.photos || []
+
+  const goToPrevious = useCallback(() => {
+    if (photos.length === 0) return
+    setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)
+  }, [photos])
+
+  const goToNext = useCallback(() => {
+    if (photos.length === 0) return
+    setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
+  }, [photos])
+
+  useEffect(() => {
+    if (!isAutoPlay || photos.length === 0) return
+    const timer = setInterval(() => {
+      setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [isAutoPlay, photos])
+
+  const handleDownload = async () => {
+    if (!album) return
+    const photo = album.photos[currentPhotoIndex]
+    if (!photo) return
+    const response = await fetch(photo.src)
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    const baseName = photo.alt || `${album.title}-${currentPhotoIndex + 1}`
+    link.download = `${baseName.replace(/\s+/g, '_')}.jpg`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
-  const goToNext = () => {
-    setCurrentPhotoIndex((prev) => (prev + 1) % album.photos.length)
+  const handleShare = async () => {
+    if (!album) return
+    const photo = album.photos[currentPhotoIndex]
+    if (!photo) return
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: album.title,
+          text: photo.alt || album.title,
+          url: photo.src
+        })
+      } catch (error) {
+        console.error('이미지 공유 실패:', error)
+      }
+    } else {
+      alert('이 브라우저에서는 공유 기능이 지원되지 않습니다.')
+    }
   }
 
   return (
@@ -114,8 +162,20 @@ export default function AlbumDetail() {
               )}
 
               {/* Photo Counter */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md text-white text-sm">
-                {currentPhotoIndex + 1} / {album.photos.length}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md text-white text-sm flex items-center gap-3">
+                <span>{currentPhotoIndex + 1} / {album.photos.length}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsAutoPlay((prev) => !prev)
+                  }}
+                  className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 9-14 9V3z" />
+                  </svg>
+                  {isAutoPlay ? '정지' : '재생'}
+                </button>
               </div>
             </div>
 
@@ -155,10 +215,15 @@ export default function AlbumDetail() {
           imageSrc={album.photos[currentPhotoIndex]?.src || ''}
           imageAlt={album.photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
           onClose={() => setIsLightboxOpen(false)}
-          onPrevious={goToPrevious}
-          onNext={goToNext}
+          onPrevious={album.photos.length > 1 ? goToPrevious : undefined}
+          onNext={album.photos.length > 1 ? goToNext : undefined}
           hasPrevious={album.photos.length > 1}
           hasNext={album.photos.length > 1}
+          onDownload={handleDownload}
+          onShare={handleShare}
+          onToggleAutoPlay={() => setIsAutoPlay((prev) => !prev)}
+          isAutoPlaying={isAutoPlay}
+          tags={album.photos[currentPhotoIndex]?.tags}
         />
       </div>
     </div>

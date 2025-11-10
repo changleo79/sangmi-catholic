@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { getAlbums, saveAlbums, getAlbumCategories, type AlbumWithCategory } from '../utils/storage'
 import img01 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
@@ -9,6 +9,7 @@ import img04 from '../../사진파일/KakaoTalk_20251104_172439243_04.jpg'
 export default function Albums() {
   const [albums, setAlbums] = useState<AlbumWithCategory[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('전체')
+  const [tagQuery, setTagQuery] = useState<string>('')
   const categories = getAlbumCategories()
 
   useEffect(() => {
@@ -63,9 +64,17 @@ export default function Albums() {
     saveAlbums(albums)
   }
 
-  const filteredAlbums = selectedCategory === '전체' 
-    ? albums 
-    : albums.filter(album => album.category === selectedCategory)
+  const filteredAlbums = useMemo(() => {
+    return albums.filter((album) => {
+      const categoryMatch = selectedCategory === '전체' || album.category === selectedCategory
+      const tagMatch = tagQuery.trim()
+        ? album.photos.some((photo) =>
+            photo.tags?.some((tag) => tag.includes(tagQuery.trim()))
+          )
+        : true
+      return categoryMatch && tagMatch
+    })
+  }, [albums, selectedCategory, tagQuery])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -79,7 +88,7 @@ export default function Albums() {
         </div>
 
         {/* Category Filter */}
-        <div className="mb-12 flex flex-wrap justify-center gap-3 px-4">
+        <div className="mb-6 flex flex-wrap justify-center gap-3 px-4">
           {categories.map((category) => (
             <button
               key={category}
@@ -116,6 +125,16 @@ export default function Albums() {
               {category}
             </button>
           ))}
+        </div>
+
+        <div className="mb-12 max-w-xl mx-auto">
+          <input
+            type="text"
+            value={tagQuery}
+            onChange={(e) => setTagQuery(e.target.value)}
+            placeholder="태그로 검색해보세요 (예: 전례, 청년, 행사)"
+            className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-catholic-logo focus:border-transparent shadow-sm"
+          />
         </div>
 
         {/* Albums Grid */}
@@ -164,6 +183,18 @@ export default function Albums() {
                     <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 group-hover:text-catholic-logo transition-colors leading-tight">
                       {album.title}
                     </h3>
+                    {album.photos.some((photo) => photo.tags?.length) && (
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {Array.from(new Set(album.photos.flatMap((photo) => photo.tags || []))).slice(0, 6).map((tag) => (
+                          <span key={`${album.id}-${tag}`} className="px-2 py-1 text-[11px] rounded-full bg-gray-100 text-gray-600">
+                            #{tag}
+                          </span>
+                        ))}
+                        {Array.from(new Set(album.photos.flatMap((photo) => photo.tags || []))).length > 6 && (
+                          <span className="text-[11px] text-gray-400">+ 더보기</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>

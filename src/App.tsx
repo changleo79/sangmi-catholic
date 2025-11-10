@@ -4,6 +4,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
 import ScrollProgress from './components/ScrollProgress'
+import BottomNav from './components/BottomNav'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import { initializeData } from './utils/storage'
 import Home from './pages/Home'
@@ -21,6 +22,7 @@ import FAQsManage from './pages/admin/FAQsManage'
 import AlbumsManage from './pages/admin/AlbumsManage'
 import MassManage from './pages/admin/MassManage'
 import BulletinsManage from './pages/admin/BulletinsManage'
+import BackupManage from './pages/admin/BackupManage'
 import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
 import NoticeDetail from './pages/NoticeDetail'
@@ -148,8 +150,17 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+                  <Route
+                    path="/admin/backups"
+                    element={
+                      <ProtectedRoute>
+                        <BackupManage />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Routes>
               </main>
+              <BottomNav />
               <Footer />
               <ScrollToTop />
             </div>
