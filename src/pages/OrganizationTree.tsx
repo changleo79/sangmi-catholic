@@ -176,7 +176,6 @@ export default function OrganizationTree() {
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ backgroundColor: 'rgba(123, 31, 75, 0.12)', color: '#7B1F4B' }}>중간리더</span>
                   <span className="text-xs text-gray-500">게시글 {getPostsCount('총회장')}개</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">총회장</h3>
@@ -212,7 +211,6 @@ export default function OrganizationTree() {
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-100 text-gray-700">총괄</span>
                   <span className="text-xs text-gray-500">게시글 {getPostsCount('총무')}개</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900">총무</h3>

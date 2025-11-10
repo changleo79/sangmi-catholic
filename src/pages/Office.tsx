@@ -149,7 +149,7 @@ export default function Office() {
                 </div>
                 <div className="space-y-2 text-gray-600 text-sm">
                   <p>미사예물 신청은 사무실로 연락하시거나 미사 전후에 사무실을 방문하여 신청하실 수 있습니다.</p>
-                  <p className="pt-2 text-xs text-gray-500">※ 미사예물은 미사 전에 사무실에 제출해 주시기 바랍니다.</p>
+                  <p className="pt-2 text-xs text-gray-500">※ 미사예물은 봉헌일 하루 전 오후 5시까지 사무실에 제출해 주세요.</p>
                 </div>
               </section>
             </aside>

@@ -132,7 +132,7 @@ export default function About() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">팩스</p>
-                  <p className="text-gray-600">031-282-9958</p>
+                  <p className="text-gray-600">031-282-9985</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

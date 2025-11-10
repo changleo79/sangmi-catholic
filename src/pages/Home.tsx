@@ -184,12 +184,6 @@ export default function Home() {
     }
   ]
 
-  const heroStats = [
-    { label: '공지', value: `${notices.length}건`, to: '/news' },
-    { label: '성당단체', value: '위원회 6 · 단체 24', to: '/organizations' },
-    { label: '앨범', value: `${displayAlbums.length}건`, to: '/albums' }
-  ]
-
   const noticeTabs: Record<NoticeTabKey, {
     label: string
     description: string
@@ -243,8 +237,8 @@ export default function Home() {
 
   const activeNoticeContent = noticeTabs[activeNoticeTab]
   const massHighlights = [
-    { title: '주일 미사', time: '오전 9시 · 오전 11시 · 오후 7시 30분' },
-    { title: '평일 미사', time: '화–금 오후 7시 30분' },
+    { title: '주일 미사', time: '오전 9시 / 오전 11시 / 오후 7시 30분' },
+    { title: '평일 미사 (화–금)', time: '오후 7시 30분' },
     { title: '토요일 미사', time: '오후 6시 (주일미사)' }
   ]
 
@@ -263,7 +257,7 @@ export default function Home() {
                 backgroundSize: 'cover',
                 backgroundPosition: index === 0 ? '48% 47%' : 'center center',
                 backgroundRepeat: 'no-repeat',
-                transform: index === 0 ? 'scale(1.04)' : 'scale(1.06)'
+                transform: index === 0 ? 'rotate(-1deg) scale(1.04)' : 'scale(1.06)'
               }}
             />
           ))}
@@ -341,20 +335,8 @@ export default function Home() {
                   공지/소식 모아보기
                 </Link>
               </div>
-              <div className="flex flex-wrap gap-3 pt-4">
-                {heroStats.map(stat => (
-                  <Link
-                    key={stat.label}
-                    to={stat.to}
-                    className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm text-white/90 hover:bg-white/15 transition-all duration-300"
-                  >
-                    <span className="font-semibold text-white">{stat.value}</span>
-                    <span>{stat.label}</span>
-                  </Link>
-                ))}
-              </div>
             </div>
-            <div className="w-full max-w-md lg:max-w-sm bg-white/12 backdrop-blur-lg border border-white/20 rounded-3xl p-6 text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+            <div className="hidden md:block md:w-full md:max-w-md lg:max-w-sm bg-white/12 backdrop-blur-lg border border-white/20 rounded-3xl p-6 text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
@@ -565,7 +547,7 @@ export default function Home() {
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Link
-                    to="/organization-tree"
+                    to="/organizations/tree"
                     className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
                   >
                     <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
