@@ -461,9 +461,9 @@ export default function OrganizationTree() {
               </div>
 
               {/* Level 4: 위원회들 */}
-              <div className="relative mb-8 md:px-[90px]" style={{ paddingTop: '80px' }}>
+              <div className="relative mb-6 md:px-[90px]" style={{ paddingTop: '40px' }}>
                 {/* 상단 연결선 제거 (요청에 따라 숨김) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" style={{ marginTop: '60px' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" style={{ marginTop: '35px' }}>
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { getAlbums, saveAlbums, getAlbumCategories, initializeData, type AlbumWithCategory } from '../utils/storage'
+import { getAlbums, saveAlbums, getAlbumCategories, initializeData, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
 import img01 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
 import img02 from '../../사진파일/KakaoTalk_20251104_172439243_02.jpg'
 import img03 from '../../사진파일/KakaoTalk_20251104_172439243_03.jpg'
@@ -48,33 +48,28 @@ export default function Albums() {
   const loadAlbums = () => {
     const stored = getAlbums()
     if (stored.length === 0) {
-      initializeData().then(() => {
-        const refreshed = getAlbums()
-        setAlbums(refreshed)
-      })
+      initializeData()
+        .then(() => {
+          ensureDefaultAlbumExists()
+          const refreshed = getAlbums()
+          setAlbums(refreshed)
+        })
+        .catch(() => {
+          const refreshed = getAlbums()
+          if (refreshed.length === 0) {
+            initializeDefaultAlbum()
+            setAlbums(getAlbums())
+          } else {
+            setAlbums(refreshed)
+          }
+        })
     } else {
       setAlbums(stored)
     }
   }
 
   const initializeDefaultAlbum = () => {
-    // 기본 앨범 데이터 생성 (4개 이미지)
-    const defaultAlbum: AlbumWithCategory = {
-      id: Date.now().toString(),
-      title: '상미성당 앨범',
-      date: new Date().toISOString().split('T')[0],
-      cover: img01,
-      category: '행사',
-      photos: [
-        { src: img01, alt: '성당 사진 1' },
-        { src: img02, alt: '성당 사진 2' },
-        { src: img03, alt: '성당 사진 3' },
-        { src: img04, alt: '성당 사진 4' }
-      ]
-    }
-    const albums = getAlbums()
-    albums.push(defaultAlbum)
-    saveAlbums(albums)
+    ensureDefaultAlbumExists()
   }
 
   const filteredAlbums = useMemo(() => {

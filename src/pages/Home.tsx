@@ -8,7 +8,8 @@ import {
   getRecruitments,
   getBulletins,
   type RecruitmentItem,
-  type BulletinItem
+  type BulletinItem,
+  ensureDefaultAlbumExists
 } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
 
@@ -59,31 +60,14 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
+    ensureDefaultAlbumExists()
     const storedAlbums = getAlbums()
-    if (storedAlbums.length === 0) {
-      const defaultAlbum: any = {
-        id: Date.now().toString(),
-        title: '상미성당 앨범',
-        date: new Date().toISOString().split('T')[0],
-        cover: galleryPhotos[0],
-        category: '행사',
-        photos: galleryPhotos.map((photo, i) => ({
-          src: photo,
-          alt: `성당 사진 ${i + 1}`
-        }))
-      }
-      const albums = getAlbums()
-      albums.push(defaultAlbum)
-      saveAlbums(albums)
-      setDisplayAlbums([{ id: defaultAlbum.id, cover: defaultAlbum.cover, title: defaultAlbum.title }])
-    } else {
-      const recentAlbums = storedAlbums.slice(0, 4).map(album => ({
-        id: album.id,
-        cover: album.cover || galleryPhotos[0],
-        title: album.title
-      }))
-      setDisplayAlbums(recentAlbums)
-    }
+    const recentAlbums = storedAlbums.slice(0, 4).map(album => ({
+      id: album.id,
+      cover: album.cover || galleryPhotos[0],
+      title: album.title
+    }))
+    setDisplayAlbums(recentAlbums)
   }, [])
 
   useEffect(() => {
@@ -281,7 +265,7 @@ export default function Home() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 md:bottom-8 lg:bottom-10">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 md:bottom-16 lg:bottom-20">
           {slideImages.map((_, index) => (
             <button
               key={index}

@@ -131,6 +131,22 @@ const BULLETINS_KEY = 'admin_bulletins'
 const ORGANIZATIONS_KEY = 'admin_organizations'
 const ORGANIZATION_POSTS_KEY = 'admin_organization_posts'
 
+const DEFAULT_ALBUM_ID = 'default-album'
+
+const createDefaultAlbum = (): AlbumWithCategory => {
+  const today = new Date().toISOString().split('T')[0]
+  return {
+    id: DEFAULT_ALBUM_ID,
+    title: '상미성당 앨범',
+    date: today,
+    cover: '/images/main-og.jpg',
+    category: '행사',
+    photos: [
+      { src: '/images/main-og.jpg', alt: '상미성당 전경', tags: ['본당', '외관'] }
+    ]
+  }
+}
+
 // JSON 파일 로드 헬퍼 함수
 const loadJSON = async <T>(path: string, fallback: T): Promise<T> => {
   try {
@@ -189,6 +205,11 @@ export const initializeData = async (): Promise<void> => {
     if (recruitments.length > 0) localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
     if (faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
     if (albums.length > 0) localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
+    if (albums.length === 0) {
+      const defaultAlbum = createDefaultAlbum()
+      localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
+      cachedData.albums = [defaultAlbum]
+    }
     if (massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
     if (sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
     if (catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
@@ -333,6 +354,14 @@ export const exportAlbums = (): void => {
 
 export const getAlbumCategories = (): string[] => {
   return ['전체', '주일 미사', '행사', '전례', '공동체 활동', '기타']
+}
+
+export const ensureDefaultAlbumExists = (): void => {
+  const albums = getAlbums()
+  if (!albums.some(album => album.id === DEFAULT_ALBUM_ID)) {
+    const nextAlbums = [...albums, createDefaultAlbum()]
+    saveAlbums(nextAlbums)
+  }
 }
 
 // 미사 시간 관리
