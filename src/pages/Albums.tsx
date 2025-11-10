@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { getAlbums, saveAlbums, getAlbumCategories, type AlbumWithCategory } from '../utils/storage'
+import { getAlbums, saveAlbums, getAlbumCategories, initializeData, type AlbumWithCategory } from '../utils/storage'
 import img01 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
 import img02 from '../../사진파일/KakaoTalk_20251104_172439243_02.jpg'
 import img03 from '../../사진파일/KakaoTalk_20251104_172439243_03.jpg'
@@ -17,9 +17,13 @@ export default function Albums() {
     const handleFocus = () => {
       loadAlbums()
     }
-    
+    const handleAlbumsUpdate = () => {
+      loadAlbums()
+    }
+
     // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
     const loadData = async () => {
+      await initializeData()
       await new Promise(resolve => setTimeout(resolve, 100))
       loadAlbums()
       // 기본 앨범이 없으면 초기 데이터 생성
@@ -30,18 +34,27 @@ export default function Albums() {
       }
     }
     loadData()
-    
+
     // 페이지 포커스 시 데이터 다시 로드 (다른 탭에서 관리자가 수정한 경우)
     window.addEventListener('focus', handleFocus)
-    
+    window.addEventListener('albumsUpdated', handleAlbumsUpdate)
+
     return () => {
       window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
     }
   }, [])
 
   const loadAlbums = () => {
     const stored = getAlbums()
-    setAlbums(stored)
+    if (stored.length === 0) {
+      initializeData().then(() => {
+        const refreshed = getAlbums()
+        setAlbums(refreshed)
+      })
+    } else {
+      setAlbums(stored)
+    }
   }
 
   const initializeDefaultAlbum = () => {

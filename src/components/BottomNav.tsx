@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 const navItems = [
   {
     to: '/mass',
-    label: '미사안내',
+    label: '미사 안내',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -12,7 +12,7 @@ const navItems = [
   },
   {
     to: '/news',
-    label: '공지소식',
+    label: '공지/소식',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v15z" />
@@ -30,7 +30,7 @@ const navItems = [
   },
   {
     to: '/albums',
-    label: '성당앨범',
+    label: '성당 앨범',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h9" />
