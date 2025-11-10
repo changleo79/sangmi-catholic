@@ -265,7 +265,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/60" />
         <button
           onClick={goToPrevious}
-          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 active:bg-white/35 transition-all duration-300 flex items-center justify-center group touch-manipulation"
+          className="hidden md:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 active:bg-white/35 transition-all duration-300 items-center justify-center group"
           aria-label="이전 슬라이드"
         >
           <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,7 +274,7 @@ export default function Home() {
         </button>
         <button
           onClick={goToNext}
-          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 active:bg-white/35 transition-all duration-300 flex items-center justify-center group touch-manipulation"
+          className="hidden md:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 active:bg-white/35 transition-all duration-300 items-center justify-center group"
           aria-label="다음 슬라이드"
         >
           <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,15 +315,6 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   미사 시간 보기
-                </Link>
-                <Link
-                  to="/organizations"
-                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-white/60 text-white font-semibold hover:bg-white/10 hover:-translate-y-1 transition-all duration-300 min-w-[170px]"
-                >
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 018 0v2m-3-10a4 4 0 11-8 0 4 4 0 018 0zM5 21h14" />
-                  </svg>
-                  성당단체 둘러보기
                 </Link>
                 <Link
                   to="/news"
@@ -400,6 +391,14 @@ export default function Home() {
               ))}
             </div>
           </div>
+        </div>
+        <div className="container mx-auto px-4 mt-6">
+          <Link
+            to="/organizations"
+            className="block md:hidden bg-white rounded-2xl shadow-lg border border-gray-100 px-6 py-4 text-center text-sm font-semibold text-catholic-logo hover:text-catholic-logo-dark transition-colors"
+          >
+            성당단체 둘러보기 →
+          </Link>
         </div>
       </section>
 
