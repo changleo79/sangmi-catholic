@@ -69,7 +69,7 @@ export default function Office() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">이메일</p>
-                      <p className="text-gray-600">sangmi@catholic.or.kr</p>
+                      <p className="text-gray-600">sangmi@casuwon.or.kr</p>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-gray-100">

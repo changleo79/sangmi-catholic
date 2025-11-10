@@ -33,10 +33,18 @@ export default function About() {
               <p>
                 상미성당은 모든 신자들이 한 가족으로 모여 기도하고, 함께 성장하며, 주변 이웃들에게 복음을 전하는 따뜻한 공동체가 되고자 합니다.
               </p>
-              <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
                 <p className="text-base">
                   <span className="font-semibold text-gray-900">설립일 : </span>
                   <span className="text-gray-700">2018년 6월 18일</span>
+                </p>
+                <p className="text-base">
+                  <span className="font-semibold text-gray-900">기공식 미사 : </span>
+                  <span className="text-gray-700">2023년 11월 18일</span>
+                </p>
+                <p className="text-base">
+                  <span className="font-semibold text-gray-900">입당 미사 : </span>
+                  <span className="text-gray-700">2025년 3월 22일</span>
                 </p>
               </div>
             </div>
@@ -52,34 +60,36 @@ export default function About() {
               {/* 1대 본당신부 */}
               <div className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="aspect-square w-full max-w-[200px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                  {/* 사진을 여기에 추가하세요 */}
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm group-hover:scale-105 transition-transform duration-300">
-                    사진
-                  </div>
+                  <img
+                    src="/images/past-priest-choi.jpg"
+                    alt="초대 주임신부 최범근 요한사도 신부님"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
                 <div className="text-center">
                   <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-2 transition-all duration-300 group-hover:scale-105" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
-                    1대 본당신부
+                    초대 주임신부
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-catholic-logo transition-colors duration-300">최범근 요한사도</h3>
-                  <p className="text-sm text-gray-600 mb-2">재임기간 : 2018.06 - </p>
+                  <p className="text-sm text-gray-600 mb-2">재임기간 : 2019년 6월 18일 ~ 2025년 6월 16일</p>
                 </div>
               </div>
               
               {/* 2대 본당신부 */}
               <div className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="aspect-square w-full max-w-[200px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300">
-                  {/* 사진을 여기에 추가하세요 */}
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm group-hover:scale-105 transition-transform duration-300">
-                    사진
-                  </div>
+                  <img
+                    src="/images/past-priest-jeong.jpg"
+                    alt="2대 주임신부 정진성 아우구스티노 신부님"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
                 <div className="text-center">
                   <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-2 transition-all duration-300 group-hover:scale-105" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
                     2대 본당신부
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-catholic-logo transition-colors duration-300">정진성 아우구스티노</h3>
-                  <p className="text-sm text-gray-600 mb-2">재임기간 : - </p>
+                  <p className="text-sm text-gray-600 mb-2">재임기간 : 2025년 6월 17일 ~ 현재</p>
                 </div>
               </div>
             </div>
@@ -111,7 +121,7 @@ export default function About() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">이메일</p>
-                  <p className="text-gray-600">sangmi@catholic.or.kr</p>
+                <p className="text-gray-600">sangmi@casuwon.or.kr</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
