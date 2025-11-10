@@ -64,10 +64,6 @@ export default function OrganizationTree() {
     '평신도협의회'
   ]
 
-  const horizontalOffset = parentOrganizations.length > 0
-    ? `${100 / (parentOrganizations.length * 2)}%`
-    : '10%'
-
   const mobileAccentStyles: Record<ParentOrganizationType, { primary: string; secondary: string; light: string }> = {
     '총회장': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.16)' },
     '총무': { primary: '#7B1F4B', secondary: '#5a1538', light: 'rgba(123, 31, 75, 0.12)' },
@@ -78,6 +74,54 @@ export default function OrganizationTree() {
     '재정위원회': { primary: '#4C9C84', secondary: '#327964', light: 'rgba(76, 156, 132, 0.16)' },
     '평신도협의회': { primary: '#D0864C', secondary: '#b5682f', light: 'rgba(208, 134, 76, 0.18)' }
   }
+
+  const mobileLegendItems = [
+    {
+      title: '주임신부님',
+      description: '본당의 영적 중심',
+      icon: (
+        <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      )
+    },
+    {
+      title: '총회장',
+      description: '위원회 조율 및 협의',
+      icon: (
+        <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17l5-5 5 5M7 7h10" />
+        </svg>
+      )
+    },
+    {
+      title: '총무',
+      description: '행정 및 운영 지원',
+      icon: (
+        <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h9" />
+        </svg>
+      )
+    },
+    {
+      title: '위원회',
+      description: '분야별 사목 활동',
+      icon: (
+        <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      )
+    },
+    {
+      title: '단체',
+      description: '신자들의 소모임',
+      icon: (
+        <svg className="w-5 h-5 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
+        </svg>
+      )
+    }
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -101,14 +145,18 @@ export default function OrganizationTree() {
             style={{ background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)' }}
           >
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at top, rgba(255,255,255,0.7), transparent 55%)' }}></div>
-            <div className="relative space-y-3">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 rounded-full text-sm font-semibold tracking-wide">
-                최상위
-              </span>
-              <h2 className="text-2xl font-bold">주임신부님</h2>
-              <p className="text-sm text-white/80 leading-relaxed">
-                상미성당 공동체를 이끄는 영적 지도자입니다.
-              </p>
+            <div className="relative flex items-start gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/25 backdrop-blur">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold">주임신부님</h2>
+                <p className="text-sm text-white/80 leading-relaxed">
+                  상미성당 공동체를 이끄는 영적 지도자입니다.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -121,8 +169,10 @@ export default function OrganizationTree() {
           {/* 총회장 */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-semibold text-lg shadow-lg" style={{ background: 'linear-gradient(135deg, #9B5A7B 0%, #7B1F4B 100%)' }}>
-                총
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, #9B5A7B 0%, #7B1F4B 100%)' }}>
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4 4 4-4m-6 8h4a2 2 0 002-2V7a2 2 0 00-2-2H10a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -155,8 +205,10 @@ export default function OrganizationTree() {
           {/* 총무 */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-catholic-logo font-semibold text-lg shadow-inner" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
-                무
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner" style={{ backgroundColor: 'rgba(123, 31, 75, 0.12)' }}>
+                <svg className="w-6 h-6 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h9" />
+                </svg>
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -201,17 +253,19 @@ export default function OrganizationTree() {
                 key={`${org}-${refreshKey}`}
                 className="group relative rounded-3xl border border-gray-100 bg-white shadow-xl overflow-hidden"
               >
-                <div
-                  className="absolute inset-x-0 top-0 h-1.5"
-                  style={{ background: `linear-gradient(90deg, ${accent.primary}, ${accent.secondary})` }}
-                ></div>
+              <div
+                className="absolute inset-x-0 top-0 h-1.5"
+                style={{ background: `linear-gradient(90deg, ${accent.primary}, ${accent.secondary})` }}
+              ></div>
                 <div className="p-6 space-y-5">
                   <div className="flex items-start gap-4">
                     <div
                       className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-white font-semibold text-lg shadow-lg"
                       style={{ background: `linear-gradient(135deg, ${accent.primary}, ${accent.secondary})` }}
                     >
-                      {info.name.replace('위원회', '')[0]}
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
                     <div className="flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -290,6 +344,20 @@ export default function OrganizationTree() {
               </div>
             )
           })}
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            {mobileLegendItems.map((item) => (
+              <div key={item.title} className="flex items-start gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-catholic-logo/10">
+                  {item.icon}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                  <p className="text-xs text-gray-500 leading-relaxed">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* PC View - Organization Chart */}
@@ -391,21 +459,18 @@ export default function OrganizationTree() {
               </div>
 
               {/* Level 4: 위원회들 */}
-              <div className="relative mb-8" style={{ paddingTop: '80px' }}>
+              <div className="relative mb-8 md:px-[90px]" style={{ paddingTop: '80px' }}>
                 {/* Main horizontal line connecting all committees - 총무 선 끝(80px 아래)에 위치, PC만 표시 */}
                 <div 
                   className="absolute h-0.5 bg-gray-400 z-10 hidden md:block"
                   style={{ 
                     top: '0px',
-                    left: horizontalOffset,
-                    right: horizontalOffset
+                    left: 0,
+                    right: 0
                   }}
                 ></div>
                 
-                <div
-                  className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-6 md:gap-x-0 md:gap-y-12 md:justify-items-center"
-                  style={{ marginTop: '60px' }}
-                >
+                <div className="flex flex-nowrap justify-between gap-6" style={{ marginTop: '60px' }}>
                   {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const postsCount = getPostsCount(org)

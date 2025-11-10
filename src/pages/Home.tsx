@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { notices as defaultNotices } from '../data/notices'
-import { getNotices, getAlbums, saveAlbums } from '../utils/storage'
+import {
+  getNotices,
+  getAlbums,
+  saveAlbums,
+  getRecruitments,
+  getBulletins,
+  type RecruitmentItem,
+  type BulletinItem
+} from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
 
 import imgMain from '../../사진파일/메인이미지.jpg'
@@ -10,42 +18,49 @@ import img02 from '../../사진파일/KakaoTalk_20251104_172439243_02.jpg'
 import img03 from '../../사진파일/KakaoTalk_20251104_172439243_03.jpg'
 import img04 from '../../사진파일/KakaoTalk_20251104_172439243_04.jpg'
 
+type NoticeTabKey = 'notice' | 'recruitment' | 'bulletin'
+
 export default function Home() {
-  const featureSectionRef = useRef<HTMLElement>(null)
-  const noticeSectionRef = useRef<HTMLElement>(null)
+  const quickSectionRef = useRef<HTMLElement>(null)
+  const newsSectionRef = useRef<HTMLElement>(null)
   const gallerySectionRef = useRef<HTMLElement>(null)
+
   const [notices, setNotices] = useState<NoticeItem[]>([])
+  const [recruitments, setRecruitments] = useState<RecruitmentItem[]>([])
+  const [bulletins, setBulletins] = useState<BulletinItem[]>([])
+  const [displayAlbums, setDisplayAlbums] = useState<Array<{ id: string; cover: string; title: string }>>([])
+  const [activeNoticeTab, setActiveNoticeTab] = useState<NoticeTabKey>('notice')
+  const [currentSlide, setCurrentSlide] = useState(0)
+
   const galleryPhotos = [img01, img02, img03, img04]
-  
+  const slideImages = [imgMain, img01, img02]
+
   useEffect(() => {
-    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
-    // 약간의 지연을 두어 initializeData가 완료되도록 함
     const loadData = async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
+
       const storedNotices = getNotices()
-      if (storedNotices.length > 0) {
-        setNotices(storedNotices)
+      setNotices(storedNotices.length > 0 ? storedNotices : defaultNotices)
+
+      const storedRecruitments = getRecruitments()
+      if (storedRecruitments.length > 0) {
+        setRecruitments(storedRecruitments.slice(0, 6))
       } else {
-        setNotices(defaultNotices)
+        setRecruitments([
+          { id: 'recruit-default-1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
+          { id: 'recruit-default-2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
+        ])
       }
+
+      const storedBulletins = getBulletins()
+      setBulletins(storedBulletins.slice(0, 6))
     }
     loadData()
   }, [])
-  
-  const recent = notices.slice(0, 3)
-  
-  // 슬라이드 이미지 배열 (메인이미지가 첫 번째, 서브 이미지 2개 추가)
-  const slideImages = [imgMain, img01, img02]
-  const [currentSlide, setCurrentSlide] = useState(0)
-  
-  // Albums Preview Component
-  const [displayAlbums, setDisplayAlbums] = useState<Array<{id: string, cover: string, title: string}>>([])
-  
+
   useEffect(() => {
-    // 기본 앨범이 없으면 생성
     const storedAlbums = getAlbums()
     if (storedAlbums.length === 0) {
-      // 기본 앨범 생성
       const defaultAlbum: any = {
         id: Date.now().toString(),
         title: '상미성당 앨범',
@@ -60,14 +75,8 @@ export default function Home() {
       const albums = getAlbums()
       albums.push(defaultAlbum)
       saveAlbums(albums)
-      // 생성된 앨범으로 표시
-      setDisplayAlbums([{
-        id: defaultAlbum.id,
-        cover: defaultAlbum.cover,
-        title: defaultAlbum.title
-      }])
+      setDisplayAlbums([{ id: defaultAlbum.id, cover: defaultAlbum.cover, title: defaultAlbum.title }])
     } else {
-      // 최근 앨범 4개 사용
       const recentAlbums = storedAlbums.slice(0, 4).map(album => ({
         id: album.id,
         cover: album.cover || galleryPhotos[0],
@@ -76,34 +85,28 @@ export default function Home() {
       setDisplayAlbums(recentAlbums)
     }
   }, [])
-  
-  // 자동 슬라이드
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slideImages.length)
-    }, 5000) // 5초마다 전환
-    
+      setCurrentSlide(prev => (prev + 1) % slideImages.length)
+    }, 5000)
     return () => clearInterval(interval)
   }, [slideImages.length])
 
-  // 스크롤 애니메이션
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('animate-on-scroll')
           }
         })
       },
-      {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px',
-      }
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     )
 
-    const sections = [featureSectionRef.current, noticeSectionRef.current, gallerySectionRef.current]
-    sections.forEach((section) => {
+    const sections = [quickSectionRef.current, newsSectionRef.current, gallerySectionRef.current]
+    sections.forEach(section => {
       if (section) {
         section.classList.add('scroll-animate')
         observer.observe(section)
@@ -111,33 +114,144 @@ export default function Home() {
     })
 
     return () => {
-      sections.forEach((section) => {
-        if (section) {
-          observer.unobserve(section)
-        }
+      sections.forEach(section => {
+        if (section) observer.unobserve(section)
       })
     }
   }, [])
-  
-  // 슬라이드 변경 함수
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-  }
-  
-  const goToPrevious = () => {
-    setCurrentSlide((prev) => (prev - 1 + slideImages.length) % slideImages.length)
-  }
-  
-  const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % slideImages.length)
+
+  const goToSlide = (index: number) => setCurrentSlide(index)
+  const goToPrevious = () => setCurrentSlide(prev => (prev - 1 + slideImages.length) % slideImages.length)
+  const goToNext = () => setCurrentSlide(prev => (prev + 1) % slideImages.length)
+
+  const formatDate = (date?: string) => {
+    if (!date) return ''
+    try {
+      return new Intl.DateTimeFormat('ko', { month: 'numeric', day: 'numeric' }).format(new Date(date))
+    } catch {
+      return date
+    }
   }
 
+  const quickLinks = [
+    {
+      title: '공지 / 소식',
+      description: '본당과 단체의 최신 안내',
+      to: '/news',
+      accent: '#7B1F4B',
+      background: 'linear-gradient(135deg, rgba(123, 31, 75, 0.14) 0%, rgba(123, 31, 75, 0.04) 100%)',
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v15z" />
+        </svg>
+      )
+    },
+    {
+      title: '성당단체 둘러보기',
+      description: '위원회와 단체 소개, 게시판',
+      to: '/organizations',
+      accent: '#8B4A6B',
+      background: 'linear-gradient(135deg, rgba(139, 74, 107, 0.14) 0%, rgba(139, 74, 107, 0.04) 100%)',
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 018 0v2m-3-10a4 4 0 11-8 0 4 4 0 018 0zM5 21h14" />
+        </svg>
+      )
+    },
+    {
+      title: '성당 앨범',
+      description: '행사와 추억을 사진으로',
+      to: '/albums',
+      accent: '#4C9C84',
+      background: 'linear-gradient(135deg, rgba(76, 156, 132, 0.14) 0%, rgba(76, 156, 132, 0.04) 100%)',
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v3M4 19V5m0 14h16m-6-6l2 2 3-3m-9 1a2 2 0 110-4 2 2 0 010 4z" />
+        </svg>
+      )
+    },
+    {
+      title: '성당 업무 안내',
+      description: '행정, 미사예물, 사무실 연락',
+      to: '/office',
+      accent: '#D0864C',
+      background: 'linear-gradient(135deg, rgba(208, 134, 76, 0.14) 0%, rgba(208, 134, 76, 0.04) 100%)',
+      icon: (
+        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m1-11h3m-3 4h3M5 8h3m-3 4h3m2-9h2a2 2 0 012 2v14l-3-1-3 1V5a2 2 0 012-2z" />
+        </svg>
+      )
+    }
+  ]
+
+  const heroStats = [
+    { label: '공지', value: `${notices.length}건`, to: '/news' },
+    { label: '성당단체', value: '위원회 6 · 단체 24', to: '/organizations' },
+    { label: '앨범', value: `${displayAlbums.length}건`, to: '/albums' }
+  ]
+
+  const noticeTabs: Record<NoticeTabKey, {
+    label: string
+    description: string
+    items: Array<{ id: string; title: string; summary?: string; date?: string; to: string }>
+    emptyText: string
+    ctaLabel: string
+    ctaLink: string
+  }> = {
+    notice: {
+      label: '공지사항',
+      description: '본당의 주요 안내와 행정 소식',
+      items: notices.slice(0, 4).map((item, idx) => ({
+        id: `notice-${idx}-${item.title}`,
+        title: item.title,
+        summary: item.summary,
+        date: formatDate(item.date),
+        to: '/news'
+      })),
+      emptyText: '등록된 공지사항이 없습니다.',
+      ctaLabel: '공지사항 전체 보기',
+      ctaLink: '/news'
+    },
+    recruitment: {
+      label: '단체 소식',
+      description: '함께할 봉사와 단체 모집 안내',
+      items: recruitments.slice(0, 4).map(item => ({
+        id: item.id,
+        title: item.title,
+        summary: item.summary,
+        to: '/news'
+      })),
+      emptyText: '현재 모집 중인 단체가 없습니다.',
+      ctaLabel: '단체 소식 전체 보기',
+      ctaLink: '/news'
+    },
+    bulletin: {
+      label: '주보 안내',
+      description: '주일 주보 PDF를 내려받을 수 있습니다.',
+      items: bulletins.slice(0, 4).map(item => ({
+        id: item.id,
+        title: item.title,
+        summary: item.description,
+        date: formatDate(item.date),
+        to: '/news'
+      })),
+      emptyText: '등록된 주보가 없습니다.',
+      ctaLabel: '주보 안내 전체 보기',
+      ctaLink: '/news'
+    }
+  }
+
+  const activeNoticeContent = noticeTabs[activeNoticeTab]
+  const massHighlights = [
+    { title: '주일 미사', time: '오전 9시 · 오전 11시 · 오후 7시 30분' },
+    { title: '평일 미사', time: '화–금 오후 7시 30분' },
+    { title: '토요일 미사', time: '오후 6시 (주일미사)' }
+  ]
+
   return (
-    <div>
-      {/* Hero Section with Slider */}
-      <section className="relative w-full h-[75vh] min-h-[500px] md:h-[80vh] md:min-h-[600px] flex items-center overflow-hidden">
-        {/* 슬라이드 컨테이너 */}
-        <div className="absolute inset-0 w-full h-full">
+    <div className="bg-gradient-to-b from-white via-gray-50 to-white">
+      <section className="relative w-full h-[75vh] min-h-[520px] md:h-[80vh] md:min-h-[620px] flex items-center overflow-hidden">
+        <div className="absolute inset-0">
           {slideImages.map((img, index) => (
             <div
               key={index}
@@ -149,19 +263,16 @@ export default function Home() {
                 backgroundSize: 'cover',
                 backgroundPosition: index === 0 ? '48% 47%' : 'center center',
                 backgroundRepeat: 'no-repeat',
-                transform: index === 0 ? 'rotate(-1deg) scale(1.03)' : 'scale(1.05)',
+                transform: index === 0 ? 'scale(1.04)' : 'scale(1.06)'
               }}
             />
           ))}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/50" />
-        
-        {/* 슬라이드 네비게이션 화살표 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/60" />
         <button
           onClick={goToPrevious}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 active:bg-white/40 transition-all duration-300 flex items-center justify-center group touch-manipulation"
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 active:bg-white/35 transition-all duration-300 flex items-center justify-center group touch-manipulation"
           aria-label="이전 슬라이드"
-          style={{ marginTop: 'calc(-50% + 120px)' }}
         >
           <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -169,59 +280,104 @@ export default function Home() {
         </button>
         <button
           onClick={goToNext}
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 active:bg-white/40 transition-all duration-300 flex items-center justify-center group touch-manipulation"
+          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/15 backdrop-blur-md hover:bg-white/25 active:bg-white/35 transition-all duration-300 flex items-center justify-center group touch-manipulation"
           aria-label="다음 슬라이드"
-          style={{ marginTop: 'calc(-50% + 120px)' }}
         >
           <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        
-        {/* 슬라이드 인디케이터 (도트) */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
           {slideImages.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={`transition-all duration-300 rounded-full ${
-                index === currentSlide
-                  ? 'w-8 h-2 bg-white'
-                  : 'w-2 h-2 bg-white/50 hover:bg-white/70'
+                index === currentSlide ? 'w-8 h-2 bg-white' : 'w-2 h-2 bg-white/40 hover:bg-white/60'
               }`}
               aria-label={`슬라이드 ${index + 1}`}
             />
           ))}
         </div>
-        <div className="relative container mx-auto px-4 text-center text-white z-20 pt-16 md:pt-0">
-          <div className="animate-fade-in">
-            <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-2xl mb-6 leading-tight px-2">
-              상미성당에 오신 것을<br className="md:hidden" /> 환영합니다
-            </h2>
-            <p className="text-base md:text-lg lg:text-xl text-gray-100 max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed px-2">
-              기도와 말씀 안에서 하나 되는 작은 공동체
-            </p>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="relative z-20 container mx-auto px-4">
+          <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-12">
+            <div className="max-w-2xl text-left text-white space-y-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-sm font-medium tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse"></span>
+                수원교구 상미성당
+              </span>
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
+                기도와 말씀 안에서<br className="hidden md:block" /> 하나 되는 공동체
+              </h1>
+              <p className="text-base md:text-lg text-white/80 leading-relaxed">
+                본당 소식과 단체 활동, 신앙 삶을 풍성하게 하는 모든 안내를 한 자리에서 만나보세요.
+              </p>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2">
+                <Link
+                  to="/mass"
+                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white text-gray-900 font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 min-w-[170px]"
+                >
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  미사 시간 보기
+                </Link>
+                <Link
+                  to="/organizations"
+                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-white/60 text-white font-semibold hover:bg-white/10 hover:-translate-y-1 transition-all duration-300 min-w-[170px]"
+                >
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 018 0v2m-3-10a4 4 0 11-8 0 4 4 0 018 0zM5 21h14" />
+                  </svg>
+                  성당단체 둘러보기
+                </Link>
+                <Link
+                  to="/news"
+                  className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/10 text-white font-semibold border border-white/20 hover:bg-white/15 hover:-translate-y-1 transition-all duration-300 min-w-[170px]"
+                >
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v15z" />
+                  </svg>
+                  공지/소식 모아보기
+                </Link>
+              </div>
+              <div className="flex flex-wrap gap-3 pt-4">
+                {heroStats.map(stat => (
+                  <Link
+                    key={stat.label}
+                    to={stat.to}
+                    className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm text-white/90 hover:bg-white/15 transition-all duration-300"
+                  >
+                    <span className="font-semibold text-white">{stat.value}</span>
+                    <span>{stat.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className="w-full max-w-md lg:max-w-sm bg-white/12 backdrop-blur-lg border border-white/20 rounded-3xl p-6 text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6l4 2" />
+                </svg>
+                이번 주 미사 안내
+              </h3>
+              <ul className="space-y-3 mb-6">
+                {massHighlights.map(item => (
+                  <li key={item.title} className="flex items-start gap-3">
+                    <span className="mt-1 w-2 h-2 rounded-full bg-white/70"></span>
+                    <div>
+                      <p className="text-sm font-semibold text-white">{item.title}</p>
+                      <p className="text-sm text-white/80 leading-relaxed">{item.time}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
               <Link
                 to="/mass"
-                className="group px-8 py-4 rounded-xl bg-white text-gray-900 font-semibold hover:bg-gray-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 min-w-[180px] relative overflow-hidden"
+                className="inline-flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-colors"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="relative z-10">미사 시간 보기</span>
-              </Link>
-              <Link
-                to="/about"
-                className="group px-8 py-4 rounded-xl text-white font-semibold transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 min-w-[180px] relative overflow-hidden"
-                style={{ backgroundColor: '#7B1F4B' }}
-                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                <span className="relative z-10">성당소개</span>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                미사 시간표 자세히 보기
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
@@ -230,177 +386,287 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Feature Cards with images (use local gallery as backgrounds) */}
-      <section ref={featureSectionRef} className="py-20 md:py-24 bg-gradient-to-b from-white to-gray-50">
+      <section ref={quickSectionRef} className="-mt-16 md:-mt-24 pb-20">
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">주요 안내</h2>
-            <div className="w-20 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link
-              to="/mass"
-              className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 bg-white border border-gray-100 hover:-translate-y-2 hover:border-catholic-logo/30 magnetic-card"
-            >
-              <div className="relative h-48 w-full overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${img01})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+          <div className="bg-white/85 backdrop-blur rounded-3xl shadow-2xl border border-white/60 p-6 md:p-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              {quickLinks.map(link => (
+                <Link
+                  key={link.title}
+                  to={link.to}
+                  className="group relative flex items-start gap-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-5 md:p-6"
+                >
+                  <div
+                    className="flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-inner"
+                    style={{ background: link.background, color: link.accent }}
+                  >
+                    {link.icon}
                   </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 transition-colors duration-300 group" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>미사와 성사</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">미사 시간표 및 성사 안내</p>
-              </div>
-            </Link>
-
-            <Link
-              to="/news"
-              className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 bg-white border border-gray-100 hover:-translate-y-2 hover:border-catholic-logo/30 magnetic-card"
-            >
-              <div className="relative h-48 w-full overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${img02})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors">
+                      {link.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{link.description}</p>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-catholic-logo/80 group-hover:text-catholic-logo transition-colors">
+                      자세히 보기
+                      <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
                   </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 transition-colors duration-300 group" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>공지/소식</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">성당 소식, 단체 소식, 주보 안내</p>
-              </div>
-            </Link>
-
-            <Link
-              to="/directions"
-              className="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 bg-white border border-gray-100 hover:-translate-y-2 hover:border-catholic-logo/30 magnetic-card"
-            >
-              <div className="relative h-48 w-full overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${img03})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 transition-colors duration-300 group" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>오시는 길</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">지도 및 교통 안내</p>
-              </div>
-            </Link>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Notice Section */}
-      <section ref={noticeSectionRef} className="py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section ref={newsSectionRef} className="py-20">
         <div className="container mx-auto px-4">
-          <div className="flex items-end justify-between mb-10">
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-12 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">최근 공지사항</h2>
-                <div className="w-20 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-catholic-logo to-catholic-logo-dark flex items-center justify-center text-white shadow-lg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5v14l7-4 7 4V5a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-catholic-logo">성당 소식 허브</p>
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900">한눈에 보는 본당 소식</h2>
+                </div>
               </div>
+              <p className="text-sm md:text-base text-gray-600 max-w-2xl leading-relaxed">
+                공지사항부터 단체 모집, 주보 안내까지 최신 소식을 빠르게 확인하세요.
+              </p>
             </div>
-            <Link 
-              to="/news" 
-              className="font-medium flex items-center gap-2 transition-all duration-300 group px-4 py-2 rounded-lg hover:bg-white hover:shadow-md"
-              style={{ color: '#7B1F4B' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#5a1538' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#7B1F4B' }}
+            <Link
+              to={activeNoticeContent.ctaLink}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo hover:text-catholic-logo-dark transition-colors"
             >
-              전체 보기
-              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              전체 소식 보기
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-            {recent.map((n, i) => (
-              <Link
-                key={i}
-                to="/news"
-                className="block p-6 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-all duration-300 flex items-center justify-between border-b border-gray-100 last:border-b-0 group cursor-pointer hover:pl-8 active:bg-purple-50/30"
+
+          <div className="flex flex-wrap gap-2 mb-8">
+            {Object.entries(noticeTabs).map(([key, tab]) => (
+              <button
+                key={key}
+                onClick={() => setActiveNoticeTab(key as NoticeTabKey)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeNoticeTab === key
+                    ? 'bg-gradient-to-r from-catholic-logo to-catholic-logo-dark text-white shadow-lg'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-catholic-logo/30 hover:text-catholic-logo'
+                }`}
               >
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="w-2 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-0 group-hover:scale-100" style={{ backgroundColor: '#7B1F4B' }}></div>
-                  <span className="font-medium text-gray-900 transition-all duration-300 group-hover:font-semibold group-hover:text-catholic-logo">{n.title}</span>
-                </div>
-                <span className="text-gray-400 text-sm font-medium group-hover:text-gray-600 transition-colors">{n.date}</span>
-              </Link>
+                {tab.label}
+              </button>
             ))}
+          </div>
+
+          <div className="grid lg:grid-cols-[2fr,1fr] gap-6">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+              {activeNoticeContent.items.length > 0 ? (
+                activeNoticeContent.items.map(item => (
+                  <Link
+                    key={item.id}
+                    to={item.to}
+                    className="block p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/60 hover:to-transparent transition-all duration-300 group"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="w-2 h-2 rounded-full bg-catholic-logo/70 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors">
+                            {item.title}
+                          </h3>
+                        </div>
+                        {item.summary && (
+                          <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">{item.summary}</p>
+                        )}
+                      </div>
+                      {item.date && (
+                        <span className="text-xs font-medium text-gray-400 whitespace-nowrap mt-1">
+                          {item.date}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="p-10 text-center text-gray-500">{activeNoticeContent.emptyText}</div>
+              )}
+            </div>
+
+            <div className="bg-gradient-to-br from-catholic-logo to-catholic-logo-dark text-white rounded-3xl shadow-xl p-6 md:p-8 flex flex-col justify-between">
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                  빠르게 이동하기
+                </h3>
+                <ul className="space-y-3 text-sm text-white/90">
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white/70"></span>
+                    최신 공지와 단체 소식을 확인하세요.
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white/70"></span>
+                    주보 PDF를 내려받아 신앙 생활에 활용하세요.
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white/70"></span>
+                    성당단체 게시판에서 활동 소식을 나눠보세요.
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-6 space-y-3">
+                <Link
+                  to="/news"
+                  className="inline-flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/15 border border-white/20 hover:bg-white/20 transition-all"
+                >
+                  공지/소식 페이지로 이동
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+                <Link
+                  to="/organizations"
+                  className="inline-flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/15 border border-white/20 hover:bg-white/20 transition-all"
+                >
+                  성당단체 게시판
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Simple Gallery using local images */}
-      <section ref={gallerySectionRef} className="py-16 md:py-20 bg-white">
+      <section className="py-20 bg-gradient-to-b from-white via-white to-gray-50">
         <div className="container mx-auto px-4">
-          <div className="mb-10 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-12 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">성당 앨범</h2>
-                <div className="w-20 h-1.5 rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+            <div className="grid lg:grid-cols-2">
+              <div className="p-8 md:p-12 space-y-6">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-catholic-logo/10 text-sm font-semibold text-catholic-logo">
+                  성당단체 & 조직도
+                </span>
+                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                  하나의 신앙, 다양한 사도직 활동
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  위원회와 단체의 소개, 활동 게시판, 조직도를 한 곳에서 확인하세요. 실시간으로 연동되는 게시판을 통해 단체 소식도 바로 공유할 수 있습니다.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Link
+                    to="/organization-tree"
+                    className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-catholic-logo">조직도 보기</p>
+                      <p className="text-xs text-gray-500">주임신부님부터 위원회, 단체 정보</p>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/organizations"
+                    className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-catholic-logo">단체 게시판</p>
+                      <p className="text-xs text-gray-500">위원회 & 소모임 실시간 소식</p>
+                    </div>
+                  </Link>
+                </div>
               </div>
+              <div className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-catholic-logo/90 to-catholic-logo-dark"></div>
+                <div className="relative h-full p-8 md:p-12 text-white flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <h4 className="text-2xl font-semibold">성당단체 한 눈에</h4>
+                    <p className="text-sm text-white/80 leading-relaxed">
+                      소공동체위원회부터 청소년위원회까지, 6개의 상임 위원회와 24개의 단체가 신앙으로 하나 됩니다. 각 단체의 소개와 활동 사진을 확인하고 게시판에서 소통해보세요.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {[
+                      { label: '상임 위원회', value: '6개' },
+                      { label: '산하 단체', value: '24개' },
+                      { label: '게시글', value: `${notices.length + recruitments.length + bulletins.length}건` },
+                      { label: '최근 업데이트', value: formatDate(notices[0]?.date || bulletins[0]?.date) }
+                    ].map(item => (
+                      <div key={item.label} className="rounded-2xl bg-white/10 backdrop-blur p-3">
+                        <p className="text-white/70 text-xs uppercase tracking-wide">{item.label}</p>
+                        <p className="text-lg font-semibold text-white mt-1">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section ref={gallerySectionRef} className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div>
+              <p className="text-sm font-semibold text-catholic-logo mb-2">성당 앨범</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">사진으로 기억하는 상미성당</h2>
+              <p className="text-sm text-gray-600 leading-relaxed mt-2">
+                본당 행사와 단체 활동의 모습을 앨범에서 모아보세요.
+              </p>
             </div>
             <Link
               to="/albums"
-              className="font-medium flex items-center gap-2 transition-all duration-300 group px-4 py-2 rounded-lg hover:bg-gray-100 hover:shadow-md"
-              style={{ color: '#7B1F4B' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#5a1538' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#7B1F4B' }}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo hover:text-catholic-logo-dark transition-colors"
             >
-              전체 보기
-              <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              앨범 전체 보기
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {displayAlbums.map((album, i) => (
               <Link
                 key={album.id || i}
                 to={album.id ? `/albums/${album.id}` : '/albums'}
-                className="group flex flex-col rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:-translate-y-2 active:scale-95"
+                className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
+                <div className="relative aspect-[4/3] overflow-hidden">
                   <div
-                    className="absolute inset-0 bg-gray-200 transition-transform duration-700 group-hover:scale-110 image-placeholder"
+                    className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
                     style={{ backgroundImage: `url(${album.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300 shadow-xl">
-                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                  <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-400">
+                    <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 backdrop-blur text-white text-xs font-medium">
+                      사진 더 보기
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </div>
+                    </span>
                   </div>
                 </div>
-                <div className="bg-white px-4 py-3 border-t border-gray-100">
+                <div className="px-5 py-4 border-t border-gray-100">
                   <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-catholic-logo transition-colors">
                     {album.title}
                   </h3>
