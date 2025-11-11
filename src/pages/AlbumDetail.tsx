@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getAlbums, initializeData, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
+import { getAlbums, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
 import ImageLightbox from '../components/ImageLightbox'
 
 export default function AlbumDetail() {
@@ -13,59 +13,22 @@ export default function AlbumDetail() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!id) {
-      setAlbum(null)
-      setIsLoading(false)
-      return
-    }
-
     let cancelled = false
 
-    const resolveAlbum = async (attempt = 0): Promise<void> => {
+    const loadAlbum = () => {
       if (cancelled) return
       ensureDefaultAlbumExists()
       const albums = getAlbums()
-      const found = albums.find(a => a.id === id) || null
-
-      if (found) {
-        if (!cancelled) {
-          setAlbum(found)
-          setCurrentPhotoIndex(0)
-          setIsLoading(false)
-        }
-        return
-      }
-
-      if (attempt === 0) {
-        await initializeData()
-        ensureDefaultAlbumExists()
-      }
-
-      if (attempt < 4) {
-        await new Promise(resolve => setTimeout(resolve, 150 * (attempt + 1)))
-        await resolveAlbum(attempt + 1)
-      } else if (!cancelled) {
-        ensureDefaultAlbumExists()
-        const fallbackAlbums = getAlbums()
-        const fallback = fallbackAlbums.find(a => a.id === id)
-        if (fallback) {
-          setAlbum(fallback)
-          setCurrentPhotoIndex(0)
-        } else if (fallbackAlbums.length > 0) {
-          setAlbum(fallbackAlbums[0])
-          setCurrentPhotoIndex(0)
-        } else {
-          setAlbum(null)
-        }
-        setIsLoading(false)
-      }
+      const found = id ? albums.find((a) => a.id === id) || null : null
+      setAlbum(found)
+      setCurrentPhotoIndex(0)
+      setIsLoading(false)
     }
 
-    resolveAlbum()
+    loadAlbum()
 
     const handleAlbumsUpdate = () => {
-      ensureDefaultAlbumExists()
-      resolveAlbum()
+      loadAlbum()
     }
 
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
