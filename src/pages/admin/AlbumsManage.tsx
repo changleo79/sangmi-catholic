@@ -3,6 +3,52 @@ import { Link } from 'react-router-dom'
 import { AlbumWithCategory, getAlbums, saveAlbums, getAlbumCategories, ensureDefaultAlbumExists } from '../../utils/storage'
 import type { AlbumPhoto } from '../../data/albums'
 
+const MAX_IMAGE_SIZE = 1600
+const IMAGE_QUALITY = 0.85
+
+async function fileToCompressedBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = reader.result as string
+      const img = new Image()
+      img.onload = () => {
+        let { width, height } = img
+        if (width <= MAX_IMAGE_SIZE && height <= MAX_IMAGE_SIZE) {
+          resolve(result)
+          return
+        }
+
+        const canvas = document.createElement('canvas')
+        if (width > height) {
+          const ratio = MAX_IMAGE_SIZE / width
+          width = MAX_IMAGE_SIZE
+          height = Math.round(height * ratio)
+        } else {
+          const ratio = MAX_IMAGE_SIZE / height
+          height = MAX_IMAGE_SIZE
+          width = Math.round(width * ratio)
+        }
+
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          resolve(result)
+          return
+        }
+        ctx.drawImage(img, 0, 0, width, height)
+        const compressed = canvas.toDataURL('image/jpeg', IMAGE_QUALITY)
+        resolve(compressed)
+      }
+      img.onerror = () => resolve(result)
+      img.src = result
+    }
+    reader.onerror = () => reject(new Error('이미지를 읽는 중 오류가 발생했습니다.'))
+    reader.readAsDataURL(file)
+  })
+}
+
 export default function AlbumsManage() {
   const [albums, setAlbums] = useState<AlbumWithCategory[]>([])
   const [isEditing, setIsEditing] = useState(false)
@@ -233,19 +279,21 @@ export default function AlbumsManage() {
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const files = Array.from(e.target.files || [])
-                      files.forEach((file) => {
-                        const reader = new FileReader()
-                        reader.onloadend = () => {
-                          const base64 = reader.result as string
+                      for (const file of files) {
+                        try {
+                          const base64 = await fileToCompressedBase64(file)
                           setFormData(prev => ({
                             ...prev,
                             photos: [...prev.photos, { src: base64, alt: file.name }]
                           }))
+                        } catch (error) {
+                          console.error('이미지 변환 실패:', error)
+                          alert('이미지를 변환하는 중 오류가 발생했습니다. 다른 파일로 다시 시도해 주세요.')
                         }
-                        reader.readAsDataURL(file)
-                      })
+                      }
+                      e.target.value = ''
                     }}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                   />
