@@ -243,7 +243,7 @@ export default function AlbumDetail() {
             {/* Photo Thumbnails */}
             {photos.length > 1 && (
               <div className="mt-6 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                {album.photos.map((photo, index) => (
+                {photos.map((photo, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentPhotoIndex(index)}
