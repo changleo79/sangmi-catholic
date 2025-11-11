@@ -59,11 +59,12 @@ export default function About() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* 1대 본당신부 */}
               <div className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                <div className="aspect-square w-full max-w-[200px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                <div className="aspect-square w-full max-w-[220px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center">
                   <img
                     src="/images/past-priest-choi.jpg"
                     alt="초대 주임신부 최범근 요한사도 신부님"
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 bg-white"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    style={{ objectPosition: 'center top' }}
                   />
                 </div>
                 <div className="text-center">
@@ -77,11 +78,12 @@ export default function About() {
               
               {/* 2대 본당신부 */}
               <div className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                <div className="aspect-square w-full max-w-[200px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                <div className="aspect-square w-full max-w-[220px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center">
                   <img
                     src="/images/past-priest-jeong.jpg"
                     alt="2대 주임신부 정진성 아우구스티노 신부님"
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 bg-white"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    style={{ objectPosition: 'center top' }}
                   />
                 </div>
                 <div className="text-center">
