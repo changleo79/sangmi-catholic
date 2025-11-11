@@ -63,7 +63,7 @@ export default function About() {
                   <img
                     src="/images/past-priest-choi.jpg"
                     alt="초대 주임신부 최범근 요한사도 신부님"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 bg-white"
                   />
                 </div>
                 <div className="text-center">
@@ -81,7 +81,7 @@ export default function About() {
                   <img
                     src="/images/past-priest-jeong.jpg"
                     alt="2대 주임신부 정진성 아우구스티노 신부님"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 bg-white"
                   />
                 </div>
                 <div className="text-center">
@@ -110,7 +110,7 @@ export default function About() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">전화</p>
-                  <p className="text-gray-600">031-282-9989</p>
+                  <a href="tel:031-282-9989" className="text-gray-600 hover:text-catholic-logo transition-colors">031-282-9989</a>
                 </div>
               </div>
               <div className="flex items-center gap-3">

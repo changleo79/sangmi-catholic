@@ -58,7 +58,7 @@ export default function Office() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">전화</p>
-                      <p className="text-gray-600">031-282-9989</p>
+                      <a href="tel:031-282-9989" className="text-gray-600 hover:text-catholic-logo transition-colors">031-282-9989</a>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -69,7 +69,7 @@ export default function Office() {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">이메일</p>
-                      <p className="text-gray-600">sangmi@casuwon.or.kr</p>
+                      <a href="mailto:sangmi@casuwon.or.kr" className="text-gray-600 hover:text-catholic-logo transition-colors">sangmi@casuwon.or.kr</a>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-gray-100">
