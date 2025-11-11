@@ -209,20 +209,35 @@ export const initializeData = async (): Promise<void> => {
     }
     
     // localStorage에 캐시 (오프라인 지원)
-    if (notices.length > 0) localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
-    if (recruitments.length > 0) localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
-    if (faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
-    if (albums.length > 0) localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
-    if (albums.length === 0) {
-      const defaultAlbum = createDefaultAlbum()
-      localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
-      cachedData.albums = [defaultAlbum]
+    if (!localStorage.getItem(NOTICES_KEY) && notices.length > 0) localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
+    if (!localStorage.getItem(RECRUITMENTS_KEY) && recruitments.length > 0) localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
+    if (!localStorage.getItem(FAQS_KEY) && faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
+
+    const existingAlbumsRaw = localStorage.getItem(ALBUMS_KEY)
+    if (existingAlbumsRaw) {
+      try {
+        const existingAlbums: AlbumWithCategory[] = JSON.parse(existingAlbumsRaw)
+        if (existingAlbums.length > 0) {
+          cachedData.albums = existingAlbums
+        }
+      } catch (error) {
+        console.error('로컬 앨범 데이터 파싱 실패:', error)
+      }
+    } else {
+      if (albums.length > 0) {
+        localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
+      } else {
+        const defaultAlbum = createDefaultAlbum()
+        localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
+        cachedData.albums = [defaultAlbum]
+      }
     }
-    if (massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
-    if (sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
-    if (catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
-    if (bulletins.length > 0) localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
-    if (organizationPosts.length > 0) localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(organizationPosts))
+
+    if (!localStorage.getItem(MASS_SCHEDULE_KEY) && massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
+    if (!localStorage.getItem(SACRAMENTS_KEY) && sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
+    if (!localStorage.getItem(CATECHISM_KEY) && catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
+    if (!localStorage.getItem(BULLETINS_KEY) && bulletins.length > 0) localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
+    if (!localStorage.getItem(ORGANIZATION_POSTS_KEY) && organizationPosts.length > 0) localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(organizationPosts))
   } catch (e) {
     console.error('데이터 초기화 실패:', e)
   }

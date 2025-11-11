@@ -83,7 +83,7 @@ export default function About() {
                     src="/images/past-priest-jeong.jpg"
                     alt="2대 주임신부 정진성 아우구스티노 신부님"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    style={{ objectPosition: 'center top' }}
+                    style={{ objectPosition: 'center 15%' }}
                   />
                 </div>
                 <div className="text-center">

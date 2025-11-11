@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { AlbumWithCategory, getAlbums, saveAlbums, getAlbumCategories, initializeData, ensureDefaultAlbumExists } from '../../utils/storage'
+import { AlbumWithCategory, getAlbums, saveAlbums, getAlbumCategories, ensureDefaultAlbumExists } from '../../utils/storage'
 import type { AlbumPhoto } from '../../data/albums'
 
 export default function AlbumsManage() {
@@ -21,7 +21,7 @@ export default function AlbumsManage() {
   const categories = getAlbumCategories().filter(c => c !== '전체')
 
   useEffect(() => {
-    initializeDefaultAlbum()
+    ensureDefaultAlbumExists()
     loadAlbums()
   }, [])
 
@@ -62,8 +62,6 @@ export default function AlbumsManage() {
     
     setAlbums(newAlbums)
     saveAlbums(newAlbums)
-    // 캐시 업데이트를 위해 initializeData 호출
-    initializeData()
     resetForm()
   }
 
@@ -79,8 +77,6 @@ export default function AlbumsManage() {
       const newAlbums = albums.filter(a => a.id !== id)
       setAlbums(newAlbums)
       saveAlbums(newAlbums)
-      // 캐시 업데이트를 위해 initializeData 호출
-      initializeData()
     }
   }
 
