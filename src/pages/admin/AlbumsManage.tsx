@@ -17,10 +17,8 @@ export default function AlbumsManage() {
     category: '주일 미사',
     photos: []
   })
-  const [newPhotoSrc, setNewPhotoSrc] = useState('')
-  const [newPhotoAlt, setNewPhotoAlt] = useState('')
-  const [newPhotoTags, setNewPhotoTags] = useState('')
   const [isUploading, setIsUploading] = useState(false)
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const uploadSessionRef = useRef<string>(generateDraftId())
   const categories = getAlbumCategories().filter(c => c !== '전체')
 
@@ -90,20 +88,90 @@ export default function AlbumsManage() {
       const newAlbums = albums.filter(a => a.id !== id)
       setAlbums(newAlbums)
       saveAlbums(newAlbums)
+      
+      // 기본 앨범 삭제 시 플래그 설정 (다시 생성되지 않도록)
+      if (id === '1762757851120') {
+        localStorage.setItem('default_album_deleted', 'true')
+      }
     }
   }
 
   const parseTags = (value: string) => value.split(',').map(tag => tag.trim()).filter(Boolean)
 
-  const addPhoto = () => {
-    if (newPhotoSrc.trim()) {
-      setFormData({
-        ...formData,
-        photos: [...formData.photos, { src: newPhotoSrc, alt: newPhotoAlt || undefined, tags: parseTags(newPhotoTags) }]
+  // 네이버 클라우드 연결 테스트
+  const testNaverCloudConnection = async () => {
+    setTestResult({ success: false, message: '테스트 중...' })
+    try {
+      // 작은 테스트 이미지 생성 (1x1 픽셀 PNG)
+      const canvas = document.createElement('canvas')
+      canvas.width = 1
+      canvas.height = 1
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, 1, 1)
+      }
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          setTestResult({ success: false, message: '테스트 이미지 생성 실패' })
+          return
+        }
+
+        const testFile = new File([blob], 'test.png', { type: 'image/png' })
+        const formData = new FormData()
+        formData.append('albumId', 'test-connection')
+        formData.append('files', testFile)
+
+        try {
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+          })
+
+          if (!response.ok) {
+            const result = await response.json().catch(() => ({}))
+            setTestResult({ 
+              success: false, 
+              message: `연결 실패 (${response.status}): ${result.message || '알 수 없는 오류'}` 
+            })
+            return
+          }
+
+          const result = await response.json() as { uploads: { url: string }[] }
+          if (result.uploads && result.uploads.length > 0) {
+            const testUrl = result.uploads[0].url
+            
+            // 업로드된 이미지가 실제로 접근 가능한지 확인
+            const imgTest = new Image()
+            imgTest.onload = () => {
+              setTestResult({ 
+                success: true, 
+                message: `✅ 연결 성공!\n업로드된 이미지 URL: ${testUrl}\n이미지가 정상적으로 표시됩니다.` 
+              })
+            }
+            imgTest.onerror = () => {
+              setTestResult({ 
+                success: false, 
+                message: `⚠️ 업로드는 성공했지만 이미지 접근 실패\nURL: ${testUrl}\nCDN 설정을 확인해 주세요.` 
+              })
+            }
+            imgTest.src = testUrl
+          } else {
+            setTestResult({ success: false, message: '업로드 응답에 파일이 없습니다.' })
+          }
+        } catch (error) {
+          setTestResult({ 
+            success: false, 
+            message: `연결 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}` 
+          })
+        }
+      }, 'image/png')
+    } catch (error) {
+      setTestResult({ 
+        success: false, 
+        message: `테스트 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}` 
       })
-      setNewPhotoSrc('')
-      setNewPhotoAlt('')
-      setNewPhotoTags('')
     }
   }
 
@@ -194,9 +262,6 @@ export default function AlbumsManage() {
     })
     setIsEditing(false)
     setEditingId(null)
-    setNewPhotoSrc('')
-    setNewPhotoAlt('')
-    setNewPhotoTags('')
     loadAlbums()
     uploadSessionRef.current = generateDraftId()
   }
@@ -311,9 +376,18 @@ export default function AlbumsManage() {
                 
                 {/* 파일 업로드 */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    파일 업로드 (JPG, PNG)
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      파일 업로드 (JPG, PNG)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={testNaverCloudConnection}
+                      className="px-3 py-1 text-xs rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      🔗 연결 테스트
+                    </button>
+                  </div>
                   <input
                     type="file"
                     accept="image/*"
@@ -326,58 +400,20 @@ export default function AlbumsManage() {
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    💡 선택한 파일은 업로드 즉시 클라우드 저장소(Naver Cloud Object Storage)에 저장되고, 결과 URL이 자동으로 연결됩니다.
+                    💡 선택한 파일은 Naver Cloud Object Storage에 업로드되고, CDN URL이 자동으로 연결됩니다.
                   </p>
                   {isUploading && (
                     <p className="mt-2 text-xs text-catholic-logo">이미지를 업로드하는 중입니다...</p>
                   )}
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    또는 URL로 추가
-                  </label>
-                  <input
-                    type="url"
-                    value={newPhotoSrc}
-                    onChange={(e) => setNewPhotoSrc(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                    placeholder="이미지 URL (예: /albums/2025-11/001.jpg 또는 https://...)"
-                  />
-                  <p className="text-xs text-gray-500">
-                    💡 외부 URL, 프로젝트 내 경로, 또는 로컬 이미지 경로를 입력하세요.
-                  </p>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      이미지 ALT 텍스트 (선택)
-                    </label>
-                    <input
-                      type="text"
-                      value={newPhotoAlt}
-                      onChange={(e) => setNewPhotoAlt(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                      placeholder="예: 부활대축일 미사"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      태그 (쉼표)
-                    </label>
-                    <input
-                      type="text"
-                      value={newPhotoTags}
-                      onChange={(e) => setNewPhotoTags(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                      placeholder="예: 부활, 전례, 합창"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addPhoto}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    URL로 사진 추가
-                  </button>
+                  {testResult && (
+                    <div className={`mt-2 p-3 rounded-lg text-xs whitespace-pre-line ${
+                      testResult.success 
+                        ? 'bg-green-50 text-green-800 border border-green-200' 
+                        : 'bg-red-50 text-red-800 border border-red-200'
+                    }`}>
+                      {testResult.message}
+                    </div>
+                  )}
                 </div>
                 
                 {/* 추가된 사진 목록 */}

@@ -391,6 +391,11 @@ export const getAlbumCategories = (): string[] => {
 }
 
 export const ensureDefaultAlbumExists = (): void => {
+  // 기본 앨범이 삭제된 경우 다시 생성하지 않음
+  if (localStorage.getItem('default_album_deleted') === 'true') {
+    return
+  }
+  
   const albums = getAlbums()
   if (!albums.some(album => album.id === DEFAULT_ALBUM_ID)) {
     const nextAlbums = [...albums, createDefaultAlbum()]
