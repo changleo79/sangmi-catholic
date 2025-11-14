@@ -379,8 +379,6 @@ export default function OrganizationTree() {
                               )}
                             </Link>
                             
-                            {/* 위원회 박스에서 하위 단체로 내려가는 선 - 재정위원회는 단체가 없으므로 선 없음, PC만 표시 */}
-                            {/* 요청에 따라 하위 연결선도 제거 */}
                           </div>
                         </div>
 

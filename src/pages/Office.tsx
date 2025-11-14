@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react'
 import { getFAQs, type FAQItem } from '../utils/storage'
+import { facilityScheduleRows } from '../data/facilitySchedule'
 
 export default function Office() {
   const [faqs, setFaqs] = useState<FAQItem[]>([])
+
+  const officeColumns = [
+    { key: 'office', label: '사무장 근무' },
+    { key: 'manager', label: '관리장 근무' },
+    { key: 'shop', label: '성물방' }
+  ] as const
 
   useEffect(() => {
     // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
@@ -73,20 +80,34 @@ export default function Office() {
                     </div>
                   </div>
                   <div className="pt-4 border-t border-gray-100">
-                    <p className="font-semibold text-gray-900 mb-4">운영시간</p>
-                    <div className="space-y-2">
-                      {[
-                        '화–금 : 오전 9시부터 오후 6시 (점심 오후12시~오후1시)',
-                        '토요일 : 오전 9시부터 오후 5시',
-                        '주일 : 오전 9시부터 오후 4시 30분',
-                        '월요일 : 휴무'
-                      ].map((time, i) => (
-                        <div key={i} className="flex items-center gap-2 text-gray-700">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
-                          <p>{time}</p>
-                        </div>
-                      ))}
+                    <p className="font-semibold text-gray-900 mb-4">요일별 근무표</p>
+                    <div className="overflow-x-auto rounded-xl border border-gray-200">
+                      <table className="min-w-full bg-white text-sm text-left text-gray-700">
+                        <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-900">
+                          <tr>
+                            <th className="px-4 py-3 font-semibold">요일</th>
+                            {officeColumns.map(column => (
+                              <th key={column.key} className="px-4 py-3 font-semibold whitespace-nowrap">
+                                {column.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {facilityScheduleRows.map(row => (
+                            <tr key={`office-${row.day}`} className="border-b last:border-b-0">
+                              <th className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{row.day}</th>
+                              {officeColumns.map(column => (
+                                <td key={column.key} className="px-4 py-3 text-sm whitespace-pre-wrap">
+                                  {row[column.key] && row[column.key]?.toString().trim().length > 0 ? row[column.key] : '—'}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
+                    <p className="mt-3 text-xs text-gray-500">* 공휴일 : 사무실 휴무</p>
                   </div>
                 </div>
               </section>

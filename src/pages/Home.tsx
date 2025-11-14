@@ -220,9 +220,10 @@ export default function Home() {
 
   const activeNoticeContent = noticeTabs[activeNoticeTab]
   const massHighlights = [
-    { title: '주일 미사', time: '오전 10시 (교중) · 오후 3시 (어린이)' },
-    { title: '평일 미사', time: '월 6:30 새벽 · 화/목 7:30 저녁 · 수/금 10:00 아침' },
-    { title: '토요일 미사', time: '오후 5시 청년 · 매월 첫토 오전 10시 성모신심' }
+    { title: '주일 미사', time: '10:00 교중 · 15:00 어린이' },
+    { title: '평일 미사', time: '월 06:30 새벽 · 수/금 10:00 아침 · 화/목 19:30 저녁' },
+    { title: '성물방 · 사무실', time: '주일 미사 후 30분 · 화~금 12:00~20:30 / 09:00~18:00' },
+    { title: '주일 셔틀', time: '1·3·4·5·6지역 새성전 차량 운행 (교중미사)' }
   ]
 
   return (

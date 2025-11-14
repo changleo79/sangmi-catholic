@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getMassSchedule, getSacraments, getCatechismInfo } from '../utils/storage'
+import { facilityScheduleRows, facilityScheduleNotes, shuttleRoutes } from '../data/facilitySchedule'
 import type { MassScheduleItem, SacramentItem, CatechismInfo } from '../utils/storage'
 import ShareButton from '../components/ShareButton'
 
@@ -22,9 +23,9 @@ export default function Mass() {
           { id: '1', day: '월요일', time: '오전 6시 30분', description: '새벽미사' },
           { id: '2', day: '화요일', time: '오후 7시 30분', description: '저녁미사' },
           { id: '3', day: '수요일', time: '오전 10시', description: '아침미사' },
-          { id: '4', day: '목요일', time: '오후 7시 30분', description: '저녁미사' },
+          { id: '4', day: '목요일', time: '오후 7시 30분', description: '저녁미사', note: '성시간 (첫 목요일 19:30)' },
           { id: '5', day: '금요일', time: '오전 10시', description: '아침미사' },
-          { id: '6', day: '토요일', time: '오후 5시', description: '청년미사', note: '매월 첫토요일 오전 10시 (성모신심미사)' },
+          { id: '6', day: '토요일', time: '오후 5시', description: '청년미사', note: '성모신심미사 (첫 토요일 10:00)' },
           { id: '7', day: '일요일', time: '오전 10시', description: '교중미사' },
           { id: '8', day: '일요일', time: '오후 3시', description: '어린이미사' }
         ]
@@ -38,7 +39,7 @@ export default function Mass() {
         // 기본 데이터
         const defaultSacraments: SacramentItem[] = [
           { id: '1', name: '세례성사', description: '예비신자 교리 후 진행' },
-          { id: '2', name: '고해성사', description: '미사 전후 또는 사제와 약속' },
+          { id: '2', name: '고해성사', description: '미사 30분 전부터 가능 (별도 문의 가능)' },
           { id: '3', name: '견진성사', description: '연간 일정에 따라 진행' },
           { id: '4', name: '혼인성사', description: '사제와 사전 상담 필수' },
           { id: '5', name: '병자성사', description: '사무실로 연락 바랍니다' }
@@ -59,6 +60,15 @@ export default function Mass() {
     }
     loadData()
   }, [])
+
+  const facilityColumns = [
+    { key: 'churchOpen', label: '성당 오픈' },
+    { key: 'mass', label: '미사 시간' },
+    { key: 'special', label: '특별 미사' },
+    { key: 'shop', label: '성물방' },
+    { key: 'office', label: '사무장 근무' },
+    { key: 'manager', label: '관리장 근무' }
+  ] as Array<{ key: keyof typeof facilityScheduleRows[number]; label: string }>
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -207,6 +217,99 @@ export default function Mass() {
               </div>
             </div>
           )}
+
+          <div className="space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">미사 · 성물방 · 사무실 근무 시간표</h2>
+                    <p className="text-sm text-gray-500 mt-1">2025년 10월 1일 기준</p>
+                  </div>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm text-left text-gray-700">
+                  <thead>
+                    <tr className="bg-gray-50 text-gray-900 text-xs uppercase tracking-wider">
+                      <th className="px-4 py-3 font-semibold">요일</th>
+                      {facilityColumns.map(column => (
+                        <th key={column.key} className="px-4 py-3 font-semibold whitespace-nowrap">
+                          {column.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {facilityScheduleRows.map(row => (
+                      <tr key={row.day} className="border-b last:border-b-0 hover:bg-gray-50">
+                        <th className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{row.day}</th>
+                        {facilityColumns.map(column => {
+                          const rawValue = row[column.key]
+                          const displayValue =
+                            typeof rawValue === 'string' && rawValue.trim().length > 0 ? rawValue : '—'
+                          return (
+                            <td key={column.key} className="px-4 py-3 align-top whitespace-pre-wrap">
+                              {displayValue}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <ul className="mt-4 text-xs text-gray-500 list-disc list-inside space-y-1">
+                {facilityScheduleNotes.map(note => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">주일 교중미사 셔틀 운행 안내</h2>
+                    <p className="text-sm text-gray-500 mt-1">2025년 4월 13일 시행</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-6">
+                {shuttleRoutes.map(route => (
+                  <div key={route.title} className="rounded-2xl bg-gray-50 border border-gray-200 p-5">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">{route.title}</h3>
+                    <div className="space-y-4">
+                      {route.runs.map((run, index) => (
+                        <div key={`${route.title}-${run.label ?? index}`}>
+                          {run.label && (
+                            <p className="text-sm font-semibold text-catholic-logo mb-1">{run.label}</p>
+                          )}
+                          <div className="space-y-1">
+                            {run.stops.map((stop, stopIdx) => (
+                              <p key={`${stop.time}-${stop.stop}-${stopIdx}`} className="text-sm text-gray-700">
+                                <span className="font-medium text-gray-900">{stop.time}</span> {stop.stop}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
