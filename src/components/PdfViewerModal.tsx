@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { extractPdfText, fetchPdfBlob } from '../utils/pdf'
 
 interface PdfViewerModalProps {
@@ -20,18 +20,32 @@ export default function PdfViewerModal({
   const [isLoading, setIsLoading] = useState(false)
   const [textContent, setTextContent] = useState<string>('')
   const [error, setError] = useState<string>('')
+  const scrollPositionRef = useRef<number>(0)
 
   useEffect(() => {
     if (!isOpen) {
       setActiveTab('pdf')
       setTextContent('')
       setError('')
+      // 모달이 닫힐 때 스크롤 위치 복원
+      window.scrollTo(0, scrollPositionRef.current)
+      document.body.style.overflow = ''
       return
     }
 
+    // 모달이 열릴 때 현재 스크롤 위치 저장
+    scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
     document.body.style.overflow = 'hidden'
+    // 스크롤 위치 유지 (body에 스타일 추가)
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollPositionRef.current}px`
+    document.body.style.width = '100%'
+    
     return () => {
       document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
     }
   }, [isOpen])
 

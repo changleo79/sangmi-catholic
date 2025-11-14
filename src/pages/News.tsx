@@ -164,7 +164,9 @@ export default function News() {
                   {bulletins.slice(0, bulletinsPage * itemsPerPage).map((bulletin) => (
                   <div
                     key={bulletin.id}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
                       setSelectedBulletin(bulletin)
                       setIsPdfModalOpen(true)
                     }}
