@@ -15,29 +15,56 @@ export default function AlbumDetail() {
   useEffect(() => {
     let cancelled = false
 
-    const loadAlbum = () => {
+    const loadAlbum = async () => {
       if (cancelled) return
-      ensureDefaultAlbumExists()
-      const albums = getAlbums()
-      const found = id ? albums.find((a) => a.id === id) || null : null
-      setAlbum(found)
-      setCurrentPhotoIndex(0)
-      setIsLoading(false)
+      
+      try {
+        // 데이터 초기화 대기
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        ensureDefaultAlbumExists()
+        const albums = getAlbums()
+        console.log('[AlbumDetail] 로드된 앨범 목록:', albums.map(a => ({ id: a.id, title: a.title })))
+        
+        const found = id ? albums.find((a) => a.id === id) || null : null
+        console.log('[AlbumDetail] 찾은 앨범:', found ? { id: found.id, title: found.title, photosCount: found.photos.length } : '없음')
+        
+        if (!found && id) {
+          console.warn('[AlbumDetail] 앨범을 찾을 수 없습니다. ID:', id)
+        }
+        
+        setAlbum(found)
+        setCurrentPhotoIndex(0)
+        setIsLoading(false)
+      } catch (error) {
+        console.error('[AlbumDetail] 앨범 로드 오류:', error)
+        setIsLoading(false)
+      }
     }
 
     loadAlbum()
 
     const handleAlbumsUpdate = () => {
-      loadAlbum()
+      if (!cancelled) {
+        console.log('[AlbumDetail] albumsUpdated 이벤트 수신')
+        loadAlbum()
+      }
+    }
+
+    const handleFocus = () => {
+      if (!cancelled) {
+        console.log('[AlbumDetail] focus 이벤트 수신')
+        loadAlbum()
+      }
     }
 
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
-    window.addEventListener('focus', handleAlbumsUpdate)
+    window.addEventListener('focus', handleFocus)
 
     return () => {
       cancelled = true
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-      window.removeEventListener('focus', handleAlbumsUpdate)
+      window.removeEventListener('focus', handleFocus)
     }
   }, [id])
 

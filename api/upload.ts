@@ -181,7 +181,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
         } catch (uploadError) {
           console.error(`파일 업로드 실패 (${file.originalName}):`, uploadError)
-          throw new Error(`Failed to upload ${file.originalName}: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`)
+          const error = uploadError as any
+          let errorMessage = error?.message || 'Unknown error'
+          
+          // Access Denied 오류의 경우 더 자세한 정보 제공
+          if (errorMessage.includes('Access Denied') || errorMessage.includes('403')) {
+            errorMessage = `Access Denied - 가능한 원인:\n` +
+              `1. 버킷 이름이 잘못되었습니다 (현재: ${requiredEnv.bucket})\n` +
+              `2. Access Key/Secret Key가 잘못되었거나 권한이 없습니다\n` +
+              `3. 버킷이 존재하지 않거나 다른 리전에 있습니다\n` +
+              `4. Object Storage 서비스가 활성화되지 않았습니다\n` +
+              `\n확인 사항:\n` +
+              `- 버킷 이름: ${requiredEnv.bucket}\n` +
+              `- 리전: ${region}\n` +
+              `- 엔드포인트: ${endpoint}`
+          }
+          
+          throw new Error(`Failed to upload ${file.originalName}: ${errorMessage}`)
         }
       })
     )

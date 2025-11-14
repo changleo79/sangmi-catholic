@@ -28,9 +28,9 @@ export default function BulletinsManage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    // PDF 파일 URL이 필수인지 확인
+    // 파일 URL이 필수인지 확인
     if (!formData.fileUrl) {
-      alert('PDF 파일을 업로드하거나 URL을 입력해주세요.')
+      alert('주보 파일(PDF 또는 JPG)을 업로드하거나 URL을 입력해주세요.')
       return
     }
     
@@ -53,10 +53,10 @@ export default function BulletinsManage() {
 
   const handleEdit = (bulletin: BulletinItem) => {
     // fileUrl이 data:로 시작하면 업로드된 파일, 아니면 URL
-    const isPdfUploaded = bulletin.fileUrl.startsWith('data:')
+    const isFileUploaded = bulletin.fileUrl.startsWith('data:')
     const isThumbnailUploaded = bulletin.thumbnailUrl?.startsWith('data:')
     
-    setPdfInputType(isPdfUploaded ? 'upload' : 'url')
+    setPdfInputType(isFileUploaded ? 'upload' : 'url')
     setThumbnailInputType(isThumbnailUploaded ? 'upload' : 'url')
     
     setFormData({
@@ -96,10 +96,15 @@ export default function BulletinsManage() {
   const handlePdfFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      if (file.type !== 'application/pdf') {
-        alert('PDF 파일만 업로드 가능합니다.')
+      // PDF 또는 이미지 파일 허용
+      const isPdf = file.type === 'application/pdf'
+      const isImage = file.type.startsWith('image/')
+      
+      if (!isPdf && !isImage) {
+        alert('PDF 또는 이미지 파일(JPG, PNG 등)만 업로드 가능합니다.')
         return
       }
+      
       const reader = new FileReader()
       reader.onloadend = () => {
         const base64 = reader.result as string
@@ -173,7 +178,7 @@ export default function BulletinsManage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">PDF 파일 *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">주보 파일 (PDF 또는 JPG) *</label>
                 
                 {/* 입력 방식 선택 */}
                 <div className="flex gap-4 mb-3">
@@ -205,17 +210,24 @@ export default function BulletinsManage() {
                   <div>
                     <input
                       type="file"
-                      accept="application/pdf"
+                      accept="application/pdf,image/jpeg,image/jpg,image/png"
                       onChange={handlePdfFileUpload}
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                       required={!formData.fileUrl}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      💡 PDF 파일을 선택하면 Base64로 변환되어 저장됩니다. (브라우저에 저장됨)
+                      💡 PDF 또는 이미지 파일(JPG, PNG)을 선택하면 Base64로 변환되어 저장됩니다. (브라우저에 저장됨)
                     </p>
                     {formData.fileUrl && formData.fileUrl.startsWith('data:') && (
                       <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-xs text-green-700">✓ PDF 파일이 업로드되었습니다.</p>
+                        <p className="text-xs text-green-700">
+                          ✓ {formData.fileUrl.startsWith('data:application/pdf') ? 'PDF' : '이미지'} 파일이 업로드되었습니다.
+                        </p>
+                        {formData.fileUrl.startsWith('data:image/') && (
+                          <div className="mt-2 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                            <img src={formData.fileUrl} alt="파일 미리보기" className="w-full h-full object-cover" />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -230,7 +242,7 @@ export default function BulletinsManage() {
                       required={!formData.fileUrl || !formData.fileUrl.startsWith('data:')}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      💡 PDF 파일 URL을 입력하세요. (예: /files/bulletin-2025-11.pdf 또는 https://...)
+                      💡 PDF 또는 이미지 파일 URL을 입력하세요. (예: /files/bulletin-2025-11.pdf 또는 https://...)
                     </p>
                   </div>
                 )}
