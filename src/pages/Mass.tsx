@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { getMassSchedule, getSacraments, getCatechismInfo } from '../utils/storage'
-import { facilityScheduleRows, facilityScheduleNotes, shuttleRoutes } from '../data/facilitySchedule'
 import type { MassScheduleItem, SacramentItem, CatechismInfo } from '../utils/storage'
 import ShareButton from '../components/ShareButton'
+import { facilitySchedules, facilityScheduleNote, shuttleRoutes } from '../data/schedules'
 
 export default function Mass() {
   const [massSchedule, setMassSchedule] = useState<MassScheduleItem[]>([])
@@ -23,9 +23,9 @@ export default function Mass() {
           { id: '1', day: '월요일', time: '오전 6시 30분', description: '새벽미사' },
           { id: '2', day: '화요일', time: '오후 7시 30분', description: '저녁미사' },
           { id: '3', day: '수요일', time: '오전 10시', description: '아침미사' },
-          { id: '4', day: '목요일', time: '오후 7시 30분', description: '저녁미사', note: '성시간 (첫 목요일 19:30)' },
+          { id: '4', day: '목요일', time: '오후 7시 30분', description: '저녁미사' },
           { id: '5', day: '금요일', time: '오전 10시', description: '아침미사' },
-          { id: '6', day: '토요일', time: '오후 5시', description: '청년미사', note: '성모신심미사 (첫 토요일 10:00)' },
+          { id: '6', day: '토요일', time: '오후 5시', description: '청년미사', note: '매월 첫토요일 오전 10시 (성모신심미사)' },
           { id: '7', day: '일요일', time: '오전 10시', description: '교중미사' },
           { id: '8', day: '일요일', time: '오후 3시', description: '어린이미사' }
         ]
@@ -39,7 +39,7 @@ export default function Mass() {
         // 기본 데이터
         const defaultSacraments: SacramentItem[] = [
           { id: '1', name: '세례성사', description: '예비신자 교리 후 진행' },
-          { id: '2', name: '고해성사', description: '미사 30분 전부터 가능 (별도 문의 가능)' },
+          { id: '2', name: '고해성사', description: '미사 전후 또는 사제와 약속' },
           { id: '3', name: '견진성사', description: '연간 일정에 따라 진행' },
           { id: '4', name: '혼인성사', description: '사제와 사전 상담 필수' },
           { id: '5', name: '병자성사', description: '사무실로 연락 바랍니다' }
@@ -60,15 +60,6 @@ export default function Mass() {
     }
     loadData()
   }, [])
-
-  const facilityColumns = [
-    { key: 'churchOpen', label: '성당 오픈' },
-    { key: 'mass', label: '미사 시간' },
-    { key: 'special', label: '특별 미사' },
-    { key: 'shop', label: '성물방' },
-    { key: 'office', label: '사무장 근무' },
-    { key: 'manager', label: '관리장 근무' }
-  ] as Array<{ key: keyof typeof facilityScheduleRows[number]; label: string }>
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -218,98 +209,131 @@ export default function Mass() {
             </div>
           )}
 
-          <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">미사 · 성물방 · 사무실 근무 시간표</h2>
-                    <p className="text-sm text-gray-500 mt-1">2025년 10월 1일 기준</p>
-                  </div>
-                </div>
+          {/* 성당 이용 및 근무 시간표 */}
+          <section className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">성당 오픈 · 미사 · 성물방 · 사무실 근무</h2>
+                <p className="text-sm text-gray-500 mt-1">2025-10-01 기준</p>
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm text-left text-gray-700">
-                  <thead>
-                    <tr className="bg-gray-50 text-gray-900 text-xs uppercase tracking-wider">
-                      <th className="px-4 py-3 font-semibold">요일</th>
-                      {facilityColumns.map(column => (
-                        <th key={column.key} className="px-4 py-3 font-semibold whitespace-nowrap">
-                          {column.label}
-                        </th>
-                      ))}
+              <p className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
+                {facilityScheduleNote}
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm text-left text-gray-700">
+                <thead className="text-xs uppercase tracking-wider bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-gray-900">요일</th>
+                    <th scope="col" className="px-4 py-3 text-gray-900">성당 오픈</th>
+                    <th scope="col" className="px-4 py-3 text-gray-900">미사</th>
+                    <th scope="col" className="px-4 py-3 text-gray-900">특별 미사</th>
+                    <th scope="col" className="px-4 py-3 text-gray-900">성물방</th>
+                    <th scope="col" className="px-4 py-3 text-gray-900">사무장 근무</th>
+                    <th scope="col" className="px-4 py-3 text-gray-900">관리장 근무</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {facilitySchedules.map((schedule, index) => (
+                    <tr
+                      key={schedule.day}
+                      className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/70'}
+                    >
+                      <th scope="row" className="px-4 py-4 font-semibold text-gray-900 whitespace-nowrap">
+                        {schedule.day}
+                      </th>
+                      <td className="px-4 py-4">
+                        {schedule.chapelOpen.join(' · ')}
+                      </td>
+                      <td className="px-4 py-4 space-y-1">
+                        {schedule.mass.map((item, idx) => (
+                          <div key={`${schedule.day}-mass-${idx}`}>{item}</div>
+                        ))}
+                      </td>
+                      <td className="px-4 py-4 space-y-1">
+                        {schedule.specials && schedule.specials.length > 0 ? (
+                          schedule.specials.map((item, idx) => (
+                            <div key={`${schedule.day}-special-${idx}`} className="text-catholic-logo">
+                              {item}
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        {schedule.giftShop ? schedule.giftShop : <span className="text-gray-400">-</span>}
+                      </td>
+                      <td className="px-4 py-4 space-y-1">
+                        {schedule.office.map((item, idx) => (
+                          <div key={`${schedule.day}-office-${idx}`}>{item}</div>
+                        ))}
+                      </td>
+                      <td className="px-4 py-4 space-y-1">
+                        {schedule.manager.map((item, idx) => (
+                          <div key={`${schedule.day}-manager-${idx}`}>{item}</div>
+                        ))}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {facilityScheduleRows.map(row => (
-                      <tr key={row.day} className="border-b last:border-b-0 hover:bg-gray-50">
-                        <th className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{row.day}</th>
-                        {facilityColumns.map(column => {
-                          const rawValue = row[column.key]
-                          const displayValue =
-                            typeof rawValue === 'string' && rawValue.trim().length > 0 ? rawValue : '—'
-                          return (
-                            <td key={column.key} className="px-4 py-3 align-top whitespace-pre-wrap">
-                              {displayValue}
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <ul className="mt-4 text-xs text-gray-500 list-disc list-inside space-y-1">
-                {facilityScheduleNotes.map(note => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          </section>
 
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                    </svg>
+          {/* 주일 교중미사 셔틀 안내 */}
+          <section className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">주일 교중미사 셔틀 운행 안내</h2>
+                <p className="text-sm text-gray-600 mt-1">2025년 4월 13일 기준 · 성당 도착 후 10:00 교중미사 참여</p>
+              </div>
+              <a
+                href="/directions"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-catholic-logo text-catholic-logo font-semibold hover:bg-catholic-logo hover:text-white transition-all duration-300"
+              >
+                오시는 길 페이지에서 자세히 보기
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {shuttleRoutes.map((route) => (
+                <div key={route.title} className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">{route.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{route.description}</p>
+                    </div>
+                    <span
+                      className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-semibold"
+                      style={{ background: route.accent }}
+                    >
+                      탑승
+                    </span>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">주일 교중미사 셔틀 운행 안내</h2>
-                    <p className="text-sm text-gray-500 mt-1">2025년 4월 13일 시행</p>
+                  <div className="space-y-4">
+                    {route.courses.map((course, courseIdx) => (
+                      <div key={`${route.title}-course-${courseIdx}`} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        {course.label && (
+                          <p className="text-sm font-semibold text-gray-700 mb-2">{course.label}</p>
+                        )}
+                        <ul className="space-y-2 text-sm text-gray-700">
+                          {course.stops.map((stop, stopIdx) => (
+                            <li key={`${route.title}-stop-${courseIdx}-${stopIdx}`} className="flex items-start gap-2">
+                              <span className="text-catholic-logo font-semibold">{stop.time}</span>
+                              <span className="flex-1">{stop.location}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-              <div className="space-y-6">
-                {shuttleRoutes.map(route => (
-                  <div key={route.title} className="rounded-2xl bg-gray-50 border border-gray-200 p-5">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">{route.title}</h3>
-                    <div className="space-y-4">
-                      {route.runs.map((run, index) => (
-                        <div key={`${route.title}-${run.label ?? index}`}>
-                          {run.label && (
-                            <p className="text-sm font-semibold text-catholic-logo mb-1">{run.label}</p>
-                          )}
-                          <div className="space-y-1">
-                            {run.stops.map((stop, stopIdx) => (
-                              <p key={`${stop.time}-${stop.stop}-${stopIdx}`} className="text-sm text-gray-700">
-                                <span className="font-medium text-gray-900">{stop.time}</span> {stop.stop}
-                              </p>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>

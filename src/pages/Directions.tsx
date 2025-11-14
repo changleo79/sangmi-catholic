@@ -1,3 +1,5 @@
+import { shuttleRoutes } from '../data/schedules'
+
 export default function Directions() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -10,7 +12,7 @@ export default function Directions() {
           <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* 주소 Section */}
             <section className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
@@ -56,7 +58,7 @@ export default function Directions() {
               </div>
             </section>
 
-            {/* 교통 안내 Section */}
+            {/* 안내 Section */}
             <section className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
@@ -70,26 +72,49 @@ export default function Directions() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
-                    <h3 className="font-semibold text-gray-900">대중교통</h3>
+                    <h3 className="font-semibold text-gray-900">대중교통 및 주차</h3>
                   </div>
                   <p className="text-gray-600 ml-4">
-                    인근 버스 하차 후 도보
-                  </p>
-                  <p className="text-gray-500 text-sm ml-4 mt-1">
-                    (세부 노선 추후 업데이트)
+                    기흥역 지웰 정문 및 인근 정류장에서 도보 이동이 가능합니다. 성당 내·외부 주차장 이용 시 주일에는 혼잡할 수 있으니 안내에 따라 주차해 주세요.
                   </p>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
-                    <h3 className="font-semibold text-gray-900">주차</h3>
+                    <h3 className="font-semibold text-gray-900">주일 교중미사 셔틀 운행</h3>
                   </div>
-                  <p className="text-gray-600 ml-4">
-                    성당 내/인근 주차장 이용
+                  <p className="text-gray-600 ml-4 mb-4">
+                    10:00 교중미사에 맞춰 1지역과 3·4·5·6지역을 연결하는 차량이 운행됩니다. 아래 시간표를 확인하고 여유 있게 탑승해 주세요.
                   </p>
-                  <p className="text-gray-500 text-sm ml-4 mt-1">
-                    (좌석 제한, 행사 시 혼잡)
-                  </p>
+                  <div className="space-y-4">
+                    {shuttleRoutes.map((route) => (
+                      <div key={route.title} className="border border-gray-200 rounded-2xl p-4 bg-gray-50/70">
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div>
+                            <p className="text-sm font-semibold" style={{ color: route.accent }}>{route.title}</p>
+                            <p className="text-xs text-gray-500 mt-1">{route.description}</p>
+                          </div>
+                        </div>
+                        <div className="space-y-3 text-sm text-gray-700">
+                          {route.courses.map((course, courseIdx) => (
+                            <div key={`${route.title}-${courseIdx}`}>
+                              {course.label && (
+                                <p className="font-semibold text-gray-800 mb-1">{course.label}</p>
+                              )}
+                              <ul className="space-y-1 ml-2">
+                                {course.stops.map((stop, stopIdx) => (
+                                  <li key={`${route.title}-${courseIdx}-${stopIdx}`} className="flex items-start gap-2">
+                                    <span className="text-catholic-logo font-semibold">{stop.time}</span>
+                                    <span className="flex-1">{stop.location}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </section>

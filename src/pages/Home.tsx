@@ -220,10 +220,9 @@ export default function Home() {
 
   const activeNoticeContent = noticeTabs[activeNoticeTab]
   const massHighlights = [
-    { title: '주일 미사', time: '10:00 교중 · 15:00 어린이' },
-    { title: '평일 미사', time: '월 06:30 새벽 · 수/금 10:00 아침 · 화/목 19:30 저녁' },
-    { title: '성물방 · 사무실', time: '주일 미사 후 30분 · 화~금 12:00~20:30 / 09:00~18:00' },
-    { title: '주일 셔틀', time: '1·3·4·5·6지역 새성전 차량 운행 (교중미사)' }
+    { title: '주일 미사', time: '오전 10시 (교중) · 오후 3시 (어린이)' },
+    { title: '평일 미사', time: '월 6:30 새벽 · 화/목 7:30 저녁 · 수/금 10:00 아침' },
+    { title: '토요일 미사', time: '오후 5시 청년 · 매월 첫토 오전 10시 성모신심' }
   ]
 
   return (
@@ -374,6 +373,71 @@ export default function Home() {
                 </Link>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="pb-20">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link
+              to="/mass"
+              className="group flex flex-col gap-4 bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 md:p-8"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-catholic-logo/10 text-catholic-logo flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-catholic-logo">2025-10-01 업데이트</p>
+                    <h3 className="text-xl font-bold text-gray-900">미사 · 성물방 · 사무실 시간표</h3>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-catholic-logo transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                주일과 평일 미사 시간, 성물방 운영, 사무장·관리장 근무 시간을 한눈에 확인하세요.
+              </p>
+              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                {['주일 10:00 교중미사', '화·목 19:30 저녁미사', '사무실 공휴일 휴무'].map(item => (
+                  <span key={item} className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">{item}</span>
+                ))}
+              </div>
+            </Link>
+            <Link
+              to="/directions"
+              className="group flex flex-col gap-4 bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 md:p-8"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#4C9C84]/10 text-[#4C9C84] flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#4C9C84]">주일 교중미사 차량</p>
+                    <h3 className="text-xl font-bold text-gray-900">셔틀 운행 시간표 보기</h3>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-[#4C9C84] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                1지역 카니발, 3·4지역·5·6지역 25인승 셔틀 운행 시간과 탑승 위치를 안내합니다.
+              </p>
+              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                {['1지역 09:00 롯데스카이', '3·4지역 09:25 신일 정류장', '5·6지역 09:00·09:25 다회 운행'].map(item => (
+                  <span key={item} className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">{item}</span>
+                ))}
+              </div>
+            </Link>
           </div>
         </div>
       </section>

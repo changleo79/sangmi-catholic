@@ -1,53 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { AlbumWithCategory, getAlbums, saveAlbums, getAlbumCategories, ensureDefaultAlbumExists } from '../../utils/storage'
 import type { AlbumPhoto } from '../../data/albums'
 
-const MAX_IMAGE_SIZE = 1600
-const IMAGE_QUALITY = 0.85
-
-async function fileToCompressedBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = reader.result as string
-      const img = new Image()
-      img.onload = () => {
-        let { width, height } = img
-        if (width <= MAX_IMAGE_SIZE && height <= MAX_IMAGE_SIZE) {
-          resolve(result)
-          return
-        }
-
-        const canvas = document.createElement('canvas')
-        if (width > height) {
-          const ratio = MAX_IMAGE_SIZE / width
-          width = MAX_IMAGE_SIZE
-          height = Math.round(height * ratio)
-        } else {
-          const ratio = MAX_IMAGE_SIZE / height
-          height = MAX_IMAGE_SIZE
-          width = Math.round(width * ratio)
-        }
-
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        if (!ctx) {
-          resolve(result)
-          return
-        }
-        ctx.drawImage(img, 0, 0, width, height)
-        const compressed = canvas.toDataURL('image/jpeg', IMAGE_QUALITY)
-        resolve(compressed)
-      }
-      img.onerror = () => resolve(result)
-      img.src = result
-    }
-    reader.onerror = () => reject(new Error('이미지를 읽는 중 오류가 발생했습니다.'))
-    reader.readAsDataURL(file)
-  })
-}
+const generateDraftId = () => `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
 export default function AlbumsManage() {
   const [albums, setAlbums] = useState<AlbumWithCategory[]>([])
@@ -64,7 +20,15 @@ export default function AlbumsManage() {
   const [newPhotoSrc, setNewPhotoSrc] = useState('')
   const [newPhotoAlt, setNewPhotoAlt] = useState('')
   const [newPhotoTags, setNewPhotoTags] = useState('')
+  const [isUploading, setIsUploading] = useState(false)
+  const uploadSessionRef = useRef<string>(generateDraftId())
   const categories = getAlbumCategories().filter(c => c !== '전체')
+
+  const getActiveAlbumId = () => {
+    if (editingId) return editingId
+    if (formData.id) return formData.id
+    return uploadSessionRef.current
+  }
 
   useEffect(() => {
     ensureDefaultAlbumExists()
@@ -89,8 +53,11 @@ export default function AlbumsManage() {
       finalCover = formData.photos[0].src
     }
     
+    const resolvedAlbumId = getActiveAlbumId()
+
     const albumData = {
       ...formData,
+      id: resolvedAlbumId,
       cover: finalCover || '' // 여전히 없으면 빈 문자열
     }
     
@@ -102,8 +69,7 @@ export default function AlbumsManage() {
         newAlbums[index] = albumData
       }
     } else {
-      const newId = Date.now().toString()
-      newAlbums.unshift({ ...albumData, id: newId })
+      newAlbums.unshift(albumData)
     }
     
     setAlbums(newAlbums)
@@ -115,6 +81,7 @@ export default function AlbumsManage() {
     setFormData(album)
     setEditingId(album.id)
     setIsEditing(true)
+    uploadSessionRef.current = album.id
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -140,6 +107,77 @@ export default function AlbumsManage() {
     }
   }
 
+  const handleFileUpload = async (files: File[]) => {
+    if (!files.length) return
+    
+    // 파일 크기 검증 (10MB 제한)
+    const oversizedFiles = files.filter(f => f.size > 10 * 1024 * 1024)
+    if (oversizedFiles.length > 0) {
+      alert(`다음 파일이 10MB를 초과합니다: ${oversizedFiles.map(f => f.name).join(', ')}\n이미지를 압축한 뒤 다시 시도해 주세요.`)
+      return
+    }
+
+    setIsUploading(true)
+    const targetAlbumId = getActiveAlbumId()
+    const body = new FormData()
+    body.append('albumId', targetAlbumId)
+    files.forEach((file) => body.append('files', file))
+
+    try {
+      console.log(`[업로드 시작] ${files.length}개 파일, Album ID: ${targetAlbumId}`)
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body
+      })
+
+      console.log(`[업로드 응답] Status: ${response.status}, OK: ${response.ok}`)
+
+      if (!response.ok) {
+        let errorMessage = `서버 오류 (${response.status})`
+        try {
+          const result = await response.json()
+          errorMessage = result.message || errorMessage
+          if (result.missingEnv) {
+            errorMessage += `\n\n누락된 환경 변수: ${result.missingEnv.join(', ')}\nVercel 환경 변수 설정을 확인해 주세요.`
+          }
+        } catch {
+          const text = await response.text().catch(() => '')
+          errorMessage = text || errorMessage
+        }
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json() as { uploads: { url: string; originalName: string }[] }
+      
+      if (!result.uploads || result.uploads.length === 0) {
+        throw new Error('업로드된 파일이 없습니다.')
+      }
+
+      console.log(`[업로드 성공] ${result.uploads.length}개 파일 업로드 완료`)
+      console.log('업로드된 URL:', result.uploads.map(u => u.url))
+
+      const uploadedPhotos: AlbumPhoto[] = result.uploads.map((item, index) => ({
+        src: item.url,
+        alt: files[index]?.name || item.originalName || undefined
+      }))
+
+      setFormData(prev => ({
+        ...prev,
+        id: prev.id || targetAlbumId,
+        photos: [...prev.photos, ...uploadedPhotos]
+      }))
+      
+      alert(`${uploadedPhotos.length}개 이미지가 성공적으로 업로드되었습니다.`)
+    } catch (error) {
+      console.error('[업로드 실패]', error)
+      const errorMessage = error instanceof Error ? error.message : '이미지를 업로드하는 중 오류가 발생했습니다.'
+      alert(`이미지 업로드 실패:\n\n${errorMessage}\n\n브라우저 개발자 도구(F12)의 Console과 Network 탭을 확인해 주세요.`)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   const removePhoto = (index: number) => {
     const newPhotos = formData.photos.filter((_, i) => i !== index)
     setFormData({ ...formData, photos: newPhotos })
@@ -160,6 +198,7 @@ export default function AlbumsManage() {
     setNewPhotoAlt('')
     setNewPhotoTags('')
     loadAlbums()
+    uploadSessionRef.current = generateDraftId()
   }
 
   return (
@@ -279,27 +318,19 @@ export default function AlbumsManage() {
                     type="file"
                     accept="image/*"
                     multiple
-                    onChange={async (e) => {
-                      const files = Array.from(e.target.files || [])
-                      for (const file of files) {
-                        try {
-                          const base64 = await fileToCompressedBase64(file)
-                          setFormData(prev => ({
-                            ...prev,
-                            photos: [...prev.photos, { src: base64, alt: file.name }]
-                          }))
-                        } catch (error) {
-                          console.error('이미지 변환 실패:', error)
-                          alert('이미지를 변환하는 중 오류가 발생했습니다. 다른 파일로 다시 시도해 주세요.')
-                        }
-                      }
+                    onChange={(e) => {
+                      const selectedFiles = Array.from(e.target.files || [])
+                      void handleFileUpload(selectedFiles)
                       e.target.value = ''
                     }}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    💡 파일을 선택하면 Base64로 변환되어 저장됩니다. (브라우저에 저장됨)
+                    💡 선택한 파일은 업로드 즉시 클라우드 저장소(Naver Cloud Object Storage)에 저장되고, 결과 URL이 자동으로 연결됩니다.
                   </p>
+                  {isUploading && (
+                    <p className="mt-2 text-xs text-catholic-logo">이미지를 업로드하는 중입니다...</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
