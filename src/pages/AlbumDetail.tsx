@@ -14,23 +14,55 @@ export default function AlbumDetail() {
 
   useEffect(() => {
     let cancelled = false
+    let retryCount = 0
+    const maxRetries = 5
 
-    const loadAlbum = async () => {
+    const loadAlbum = async (retry = false) => {
       if (cancelled) return
       
       try {
-        // 데이터 초기화 대기
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // 재시도 시 대기 시간 증가
+        const delay = retry ? Math.min(200 * retryCount, 1000) : 100
+        await new Promise(resolve => setTimeout(resolve, delay))
+        
+        // 캐시 초기화 후 다시 로드
+        if (retry) {
+          // 캐시를 강제로 초기화
+          const albumsKey = 'admin_albums'
+          const cached = (window as any).__albumsCache
+          if (cached) {
+            delete (window as any).__albumsCache
+          }
+        }
         
         ensureDefaultAlbumExists()
-        const albums = getAlbums()
-        console.log('[AlbumDetail] 로드된 앨범 목록:', albums.map(a => ({ id: a.id, title: a.title })))
+        
+        // 여러 번 시도 (forceRefresh 사용)
+        let albums = getAlbums(retryCount > 0)
+        console.log(`[AlbumDetail] 시도 ${retryCount + 1}/${maxRetries} - 로드된 앨범 목록:`, albums.map(a => ({ id: a.id, title: a.title })))
+        
+        // 앨범이 없으면 한 번 더 시도
+        if (albums.length === 0 && retryCount < 2) {
+          await new Promise(resolve => setTimeout(resolve, 200))
+          albums = getAlbums(true) // 강제 새로고침
+        }
         
         const found = id ? albums.find((a) => a.id === id) || null : null
-        console.log('[AlbumDetail] 찾은 앨범:', found ? { id: found.id, title: found.title, photosCount: found.photos.length } : '없음')
+        console.log('[AlbumDetail] 찾은 앨범:', found ? { id: found.id, title: found.title, photosCount: found.photos.length } : '없음', '검색 ID:', id)
+        
+        if (!found && id && retryCount < maxRetries) {
+          console.warn(`[AlbumDetail] 앨범을 찾을 수 없습니다. ID: ${id}, 재시도 중... (${retryCount + 1}/${maxRetries})`)
+          retryCount++
+          setTimeout(() => loadAlbum(true), 300)
+          return
+        }
         
         if (!found && id) {
-          console.warn('[AlbumDetail] 앨범을 찾을 수 없습니다. ID:', id)
+          console.error('[AlbumDetail] 최대 재시도 횟수 초과. 앨범을 찾을 수 없습니다.', {
+            searchId: id,
+            availableIds: albums.map(a => a.id),
+            availableTitles: albums.map(a => a.title)
+          })
         }
         
         setAlbum(found)
@@ -38,33 +70,52 @@ export default function AlbumDetail() {
         setIsLoading(false)
       } catch (error) {
         console.error('[AlbumDetail] 앨범 로드 오류:', error)
-        setIsLoading(false)
+        if (retryCount < maxRetries) {
+          retryCount++
+          setTimeout(() => loadAlbum(true), 300)
+        } else {
+          setIsLoading(false)
+        }
       }
     }
 
+    // 초기 로드
     loadAlbum()
 
     const handleAlbumsUpdate = () => {
       if (!cancelled) {
-        console.log('[AlbumDetail] albumsUpdated 이벤트 수신')
+        console.log('[AlbumDetail] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
+        retryCount = 0
         loadAlbum()
       }
     }
 
     const handleFocus = () => {
       if (!cancelled) {
-        console.log('[AlbumDetail] focus 이벤트 수신')
+        console.log('[AlbumDetail] focus 이벤트 수신 - 데이터 다시 로드')
+        retryCount = 0
+        loadAlbum()
+      }
+    }
+
+    // visibilitychange 이벤트도 추가 (탭 전환 시)
+    const handleVisibilityChange = () => {
+      if (!cancelled && !document.hidden) {
+        console.log('[AlbumDetail] visibilitychange 이벤트 수신 - 데이터 다시 로드')
+        retryCount = 0
         loadAlbum()
       }
     }
 
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
     window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       cancelled = true
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
       window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [id])
 

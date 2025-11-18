@@ -343,8 +343,11 @@ export const exportFAQs = (): void => {
 }
 
 // 앨범 관리
-export const getAlbums = (): AlbumWithCategory[] => {
-  if (cachedData.albums) return cachedData.albums
+export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
+  // forceRefresh가 true이면 캐시 무시
+  if (!forceRefresh && cachedData.albums) {
+    return cachedData.albums
+  }
   
   const stored = localStorage.getItem(ALBUMS_KEY)
   if (stored) {
@@ -355,13 +358,22 @@ export const getAlbums = (): AlbumWithCategory[] => {
         return parsed
       }
     } catch (e) {
+      console.error('[getAlbums] JSON 파싱 실패:', e)
       // JSON 파싱 실패 시 무시
     }
   }
-  const defaultAlbum = createDefaultAlbum()
-  localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
-  cachedData.albums = [defaultAlbum]
-  return [defaultAlbum]
+  
+  // 기본 앨범이 삭제되지 않았으면 생성
+  if (localStorage.getItem('default_album_deleted') !== 'true') {
+    const defaultAlbum = createDefaultAlbum()
+    localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
+    cachedData.albums = [defaultAlbum]
+    return [defaultAlbum]
+  }
+  
+  // 기본 앨범이 삭제되었고 저장된 데이터가 없으면 빈 배열 반환
+  cachedData.albums = []
+  return []
 }
 
 export const saveAlbums = (albums: AlbumWithCategory[]): void => {

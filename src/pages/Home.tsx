@@ -58,15 +58,46 @@ export default function Home() {
     loadData()
   }, [])
 
-  useEffect(() => {
+  const loadAlbums = () => {
     ensureDefaultAlbumExists()
-    const storedAlbums = getAlbums()
+    const storedAlbums = getAlbums(true) // 강제 새로고침
     const recentAlbums = storedAlbums.slice(0, 4).map(album => ({
       id: album.id,
       cover: album.cover || galleryPhotos[0],
       title: album.title
     }))
     setDisplayAlbums(recentAlbums)
+  }
+
+  useEffect(() => {
+    loadAlbums()
+    
+    const handleAlbumsUpdate = () => {
+      console.log('[Home] albumsUpdated 이벤트 - 앨범 다시 로드')
+      loadAlbums()
+    }
+    
+    const handleFocus = () => {
+      console.log('[Home] focus 이벤트 - 앨범 다시 로드')
+      loadAlbums()
+    }
+    
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('[Home] visibilitychange 이벤트 - 앨범 다시 로드')
+        loadAlbums()
+      }
+    }
+    
+    window.addEventListener('albumsUpdated', handleAlbumsUpdate)
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   useEffect(() => {

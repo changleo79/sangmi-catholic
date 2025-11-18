@@ -11,10 +11,20 @@ export default function Albums() {
   useEffect(() => {
     // 페이지 포커스 시 데이터 다시 로드
     const handleFocus = () => {
+      console.log('[Albums] focus 이벤트 - 데이터 다시 로드')
       loadAlbums()
     }
     const handleAlbumsUpdate = () => {
+      console.log('[Albums] albumsUpdated 이벤트 - 데이터 다시 로드')
       loadAlbums()
+    }
+    
+    // visibilitychange 이벤트 (탭 전환, 모바일에서 앱 전환 등)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('[Albums] visibilitychange 이벤트 - 데이터 다시 로드')
+        loadAlbums()
+      }
     }
 
     // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
@@ -23,7 +33,7 @@ export default function Albums() {
       await new Promise(resolve => setTimeout(resolve, 100))
       loadAlbums()
       // 기본 앨범이 없으면 초기 데이터 생성
-      const stored = getAlbums()
+      const stored = getAlbums(true) // 강제 새로고침
       if (stored.length === 0) {
         initializeDefaultAlbum()
         loadAlbums() // 다시 로드
@@ -34,33 +44,63 @@ export default function Albums() {
     // 페이지 포커스 시 데이터 다시 로드 (다른 탭에서 관리자가 수정한 경우)
     window.addEventListener('focus', handleFocus)
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       window.removeEventListener('focus', handleFocus)
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
   const loadAlbums = () => {
-    const stored = getAlbums()
-    if (stored.length === 0) {
-      initializeData()
-        .then(() => {
-          ensureDefaultAlbumExists()
-          const refreshed = getAlbums()
-          setAlbums(refreshed)
-        })
-        .catch(() => {
-          const refreshed = getAlbums()
-          if (refreshed.length === 0) {
-            initializeDefaultAlbum()
-            setAlbums(getAlbums())
-          } else {
-            setAlbums(refreshed)
+    try {
+      // 캐시 무시하고 직접 localStorage에서 가져오기
+      const storedRaw = localStorage.getItem('admin_albums')
+      let stored: AlbumWithCategory[] = []
+      
+      if (storedRaw) {
+        try {
+          stored = JSON.parse(storedRaw)
+          if (!Array.isArray(stored)) {
+            stored = []
           }
-        })
-    } else {
-      setAlbums(stored)
+        } catch (e) {
+          console.error('[Albums] localStorage 파싱 오류:', e)
+          stored = []
+        }
+      }
+      
+      if (stored.length === 0) {
+        // 캐시된 데이터도 확인
+        const cached = getAlbums()
+        if (cached.length > 0) {
+          setAlbums(cached)
+          return
+        }
+        
+        initializeData()
+          .then(() => {
+            ensureDefaultAlbumExists()
+            const refreshed = getAlbums()
+            setAlbums(refreshed)
+          })
+          .catch(() => {
+            const refreshed = getAlbums()
+            if (refreshed.length === 0) {
+              initializeDefaultAlbum()
+              setAlbums(getAlbums())
+            } else {
+              setAlbums(refreshed)
+            }
+          })
+      } else {
+        setAlbums(stored)
+      }
+    } catch (error) {
+      console.error('[Albums] 로드 오류:', error)
+      const fallback = getAlbums()
+      setAlbums(fallback)
     }
   }
 
