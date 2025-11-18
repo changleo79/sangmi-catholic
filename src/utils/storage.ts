@@ -371,28 +371,8 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
           }
         }
         
-        // draft-로 시작하는 앨범은 필터링 (저장되지 않은 임시 앨범)
-        // 단, 실제로 저장된 앨범은 제외하지 않음 (이미 저장된 경우)
-        const savedAlbums = validAlbums.filter(album => {
-          // draft-로 시작하지만 실제로 저장된 앨범은 유지
-          // (photos가 있고 title이 있으면 저장된 것으로 간주)
-          if (album.id.startsWith('draft-')) {
-            return album.photos && album.photos.length > 0 && album.title && album.title.trim() !== ''
-          }
-          return true
-        })
-        
-        // 필터링된 결과가 다르면 저장
-        if (savedAlbums.length !== validAlbums.length) {
-          if (savedAlbums.length > 0) {
-            localStorage.setItem(ALBUMS_KEY, JSON.stringify(savedAlbums))
-          } else {
-            localStorage.removeItem(ALBUMS_KEY)
-          }
-          cachedData.albums = savedAlbums
-          return savedAlbums
-        }
-        
+        // draft- 필터링 제거: 모든 앨범을 반환 (필터링은 표시할 때만 수행)
+        // 이렇게 하면 AlbumDetail에서도 draft- 앨범을 찾을 수 있음
         cachedData.albums = validAlbums
         return validAlbums
       }

@@ -8,6 +8,7 @@ import {
   getBulletins,
   type RecruitmentItem,
   type BulletinItem,
+  type AlbumWithCategory,
   ensureDefaultAlbumExists
 } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
@@ -59,21 +60,55 @@ export default function Home() {
   }, [])
 
   const loadAlbums = () => {
-    ensureDefaultAlbumExists()
-    const storedAlbums = getAlbums(true) // 강제 새로고침
-    // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
-    const savedAlbums = storedAlbums.filter(album => {
-      if (album.id.startsWith('draft-')) {
-        return album.photos && album.photos.length > 0 && album.title && album.title.trim() !== ''
+    try {
+      // 캐시 완전히 무시하고 직접 localStorage에서 가져오기
+      const storedRaw = localStorage.getItem('admin_albums')
+      let storedAlbums: AlbumWithCategory[] = []
+      
+      if (storedRaw) {
+        try {
+          const parsed = JSON.parse(storedRaw)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            storedAlbums = parsed
+            console.log('[Home] localStorage에서 직접 로드:', storedAlbums.length, '개 앨범')
+          }
+        } catch (e) {
+          console.error('[Home] localStorage 파싱 오류:', e)
+        }
       }
-      return true
-    })
-    const recentAlbums = savedAlbums.slice(0, 4).map(album => ({
-      id: album.id,
-      cover: album.cover || galleryPhotos[0],
-      title: album.title
-    }))
-    setDisplayAlbums(recentAlbums)
+      
+      // localStorage에 없으면 getAlbums() 사용
+      if (storedAlbums.length === 0) {
+        ensureDefaultAlbumExists()
+        storedAlbums = getAlbums(true) // 강제 새로고침
+        console.log('[Home] getAlbums()로 로드:', storedAlbums.length, '개 앨범')
+      }
+      
+      // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
+      const savedAlbums = storedAlbums.filter(album => {
+        if (album.id.startsWith('draft-')) {
+          return album.photos && album.photos.length > 0 && album.title && album.title.trim() !== ''
+        }
+        return true
+      })
+      
+      const recentAlbums = savedAlbums.slice(0, 4).map(album => ({
+        id: album.id,
+        cover: album.cover || galleryPhotos[0],
+        title: album.title
+      }))
+      setDisplayAlbums(recentAlbums)
+    } catch (error) {
+      console.error('[Home] 앨범 로드 오류:', error)
+      ensureDefaultAlbumExists()
+      const fallback = getAlbums(true)
+      const recentAlbums = fallback.slice(0, 4).map(album => ({
+        id: album.id,
+        cover: album.cover || galleryPhotos[0],
+        title: album.title
+      }))
+      setDisplayAlbums(recentAlbums)
+    }
   }
 
   useEffect(() => {

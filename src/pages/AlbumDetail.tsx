@@ -25,53 +25,62 @@ export default function AlbumDetail() {
         const delay = retry ? Math.min(200 * retryCount, 1000) : 100
         await new Promise(resolve => setTimeout(resolve, delay))
         
-        // 캐시 초기화 후 다시 로드
-        if (retry) {
-          // 캐시를 강제로 초기화
-          const albumsKey = 'admin_albums'
-          const cached = (window as any).__albumsCache
-          if (cached) {
-            delete (window as any).__albumsCache
+        // 캐시 완전히 무시하고 직접 localStorage에서 읽기
+        const albumsKey = 'admin_albums'
+        let albums: AlbumWithCategory[] = []
+        
+        try {
+          const storedRaw = localStorage.getItem(albumsKey)
+          if (storedRaw) {
+            const parsed = JSON.parse(storedRaw)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              albums = parsed
+              console.log(`[AlbumDetail] localStorage에서 직접 로드: ${albums.length}개 앨범`)
+            }
           }
+        } catch (e) {
+          console.error('[AlbumDetail] localStorage 파싱 오류:', e)
         }
         
-        ensureDefaultAlbumExists()
-        
-        // 여러 번 시도 (forceRefresh 사용)
-        let albums = getAlbums(retryCount > 0)
-        console.log(`[AlbumDetail] 시도 ${retryCount + 1}/${maxRetries} - 로드된 앨범 목록:`, albums.map(a => ({ id: a.id, title: a.title })))
-        
-        // 앨범이 없으면 한 번 더 시도
-        if (albums.length === 0 && retryCount < 2) {
-          await new Promise(resolve => setTimeout(resolve, 200))
+        // localStorage에 없으면 getAlbums() 사용 (기본 앨범 생성 포함)
+        if (albums.length === 0) {
+          ensureDefaultAlbumExists()
           albums = getAlbums(true) // 강제 새로고침
+          console.log(`[AlbumDetail] getAlbums()로 로드: ${albums.length}개 앨범`)
         }
         
-        const found = id ? albums.find((a) => a.id === id) || null : null
-        console.log('[AlbumDetail] 찾은 앨범:', found ? { id: found.id, title: found.title, photosCount: found.photos.length } : '없음', '검색 ID:', id)
+        console.log(`[AlbumDetail] 시도 ${retryCount + 1}/${maxRetries} - 로드된 앨범 목록:`, albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
         
-        if (!found && id && retryCount < maxRetries) {
-          console.warn(`[AlbumDetail] 앨범을 찾을 수 없습니다. ID: ${id}, 재시도 중... (${retryCount + 1}/${maxRetries})`)
+        // ID로 앨범 찾기
+        const found = id ? albums.find((a) => a.id === id) || null : null
+        
+        if (found) {
+          console.log('[AlbumDetail] 앨범 찾음:', { id: found.id, title: found.title, photosCount: found.photos?.length || 0 })
+          setAlbum(found)
+          setCurrentPhotoIndex(0)
+          setIsLoading(false)
+          return
+        }
+        
+        // 찾지 못한 경우
+        console.warn(`[AlbumDetail] 앨범을 찾을 수 없습니다. ID: ${id}`)
+        console.log('[AlbumDetail] 사용 가능한 앨범 IDs:', albums.map(a => a.id))
+        
+        if (id && retryCount < maxRetries) {
+          console.warn(`[AlbumDetail] 재시도 중... (${retryCount + 1}/${maxRetries})`)
           retryCount++
           setTimeout(() => loadAlbum(true), 300)
           return
         }
         
-        if (!found && id) {
-          console.error('[AlbumDetail] 최대 재시도 횟수 초과. 앨범을 찾을 수 없습니다.', {
-            searchId: id,
-            availableIds: albums.map(a => a.id),
-            availableTitles: albums.map(a => a.title)
-          })
-          
-          // draft- ID인 경우 특별 메시지
-          if (id.startsWith('draft-')) {
-            console.warn('[AlbumDetail] draft- ID는 저장되지 않은 임시 앨범입니다. 앨범 관리에서 저장 후 다시 시도해 주세요.')
-          }
-        }
+        // 최대 재시도 횟수 초과
+        console.error('[AlbumDetail] 최대 재시도 횟수 초과. 앨범을 찾을 수 없습니다.', {
+          searchId: id,
+          availableIds: albums.map(a => a.id),
+          availableTitles: albums.map(a => a.title)
+        })
         
-        setAlbum(found)
-        setCurrentPhotoIndex(0)
+        setAlbum(null)
         setIsLoading(false)
       } catch (error) {
         console.error('[AlbumDetail] 앨범 로드 오류:', error)
@@ -79,6 +88,7 @@ export default function AlbumDetail() {
           retryCount++
           setTimeout(() => loadAlbum(true), 300)
         } else {
+          setAlbum(null)
           setIsLoading(false)
         }
       }
