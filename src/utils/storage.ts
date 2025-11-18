@@ -547,6 +547,8 @@ export const getBulletins = (): BulletinItem[] => {
 export const saveBulletins = (bulletins: BulletinItem[]): void => {
   localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
   cachedData.bulletins = bulletins
+  // 다른 페이지에서 업데이트를 감지할 수 있도록 이벤트 발생
+  window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
 }
 
 export const exportBulletins = (): void => {

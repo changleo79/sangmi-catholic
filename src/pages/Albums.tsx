@@ -67,33 +67,10 @@ export default function Albums() {
 
   const loadAlbums = () => {
     try {
-      // 캐시 완전히 무시하고 직접 localStorage에서 가져오기
-      const storedRaw = localStorage.getItem('admin_albums')
-      let stored: AlbumWithCategory[] = []
-      
-      if (storedRaw) {
-        try {
-          stored = JSON.parse(storedRaw)
-          if (!Array.isArray(stored)) {
-            stored = []
-          }
-          console.log('[Albums] localStorage에서 직접 로드:', stored.length, '개 앨범')
-        } catch (e) {
-          console.error('[Albums] localStorage 파싱 오류:', e)
-          stored = []
-        }
-      }
-      
-      if (stored.length === 0) {
-        // localStorage에 없으면 getAlbums() 사용 (기본 앨범 생성 포함)
-        ensureDefaultAlbumExists()
-        const refreshed = getAlbums(true) // 강제 새로고침
-        console.log('[Albums] getAlbums()로 로드:', refreshed.length, '개 앨범')
-        setAlbums(refreshed)
-      } else {
-        // localStorage에 있으면 바로 사용
-        setAlbums(stored)
-      }
+      ensureDefaultAlbumExists()
+      const albums = getAlbums(true) // 강제 새로고침
+      console.log('[Albums] getAlbums()로 로드:', albums.length, '개 앨범')
+      setAlbums(albums)
     } catch (error) {
       console.error('[Albums] 로드 오류:', error)
       const fallback = getAlbums(true) // 강제 새로고침

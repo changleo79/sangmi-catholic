@@ -36,53 +36,45 @@ export default function Home() {
   const galleryPhotos = [img01, img02, img03, img04]
   const slideImages = [imgMain, img01, img02]
 
+  const loadData = () => {
+    const storedNotices = getNotices()
+    setNotices(storedNotices.length > 0 ? storedNotices : defaultNotices)
+
+    const storedRecruitments = getRecruitments()
+    if (storedRecruitments.length > 0) {
+      setRecruitments(storedRecruitments.slice(0, 6))
+    } else {
+      setRecruitments([
+        { id: 'recruit-default-1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
+        { id: 'recruit-default-2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
+      ])
+    }
+
+    const storedBulletins = getBulletins()
+    setBulletins(storedBulletins.slice(0, 6))
+  }
+
   useEffect(() => {
-    const loadData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 100))
-
-      const storedNotices = getNotices()
-      setNotices(storedNotices.length > 0 ? storedNotices : defaultNotices)
-
-      const storedRecruitments = getRecruitments()
-      if (storedRecruitments.length > 0) {
-        setRecruitments(storedRecruitments.slice(0, 6))
-      } else {
-        setRecruitments([
-          { id: 'recruit-default-1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
-          { id: 'recruit-default-2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
-        ])
-      }
-
+    loadData()
+    
+    // 주보 업데이트 이벤트 리스너
+    const handleBulletinsUpdate = () => {
+      console.log('[Home] bulletinsUpdated 이벤트 수신')
       const storedBulletins = getBulletins()
       setBulletins(storedBulletins.slice(0, 6))
     }
-    loadData()
+    
+    window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
+    
+    return () => {
+      window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+    }
   }, [])
 
   const loadAlbums = () => {
     try {
-      // 캐시 완전히 무시하고 직접 localStorage에서 가져오기
-      const storedRaw = localStorage.getItem('admin_albums')
-      let storedAlbums: AlbumWithCategory[] = []
-      
-      if (storedRaw) {
-        try {
-          const parsed = JSON.parse(storedRaw)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            storedAlbums = parsed
-            console.log('[Home] localStorage에서 직접 로드:', storedAlbums.length, '개 앨범')
-          }
-        } catch (e) {
-          console.error('[Home] localStorage 파싱 오류:', e)
-        }
-      }
-      
-      // localStorage에 없으면 getAlbums() 사용
-      if (storedAlbums.length === 0) {
-        ensureDefaultAlbumExists()
-        storedAlbums = getAlbums(true) // 강제 새로고침
-        console.log('[Home] getAlbums()로 로드:', storedAlbums.length, '개 앨범')
-      }
+      ensureDefaultAlbumExists()
+      const storedAlbums = getAlbums(true) // 강제 새로고침
       
       // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
       const savedAlbums = storedAlbums.filter(album => {

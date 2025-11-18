@@ -25,29 +25,10 @@ export default function AlbumDetail() {
         const delay = retry ? Math.min(200 * retryCount, 1000) : 100
         await new Promise(resolve => setTimeout(resolve, delay))
         
-        // 캐시 완전히 무시하고 직접 localStorage에서 읽기
-        const albumsKey = 'admin_albums'
-        let albums: AlbumWithCategory[] = []
-        
-        try {
-          const storedRaw = localStorage.getItem(albumsKey)
-          if (storedRaw) {
-            const parsed = JSON.parse(storedRaw)
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              albums = parsed
-              console.log(`[AlbumDetail] localStorage에서 직접 로드: ${albums.length}개 앨범`)
-            }
-          }
-        } catch (e) {
-          console.error('[AlbumDetail] localStorage 파싱 오류:', e)
-        }
-        
-        // localStorage에 없으면 getAlbums() 사용 (기본 앨범 생성 포함)
-        if (albums.length === 0) {
-          ensureDefaultAlbumExists()
-          albums = getAlbums(true) // 강제 새로고침
-          console.log(`[AlbumDetail] getAlbums()로 로드: ${albums.length}개 앨범`)
-        }
+        // 캐시 무시하고 getAlbums() 사용
+        ensureDefaultAlbumExists()
+        const albums = getAlbums(true) // 강제 새로고침
+        console.log(`[AlbumDetail] getAlbums()로 로드: ${albums.length}개 앨범`)
         
         console.log(`[AlbumDetail] 시도 ${retryCount + 1}/${maxRetries} - 로드된 앨범 목록:`, albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
         

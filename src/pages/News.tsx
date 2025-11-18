@@ -17,33 +17,44 @@ export default function News() {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
   const itemsPerPage = 10
 
+  const loadData = () => {
+    const storedNotices = getNotices()
+    if (storedNotices.length > 0) {
+      setNotices(storedNotices)
+    } else {
+      setNotices(defaultNotices)
+    }
+
+    const storedRecruitments = getRecruitments()
+    if (storedRecruitments.length > 0) {
+      setRecruit(storedRecruitments)
+    } else {
+      // 기본값
+      setRecruit([
+        { id: '1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
+        { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
+      ])
+    }
+
+    const storedBulletins = getBulletins()
+    setBulletins(storedBulletins)
+  }
+
   useEffect(() => {
-    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
-    const loadData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 100))
-      
-      const storedNotices = getNotices()
-      if (storedNotices.length > 0) {
-        setNotices(storedNotices)
-      } else {
-        setNotices(defaultNotices)
-      }
-
-      const storedRecruitments = getRecruitments()
-      if (storedRecruitments.length > 0) {
-        setRecruit(storedRecruitments)
-      } else {
-        // 기본값
-        setRecruit([
-          { id: '1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
-          { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
-        ])
-      }
-
+    loadData()
+    
+    // 주보 업데이트 이벤트 리스너
+    const handleBulletinsUpdate = () => {
+      console.log('[News] bulletinsUpdated 이벤트 수신')
       const storedBulletins = getBulletins()
       setBulletins(storedBulletins)
     }
-    loadData()
+    
+    window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
+    
+    return () => {
+      window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+    }
   }, [])
 
   return (
