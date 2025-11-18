@@ -186,9 +186,13 @@ export default function News() {
                     <div className="flex flex-col h-full">
                       {(() => {
                         // 썸네일 URL 우선, 없으면 fileUrl이 이미지인 경우 사용
-                        const thumbnailUrl = bulletin.thumbnailUrl || 
-                          (bulletin.fileUrl && (bulletin.fileUrl.startsWith('data:image/') || 
-                           bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) ? bulletin.fileUrl : null)
+                        // PDF 파일인 경우도 fileUrl을 썸네일로 사용 (iframe으로 표시)
+                        const isImageFile = bulletin.fileUrl && (
+                          bulletin.fileUrl.startsWith('data:image/') || 
+                          bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                          (bulletin.fileUrl.startsWith('http') && bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
+                        )
+                        const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
                         
                         return thumbnailUrl ? (
                           <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gray-100">

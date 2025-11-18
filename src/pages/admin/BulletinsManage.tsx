@@ -253,7 +253,12 @@ export default function BulletinsManage() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">썸네일 이미지 (선택)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  썸네일 이미지 (선택)
+                  <span className="ml-2 text-xs font-normal text-gray-500">
+                    💡 JPG 파일 업로드 시 자동으로 썸네일이 설정됩니다. PDF 파일인 경우에만 별도로 썸네일을 올려주세요.
+                  </span>
+                </label>
                 
                 {/* 입력 방식 선택 */}
                 <div className="flex gap-4 mb-3">
@@ -290,7 +295,7 @@ export default function BulletinsManage() {
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      💡 이미지 파일을 선택하면 Base64로 변환되어 저장됩니다.
+                      💡 이미지 파일을 선택하면 Base64로 변환되어 저장됩니다. (PDF 파일인 경우에만 필요)
                     </p>
                     {formData.thumbnailUrl && formData.thumbnailUrl.startsWith('data:') && (
                       <div className="mt-3 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
@@ -308,7 +313,7 @@ export default function BulletinsManage() {
                       placeholder="예: /files/bulletin-2025-11-thumb.jpg"
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      💡 주보의 썸네일 이미지 URL을 입력하세요. 없으면 기본 PDF 아이콘이 표시됩니다.
+                      💡 주보의 썸네일 이미지 URL을 입력하세요. 없으면 기본 PDF 아이콘이 표시됩니다. (PDF 파일인 경우에만 필요)
                     </p>
                     {formData.thumbnailUrl && !formData.thumbnailUrl.startsWith('data:') && formData.thumbnailUrl.trim() !== '' && (
                       <div className="mt-3 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">

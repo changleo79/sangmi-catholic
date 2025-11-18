@@ -28,26 +28,41 @@ export default function PdfViewerModal({
       setTextContent('')
       setError('')
       // 모달이 닫힐 때 스크롤 위치 복원
-      window.scrollTo(0, scrollPositionRef.current)
+      const savedPosition = scrollPositionRef.current
       document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      // 약간의 지연 후 스크롤 복원 (레이아웃 재계산 대기)
+      setTimeout(() => {
+        window.scrollTo(0, savedPosition)
+      }, 10)
       return
     }
 
     // 모달이 열릴 때 현재 스크롤 위치 저장
     scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
     document.body.style.overflow = 'hidden'
-    // 스크롤 위치 유지 (body에 스타일 추가)
     document.body.style.position = 'fixed'
     document.body.style.top = `-${scrollPositionRef.current}px`
     document.body.style.width = '100%'
+    
+    // ESC 키로 닫기
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleEscape)
     
     return () => {
       document.body.style.overflow = ''
       document.body.style.position = ''
       document.body.style.top = ''
       document.body.style.width = ''
+      window.removeEventListener('keydown', handleEscape)
     }
-  }, [isOpen])
+  }, [isOpen, onClose])
 
   useEffect(() => {
     if (!isOpen || activeTab !== 'text' || textContent || isLoading) return
@@ -103,9 +118,17 @@ export default function PdfViewerModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 pt-16 sm:pt-4 animate-fade-in overflow-y-auto">
-      <div className="relative w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden my-4 sm:my-8 max-h-[95vh] flex flex-col">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
+    <div 
+      className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-start sm:items-center justify-center p-0 sm:p-2 sm:p-4 pt-16 sm:pt-4 animate-fade-in overflow-y-auto"
+      onClick={(e) => {
+        // 배경 클릭 시 닫기
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div className="relative w-full h-full sm:h-auto sm:max-w-6xl bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden my-0 sm:my-4 sm:my-8 max-h-[100vh] sm:max-h-[95vh] flex flex-col">
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0 sticky top-0 z-10">
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
             {description && <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">{description}</p>}
@@ -130,11 +153,15 @@ export default function PdfViewerModal({
               <span className="hidden sm:inline">다운로드</span>
             </button>
             <button
-              onClick={onClose}
-              className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onClose()
+              }}
+              className="inline-flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
               aria-label="닫기"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -158,7 +185,7 @@ export default function PdfViewerModal({
           </div>
         </div>
 
-        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-hidden">
+        <div className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto">
           {activeTab === 'pdf' ? (
             (() => {
               // 이미지 파일인지 확인
@@ -167,11 +194,11 @@ export default function PdfViewerModal({
                              (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
               
               return isImage ? (
-                <div className="relative w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] rounded-2xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50 flex items-center justify-center">
+                <div className="relative w-full min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] rounded-2xl overflow-y-auto border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4">
                   <img
                     src={fileUrl}
                     alt={title}
-                    className="max-w-full max-h-full object-contain"
+                    className="w-full h-auto object-contain"
                     onError={(e) => {
                       const target = e.currentTarget
                       target.style.display = 'none'
@@ -190,18 +217,18 @@ export default function PdfViewerModal({
                   />
                 </div>
               ) : (
-                <div className="relative w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] rounded-2xl overflow-hidden border border-gray-100 shadow-inner">
+                <div className="relative w-full min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] rounded-2xl overflow-hidden border border-gray-100 shadow-inner">
                   <iframe
                     src={`${fileUrl}#toolbar=0`}
                     title={title}
                     className="w-full h-full"
-                    style={{ border: 'none' }}
+                    style={{ border: 'none', minHeight: '50vh' }}
                   />
                 </div>
               )
             })()
           ) : (
-            <div className="w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700">
+            <div className="w-full min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700">
               {isLoading && <p className="text-gray-500">본문을 불러오는 중입니다...</p>}
               {error && !isLoading && <p className="text-red-500">{error}</p>}
               {!isLoading && !error && textContent && (
