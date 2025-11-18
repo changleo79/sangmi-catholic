@@ -307,7 +307,7 @@ export default function Mass() {
                       <p className="text-sm text-gray-500 mt-1">{route.description}</p>
                     </div>
                     <span
-                      className="inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-semibold"
+                      className="inline-flex items-center justify-center w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] rounded-full text-white font-semibold text-xs flex-shrink-0"
                       style={{ background: route.accent }}
                     >
                       탑승

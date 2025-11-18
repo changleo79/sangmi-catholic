@@ -12,6 +12,7 @@ import {
   ensureDefaultAlbumExists
 } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
+import PdfViewerModal from '../components/PdfViewerModal'
 
 import imgMain from '../../사진파일/메인이미지.jpg'
 import img01 from '../../사진파일/KakaoTalk_20251104_172439243_01.jpg'
@@ -32,6 +33,8 @@ export default function Home() {
   const [displayAlbums, setDisplayAlbums] = useState<Array<{ id: string; cover: string; title: string }>>([])
   const [activeNoticeTab, setActiveNoticeTab] = useState<NoticeTabKey>('notice')
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [selectedBulletin, setSelectedBulletin] = useState<BulletinItem | null>(null)
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
 
   const galleryPhotos = [img01, img02, img03, img04]
   const slideImages = [imgMain, img01, img02]
@@ -275,7 +278,9 @@ export default function Home() {
         title: item.title,
         summary: item.description,
         date: formatDate(item.date),
-        to: '/news'
+        to: '/news',
+        fileUrl: item.fileUrl,
+        bulletin: item
       })),
       emptyText: '등록된 주보가 없습니다.',
       ctaLabel: '주보 안내 전체 보기',
@@ -556,32 +561,69 @@ export default function Home() {
           <div className="grid lg:grid-cols-[2fr,1fr] gap-6">
             <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
               {activeNoticeContent.items.length > 0 ? (
-                activeNoticeContent.items.map(item => (
-                  <Link
-                    key={item.id}
-                    to={item.to}
-                    className="block p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/60 hover:to-transparent transition-all duration-300 group"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="w-2 h-2 rounded-full bg-catholic-logo/70 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors">
-                            {item.title}
-                          </h3>
+                activeNoticeContent.items.map(item => {
+                  const isBulletin = activeNoticeTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
+                  let bulletinItem: BulletinItem | null = null
+                  if (isBulletin && 'bulletin' in item) {
+                    bulletinItem = item.bulletin as BulletinItem
+                  }
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/60 hover:to-transparent transition-all duration-300 group"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="w-2 h-2 rounded-full bg-catholic-logo/70 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors">
+                              {item.title}
+                            </h3>
+                          </div>
+                          {item.summary && (
+                            <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">{item.summary}</p>
+                          )}
+                          {isBulletin && bulletinItem ? (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                if (bulletinItem) {
+                                  setSelectedBulletin(bulletinItem)
+                                  setIsPdfModalOpen(true)
+                                }
+                              }}
+                              className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 hover:scale-105"
+                              style={{ backgroundColor: '#7B1F4B' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                            >
+                              바로보기
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </button>
+                          ) : null}
                         </div>
-                        {item.summary && (
-                          <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">{item.summary}</p>
-                        )}
+                        <div className="flex flex-col items-end gap-2">
+                          {item.date && (
+                            <span className="text-xs font-medium text-gray-400 whitespace-nowrap">
+                              {item.date}
+                            </span>
+                          )}
+                          {!isBulletin && (
+                            <Link
+                              to={item.to}
+                              className="text-xs text-gray-400 hover:text-catholic-logo transition-colors"
+                            >
+                              자세히 보기 →
+                            </Link>
+                          )}
+                        </div>
                       </div>
-                      {item.date && (
-                        <span className="text-xs font-medium text-gray-400 whitespace-nowrap mt-1">
-                          {item.date}
-                        </span>
-                      )}
                     </div>
-                  </Link>
-                ))
+                  )
+                })
               ) : (
                 <div className="p-10 text-center text-gray-500">{activeNoticeContent.emptyText}</div>
               )}
@@ -762,6 +804,19 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
+      {selectedBulletin && (
+        <PdfViewerModal
+          isOpen={isPdfModalOpen}
+          title={selectedBulletin.title}
+          description={selectedBulletin.description}
+          fileUrl={selectedBulletin.fileUrl}
+          onClose={() => {
+            setIsPdfModalOpen(false)
+            setSelectedBulletin(null)
+          }}
+        />
+      )}
     </div>
   )
 }

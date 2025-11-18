@@ -103,35 +103,35 @@ export default function PdfViewerModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-      <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-          <div>
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{title}</h2>
-            {description && <p className="text-sm text-gray-500 mt-1 leading-relaxed">{description}</p>}
+    <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 pt-16 sm:pt-4 animate-fade-in overflow-y-auto">
+      <div className="relative w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden my-4 sm:my-8 max-h-[95vh] flex flex-col">
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
+            {description && <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">{description}</p>}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-catholic-logo hover:bg-catholic-logo/10 transition-colors"
+              className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:text-catholic-logo hover:bg-catholic-logo/10 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12v.01M4 12a8 8 0 018-8m-4 8a4 4 0 104 4m6 0a2 2 0 11-4 0 2 2 0 014 0zm4 0v.01" />
               </svg>
-              공유
+              <span className="hidden sm:inline">공유</span>
             </button>
             <button
               onClick={handleDownload}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:text-catholic-logo hover:bg-catholic-logo/10 transition-colors"
+              className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:text-catholic-logo hover:bg-catholic-logo/10 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v16h16V4H4zm4 4h8m-4 8V8" />
               </svg>
-              다운로드
+              <span className="hidden sm:inline">다운로드</span>
             </button>
             <button
               onClick={onClose}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors"
+              className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
               aria-label="닫기"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,26 +141,26 @@ export default function PdfViewerModal({
           </div>
         </header>
 
-        <div className="px-6 pt-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
+        <div className="px-4 sm:px-6 pt-3 sm:pt-4 flex-shrink-0">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-600">
             <button
               onClick={() => setActiveTab('pdf')}
-              className={`px-4 py-2 rounded-full transition-all ${activeTab === 'pdf' ? 'bg-catholic-logo text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${activeTab === 'pdf' ? 'bg-catholic-logo text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
               PDF 보기
             </button>
             <button
               onClick={() => setActiveTab('text')}
-              className={`px-4 py-2 rounded-full transition-all ${activeTab === 'text' ? 'bg-catholic-logo text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${activeTab === 'text' ? 'bg-catholic-logo text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
               HTML 보기
             </button>
           </div>
         </div>
 
-        <div className="px-6 pb-6 pt-4">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-hidden">
           {activeTab === 'pdf' ? (
-            <div className="relative w-full h-[70vh] rounded-2xl overflow-hidden border border-gray-100 shadow-inner">
+            <div className="relative w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] rounded-2xl overflow-hidden border border-gray-100 shadow-inner">
               <iframe
                 src={`${fileUrl}#toolbar=0`}
                 title={title}
@@ -169,7 +169,7 @@ export default function PdfViewerModal({
               />
             </div>
           ) : (
-            <div className="w-full h-[70vh] overflow-y-auto border border-gray-100 rounded-2xl p-6 bg-gray-50 text-sm leading-relaxed text-gray-700">
+            <div className="w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700">
               {isLoading && <p className="text-gray-500">본문을 불러오는 중입니다...</p>}
               {error && !isLoading && <p className="text-red-500">{error}</p>}
               {!isLoading && !error && textContent && (
