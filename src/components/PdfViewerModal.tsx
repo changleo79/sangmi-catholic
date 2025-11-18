@@ -160,14 +160,46 @@ export default function PdfViewerModal({
 
         <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-hidden">
           {activeTab === 'pdf' ? (
-            <div className="relative w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] rounded-2xl overflow-hidden border border-gray-100 shadow-inner">
-              <iframe
-                src={`${fileUrl}#toolbar=0`}
-                title={title}
-                className="w-full h-full"
-                style={{ border: 'none' }}
-              />
-            </div>
+            (() => {
+              // 이미지 파일인지 확인
+              const isImage = fileUrl.startsWith('data:image/') || 
+                             fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                             (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
+              
+              return isImage ? (
+                <div className="relative w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] rounded-2xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50 flex items-center justify-center">
+                  <img
+                    src={fileUrl}
+                    alt={title}
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      const target = e.currentTarget
+                      target.style.display = 'none'
+                      const parent = target.parentElement
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="flex flex-col items-center justify-center h-full p-8 text-gray-500">
+                            <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p>이미지를 불러올 수 없습니다.</p>
+                          </div>
+                        `
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="relative w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] rounded-2xl overflow-hidden border border-gray-100 shadow-inner">
+                  <iframe
+                    src={`${fileUrl}#toolbar=0`}
+                    title={title}
+                    className="w-full h-full"
+                    style={{ border: 'none' }}
+                  />
+                </div>
+              )
+            })()
           ) : (
             <div className="w-full h-full min-h-[60vh] sm:min-h-[70vh] max-h-[calc(95vh-200px)] overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700">
               {isLoading && <p className="text-gray-500">본문을 불러오는 중입니다...</p>}

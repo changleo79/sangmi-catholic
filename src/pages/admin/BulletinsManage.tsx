@@ -108,7 +108,12 @@ export default function BulletinsManage() {
       const reader = new FileReader()
       reader.onloadend = () => {
         const base64 = reader.result as string
-        setFormData({ ...formData, fileUrl: base64 })
+        // 이미지 파일인 경우 자동으로 썸네일로도 사용
+        if (isImage && !formData.thumbnailUrl) {
+          setFormData({ ...formData, fileUrl: base64, thumbnailUrl: base64 })
+        } else {
+          setFormData({ ...formData, fileUrl: base64 })
+        }
       }
       reader.readAsDataURL(file)
     }

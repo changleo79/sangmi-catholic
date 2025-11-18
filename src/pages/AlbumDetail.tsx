@@ -37,6 +37,10 @@ export default function AlbumDetail() {
         
         if (found) {
           console.log('[AlbumDetail] 앨범 찾음:', { id: found.id, title: found.title, photosCount: found.photos?.length || 0 })
+          // photos 배열이 없거나 비어있으면 빈 배열로 설정
+          if (!found.photos || !Array.isArray(found.photos)) {
+            found.photos = []
+          }
           setAlbum(found)
           setCurrentPhotoIndex(0)
           setIsLoading(false)
@@ -155,7 +159,7 @@ export default function AlbumDetail() {
     )
   }
 
-  const photos = album?.photos || []
+  const photos = (album?.photos && Array.isArray(album.photos) && album.photos.length > 0) ? album.photos : []
 
   const goToPrevious = useCallback(() => {
     if (photos.length === 0) return
@@ -274,6 +278,22 @@ export default function AlbumDetail() {
                 alt={photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                 style={{ objectPosition: 'center' }}
+                onError={(e) => {
+                  console.error('[AlbumDetail] 이미지 로드 실패:', photos[currentPhotoIndex]?.src)
+                  const target = e.currentTarget
+                  target.style.display = 'none'
+                  const parent = target.parentElement
+                  if (parent) {
+                    parent.innerHTML = `
+                      <div class="flex flex-col items-center justify-center h-full p-8 text-white">
+                        <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p>이미지를 불러올 수 없습니다.</p>
+                      </div>
+                    `
+                  }
+                }}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
