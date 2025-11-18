@@ -354,8 +354,27 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
     try {
       const parsed = JSON.parse(stored)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        cachedData.albums = parsed
-        return parsed
+        // draft-로 시작하는 임시 앨범 필터링
+        const validAlbums = parsed.filter(album => !album.id.startsWith('draft-'))
+        
+        // 기본 앨범이 삭제되었고, 기본 앨범만 남아있으면 제거
+        const defaultAlbumDeleted = localStorage.getItem('default_album_deleted') === 'true'
+        if (defaultAlbumDeleted) {
+          const filtered = validAlbums.filter(album => album.id !== DEFAULT_ALBUM_ID)
+          if (filtered.length !== validAlbums.length) {
+            // 기본 앨범이 있었으면 제거하고 저장
+            cachedData.albums = filtered
+            if (filtered.length > 0) {
+              localStorage.setItem(ALBUMS_KEY, JSON.stringify(filtered))
+            } else {
+              localStorage.removeItem(ALBUMS_KEY)
+            }
+            return filtered
+          }
+        }
+        
+        cachedData.albums = validAlbums
+        return validAlbums
       }
     } catch (e) {
       console.error('[getAlbums] JSON 파싱 실패:', e)

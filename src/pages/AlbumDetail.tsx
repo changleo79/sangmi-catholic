@@ -63,6 +63,11 @@ export default function AlbumDetail() {
             availableIds: albums.map(a => a.id),
             availableTitles: albums.map(a => a.title)
           })
+          
+          // draft- ID인 경우 특별 메시지
+          if (id.startsWith('draft-')) {
+            console.warn('[AlbumDetail] draft- ID는 저장되지 않은 임시 앨범입니다. 앨범 관리에서 저장 후 다시 시도해 주세요.')
+          }
         }
         
         setAlbum(found)
@@ -128,23 +133,32 @@ export default function AlbumDetail() {
   }
 
   if (!album) {
+    const isDraftId = id?.startsWith('draft-')
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500 text-lg mb-4">앨범을 찾을 수 없습니다.</p>
-          <Link
-            to="/albums"
-            className="inline-block px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105"
-            style={{ backgroundColor: '#7B1F4B' }}
-          >
-            앨범 목록으로 돌아가기
-          </Link>
-          <button
-            onClick={() => navigate(-1)}
-            className="mt-4 inline-block px-6 py-3 rounded-lg text-gray-600 font-semibold transition-all duration-300 hover:scale-105 border border-gray-200"
-          >
-            이전 페이지로 가기
-          </button>
+        <div className="text-center px-4">
+          <p className="text-gray-500 text-lg mb-2">앨범을 찾을 수 없습니다.</p>
+          {isDraftId && (
+            <p className="text-gray-400 text-sm mb-4">
+              이 앨범은 아직 저장되지 않은 임시 앨범입니다.<br />
+              앨범 관리 페이지에서 저장 후 다시 시도해 주세요.
+            </p>
+          )}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/albums"
+              className="inline-block px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105"
+              style={{ backgroundColor: '#7B1F4B' }}
+            >
+              앨범 목록으로 돌아가기
+            </Link>
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-block px-6 py-3 rounded-lg text-gray-600 font-semibold transition-all duration-300 hover:scale-105 border border-gray-200"
+            >
+              이전 페이지로 가기
+            </button>
+          </div>
         </div>
       </div>
     )

@@ -111,6 +111,10 @@ export default function Albums() {
   const filteredAlbums = useMemo(() => {
     const query = tagQuery.trim().toLowerCase()
     return albums.filter((album) => {
+      // draft-로 시작하는 임시 앨범은 제외 (저장되지 않은 앨범)
+      if (album.id.startsWith('draft-')) {
+        return false
+      }
       const categoryMatch = selectedCategory === '전체' || album.category === selectedCategory
       const tagMatch = query
         ? album.photos.some((photo) =>
