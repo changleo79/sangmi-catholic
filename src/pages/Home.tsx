@@ -61,8 +61,13 @@ export default function Home() {
   const loadAlbums = () => {
     ensureDefaultAlbumExists()
     const storedAlbums = getAlbums(true) // 강제 새로고침
-    // draft-로 시작하는 임시 앨범 제외하고, 실제 저장된 앨범만 표시
-    const savedAlbums = storedAlbums.filter(album => !album.id.startsWith('draft-'))
+    // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
+    const savedAlbums = storedAlbums.filter(album => {
+      if (album.id.startsWith('draft-')) {
+        return album.photos && album.photos.length > 0 && album.title && album.title.trim() !== ''
+      }
+      return true
+    })
     const recentAlbums = savedAlbums.slice(0, 4).map(album => ({
       id: album.id,
       cover: album.cover || galleryPhotos[0],

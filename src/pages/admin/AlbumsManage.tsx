@@ -51,7 +51,12 @@ export default function AlbumsManage() {
       finalCover = formData.photos[0].src
     }
     
-    const resolvedAlbumId = getActiveAlbumId()
+    let resolvedAlbumId = getActiveAlbumId()
+    
+    // draft- ID인 경우 실제 ID로 변경 (저장 시)
+    if (resolvedAlbumId.startsWith('draft-')) {
+      resolvedAlbumId = Date.now().toString()
+    }
 
     const albumData = {
       ...formData,
@@ -67,7 +72,13 @@ export default function AlbumsManage() {
         newAlbums[index] = albumData
       }
     } else {
-      newAlbums.unshift(albumData)
+      // 기존 draft- 앨범이 있으면 제거하고 새로 추가
+      const filteredAlbums = newAlbums.filter(a => !a.id.startsWith('draft-'))
+      filteredAlbums.unshift(albumData)
+      setAlbums(filteredAlbums)
+      saveAlbums(filteredAlbums)
+      resetForm()
+      return
     }
     
     setAlbums(newAlbums)

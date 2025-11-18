@@ -354,8 +354,7 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
     try {
       const parsed = JSON.parse(stored)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        // draft-로 시작하는 임시 앨범 필터링
-        const validAlbums = parsed.filter(album => !album.id.startsWith('draft-'))
+        let validAlbums = parsed
         
         // 기본 앨범이 삭제되었고, 기본 앨범만 남아있으면 제거
         const defaultAlbumDeleted = localStorage.getItem('default_album_deleted') === 'true'
@@ -363,14 +362,35 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
           const filtered = validAlbums.filter(album => album.id !== DEFAULT_ALBUM_ID)
           if (filtered.length !== validAlbums.length) {
             // 기본 앨범이 있었으면 제거하고 저장
-            cachedData.albums = filtered
+            validAlbums = filtered
             if (filtered.length > 0) {
               localStorage.setItem(ALBUMS_KEY, JSON.stringify(filtered))
             } else {
               localStorage.removeItem(ALBUMS_KEY)
             }
-            return filtered
           }
+        }
+        
+        // draft-로 시작하는 앨범은 필터링 (저장되지 않은 임시 앨범)
+        // 단, 실제로 저장된 앨범은 제외하지 않음 (이미 저장된 경우)
+        const savedAlbums = validAlbums.filter(album => {
+          // draft-로 시작하지만 실제로 저장된 앨범은 유지
+          // (photos가 있고 title이 있으면 저장된 것으로 간주)
+          if (album.id.startsWith('draft-')) {
+            return album.photos && album.photos.length > 0 && album.title && album.title.trim() !== ''
+          }
+          return true
+        })
+        
+        // 필터링된 결과가 다르면 저장
+        if (savedAlbums.length !== validAlbums.length) {
+          if (savedAlbums.length > 0) {
+            localStorage.setItem(ALBUMS_KEY, JSON.stringify(savedAlbums))
+          } else {
+            localStorage.removeItem(ALBUMS_KEY)
+          }
+          cachedData.albums = savedAlbums
+          return savedAlbums
         }
         
         cachedData.albums = validAlbums

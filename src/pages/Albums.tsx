@@ -12,10 +12,18 @@ export default function Albums() {
     // 페이지 포커스 시 데이터 다시 로드
     const handleFocus = () => {
       console.log('[Albums] focus 이벤트 - 데이터 다시 로드')
+      // 캐시 무시하고 강제 새로고침
+      if ((window as any).__albumsCache) {
+        delete (window as any).__albumsCache
+      }
       loadAlbums()
     }
     const handleAlbumsUpdate = () => {
       console.log('[Albums] albumsUpdated 이벤트 - 데이터 다시 로드')
+      // 캐시 무시하고 강제 새로고침
+      if ((window as any).__albumsCache) {
+        delete (window as any).__albumsCache
+      }
       loadAlbums()
     }
     
@@ -23,6 +31,10 @@ export default function Albums() {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log('[Albums] visibilitychange 이벤트 - 데이터 다시 로드')
+        // 캐시 무시하고 강제 새로고침
+        if ((window as any).__albumsCache) {
+          delete (window as any).__albumsCache
+        }
         loadAlbums()
       }
     }
@@ -111,9 +123,12 @@ export default function Albums() {
   const filteredAlbums = useMemo(() => {
     const query = tagQuery.trim().toLowerCase()
     return albums.filter((album) => {
-      // draft-로 시작하는 임시 앨범은 제외 (저장되지 않은 앨범)
+      // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
       if (album.id.startsWith('draft-')) {
-        return false
+        const hasContent = album.photos && album.photos.length > 0 && album.title && album.title.trim() !== ''
+        if (!hasContent) {
+          return false // 저장되지 않은 임시 앨범만 제외
+        }
       }
       const categoryMatch = selectedCategory === '전체' || album.category === selectedCategory
       const tagMatch = query
