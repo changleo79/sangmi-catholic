@@ -344,8 +344,11 @@ export const exportFAQs = (): void => {
 
 // 앨범 관리
 export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
-  // forceRefresh가 true이면 캐시 무시
-  if (!forceRefresh && cachedData.albums) {
+  // forceRefresh가 true이면 캐시 무시하고 localStorage에서 직접 읽기
+  if (forceRefresh) {
+    // 캐시 무효화
+    cachedData.albums = undefined
+  } else if (cachedData.albums) {
     return cachedData.albums
   }
   
@@ -373,6 +376,12 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
         
         // draft- 필터링 제거: 모든 앨범을 반환 (필터링은 표시할 때만 수행)
         // 이렇게 하면 AlbumDetail에서도 draft- 앨범을 찾을 수 있음
+        // photos 배열이 없는 앨범도 유효성 검사
+        validAlbums = validAlbums.map(album => ({
+          ...album,
+          photos: Array.isArray(album.photos) ? album.photos : []
+        }))
+        
         cachedData.albums = validAlbums
         return validAlbums
       }
@@ -427,7 +436,8 @@ export const ensureDefaultAlbumExists = (): void => {
     return
   }
   
-  const albums = getAlbums()
+  // 캐시 무시하고 최신 데이터 가져오기
+  const albums = getAlbums(true)
   if (!albums.some(album => album.id === DEFAULT_ALBUM_ID)) {
     const nextAlbums = [...albums, createDefaultAlbum()]
     saveAlbums(nextAlbums)

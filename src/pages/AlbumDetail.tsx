@@ -13,6 +13,13 @@ export default function AlbumDetail() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    if (!id) {
+      console.error('[AlbumDetail] 앨범 ID가 없습니다.')
+      setAlbum(null)
+      setIsLoading(false)
+      return
+    }
+
     let cancelled = false
     let retryCount = 0
     const maxRetries = 5
@@ -22,26 +29,64 @@ export default function AlbumDetail() {
       
       try {
         // 재시도 시 대기 시간 증가
-        const delay = retry ? Math.min(200 * retryCount, 1000) : 100
+        const delay = retry ? Math.min(200 * retryCount, 1000) : 50
         await new Promise(resolve => setTimeout(resolve, delay))
         
-        // 캐시 무시하고 getAlbums() 사용
+        // 캐시 명시적으로 무효화
+        if ((window as any).__albumsCache) {
+          delete (window as any).__albumsCache
+        }
+        
+        // 기본 앨범 확인 및 생성
         ensureDefaultAlbumExists()
-        const albums = getAlbums(true) // 강제 새로고침
-        console.log(`[AlbumDetail] getAlbums()로 로드: ${albums.length}개 앨범`)
         
-        console.log(`[AlbumDetail] 시도 ${retryCount + 1}/${maxRetries} - 로드된 앨범 목록:`, albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
+        // 캐시 무시하고 최신 데이터 가져오기
+        const albums = getAlbums(true)
+        console.log(`[AlbumDetail] getAlbums(true)로 로드: ${albums.length}개 앨범`)
+        console.log(`[AlbumDetail] 시도 ${retryCount + 1}/${maxRetries} - 검색 ID: ${id}`)
+        console.log(`[AlbumDetail] 로드된 앨범 목록:`, albums.map(a => ({ 
+          id: a.id, 
+          title: a.title, 
+          photosCount: a.photos?.length || 0,
+          hasPhotos: !!a.photos && Array.isArray(a.photos) && a.photos.length > 0
+        })))
         
-        // ID로 앨범 찾기
-        const found = id ? albums.find((a) => a.id === id) || null : null
+        // ID로 앨범 찾기 (정확한 매칭)
+        const found = albums.find((a) => {
+          const match = a.id === id
+          if (match) {
+            console.log('[AlbumDetail] 앨범 매칭 성공:', { 
+              searchId: id, 
+              foundId: a.id, 
+              title: a.title,
+              photosCount: a.photos?.length || 0
+            })
+          }
+          return match
+        }) || null
         
         if (found) {
-          console.log('[AlbumDetail] 앨범 찾음:', { id: found.id, title: found.title, photosCount: found.photos?.length || 0 })
+          console.log('[AlbumDetail] 앨범 찾음:', { 
+            id: found.id, 
+            title: found.title, 
+            photosCount: found.photos?.length || 0,
+            category: found.category,
+            date: found.date
+          })
+          
           // photos 배열이 없거나 비어있으면 빈 배열로 설정
           if (!found.photos || !Array.isArray(found.photos)) {
+            console.warn('[AlbumDetail] photos 배열이 없거나 유효하지 않음. 빈 배열로 설정.')
             found.photos = []
           }
-          setAlbum(found)
+          
+          // 앨범 데이터 복사 (원본 수정 방지)
+          const albumData: AlbumWithCategory = {
+            ...found,
+            photos: [...found.photos]
+          }
+          
+          setAlbum(albumData)
           setCurrentPhotoIndex(0)
           setIsLoading(false)
           return
@@ -50,8 +95,13 @@ export default function AlbumDetail() {
         // 찾지 못한 경우
         console.warn(`[AlbumDetail] 앨범을 찾을 수 없습니다. ID: ${id}`)
         console.log('[AlbumDetail] 사용 가능한 앨범 IDs:', albums.map(a => a.id))
+        console.log('[AlbumDetail] ID 타입 비교:', {
+          searchId: id,
+          searchIdType: typeof id,
+          availableIds: albums.map(a => ({ id: a.id, type: typeof a.id }))
+        })
         
-        if (id && retryCount < maxRetries) {
+        if (retryCount < maxRetries) {
           console.warn(`[AlbumDetail] 재시도 중... (${retryCount + 1}/${maxRetries})`)
           retryCount++
           setTimeout(() => loadAlbum(true), 300)
@@ -61,6 +111,7 @@ export default function AlbumDetail() {
         // 최대 재시도 횟수 초과
         console.error('[AlbumDetail] 최대 재시도 횟수 초과. 앨범을 찾을 수 없습니다.', {
           searchId: id,
+          searchIdType: typeof id,
           availableIds: albums.map(a => a.id),
           availableTitles: albums.map(a => a.title)
         })
