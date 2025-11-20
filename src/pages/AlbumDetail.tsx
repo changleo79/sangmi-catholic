@@ -23,13 +23,11 @@ export default function AlbumDetail() {
       return
     }
 
-    // 기본 앨범은 한 번만 확인 (무한 루프 방지)
-    ensureDefaultAlbumExists()
-
     let cancelled = false
     let retryCount = 0
     const maxRetries = 5
     let isLoadingInProgress = false
+    let defaultAlbumChecked = false
 
     const loadAlbum = async (retry = false) => {
       if (cancelled || isLoadingInProgress) return
@@ -44,6 +42,12 @@ export default function AlbumDetail() {
         // 캐시 명시적으로 무효화
         if ((window as any).__albumsCache) {
           delete (window as any).__albumsCache
+        }
+        
+        // 기본 앨범은 한 번만 확인 (무한 루프 방지)
+        if (!defaultAlbumChecked) {
+          ensureDefaultAlbumExists()
+          defaultAlbumChecked = true
         }
         
         // 캐시 무시하고 최신 데이터 가져오기
