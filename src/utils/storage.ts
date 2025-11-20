@@ -404,11 +404,13 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
   return []
 }
 
-export const saveAlbums = (albums: AlbumWithCategory[]): void => {
+export const saveAlbums = (albums: AlbumWithCategory[], skipEvent = false): void => {
   try {
     localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
     cachedData.albums = albums
-    window.dispatchEvent(new CustomEvent('albumsUpdated'))
+    if (!skipEvent) {
+      window.dispatchEvent(new CustomEvent('albumsUpdated'))
+    }
   } catch (error) {
     console.error('앨범 저장 실패:', error)
     alert('앨범을 저장하는 중 오류가 발생했습니다. 이미지 용량을 줄이거나 일부 사진을 삭제한 뒤 다시 시도해 주세요.')
@@ -440,7 +442,8 @@ export const ensureDefaultAlbumExists = (): void => {
   const albums = getAlbums(true)
   if (!albums.some(album => album.id === DEFAULT_ALBUM_ID)) {
     const nextAlbums = [...albums, createDefaultAlbum()]
-    saveAlbums(nextAlbums)
+    // 기본 앨범 생성 시 이벤트 발생하지 않음 (무한 루프 방지)
+    saveAlbums(nextAlbums, true)
   }
 }
 

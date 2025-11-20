@@ -145,8 +145,14 @@ export default function AlbumDetail() {
     // 초기 로드
     loadAlbum()
 
-    const handleAlbumsUpdate = () => {
+    const handleAlbumsUpdate = (e: Event) => {
       if (!cancelled && !isLoadingInProgress) {
+        const customEvent = e as CustomEvent
+        // 기본 앨범 생성으로 인한 이벤트는 무시
+        if (customEvent.detail?.isDefaultAlbum) {
+          console.log('[AlbumDetail] 기본 앨범 생성 이벤트 무시')
+          return
+        }
         console.log('[AlbumDetail] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
         loadAlbum(true)
