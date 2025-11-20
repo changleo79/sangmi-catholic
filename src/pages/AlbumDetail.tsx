@@ -23,12 +23,18 @@ export default function AlbumDetail() {
       return
     }
 
+    // 기본 앨범은 한 번만 확인 (무한 루프 방지)
+    ensureDefaultAlbumExists()
+
     let cancelled = false
     let retryCount = 0
     const maxRetries = 5
+    let isLoadingInProgress = false
 
     const loadAlbum = async (retry = false) => {
-      if (cancelled) return
+      if (cancelled || isLoadingInProgress) return
+      
+      isLoadingInProgress = true
       
       try {
         // 재시도 시 대기 시간 증가
@@ -39,9 +45,6 @@ export default function AlbumDetail() {
         if ((window as any).__albumsCache) {
           delete (window as any).__albumsCache
         }
-        
-        // 기본 앨범 확인 및 생성
-        ensureDefaultAlbumExists()
         
         // 캐시 무시하고 최신 데이터 가져오기
         const albums = getAlbums(true)
@@ -90,6 +93,7 @@ export default function AlbumDetail() {
           setAlbum(albumData)
           setCurrentPhotoIndex(0)
           setIsLoading(false)
+          isLoadingInProgress = false
           return
         }
         
@@ -105,6 +109,7 @@ export default function AlbumDetail() {
         if (retryCount < maxRetries) {
           console.warn(`[AlbumDetail] 재시도 중... (${retryCount + 1}/${maxRetries})`)
           retryCount++
+          isLoadingInProgress = false
           setTimeout(() => loadAlbum(true), 300)
           return
         }
@@ -119,8 +124,10 @@ export default function AlbumDetail() {
         
         setAlbum(null)
         setIsLoading(false)
+        isLoadingInProgress = false
       } catch (error) {
         console.error('[AlbumDetail] 앨범 로드 오류:', error)
+        isLoadingInProgress = false
         if (retryCount < maxRetries) {
           retryCount++
           setTimeout(() => loadAlbum(true), 300)
@@ -135,7 +142,7 @@ export default function AlbumDetail() {
     loadAlbum()
 
     const handleAlbumsUpdate = () => {
-      if (!cancelled) {
+      if (!cancelled && !isLoadingInProgress) {
         console.log('[AlbumDetail] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
         loadAlbum(true)
@@ -143,7 +150,7 @@ export default function AlbumDetail() {
     }
 
     const handleFocus = () => {
-      if (!cancelled) {
+      if (!cancelled && !isLoadingInProgress) {
         console.log('[AlbumDetail] focus 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
         loadAlbum(true)
@@ -152,7 +159,7 @@ export default function AlbumDetail() {
 
     // visibilitychange 이벤트도 추가 (탭 전환 시)
     const handleVisibilityChange = () => {
-      if (!cancelled && !document.hidden) {
+      if (!cancelled && !document.hidden && !isLoadingInProgress) {
         console.log('[AlbumDetail] visibilitychange 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
         loadAlbum(true)
