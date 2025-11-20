@@ -78,17 +78,15 @@ export default function AlbumDetail() {
           })
           
           // photos 배열이 없거나 비어있으면 빈 배열로 설정
-          if (!found.photos || !Array.isArray(found.photos)) {
-            console.warn('[AlbumDetail] photos 배열이 없거나 유효하지 않음. 빈 배열로 설정.')
-            found.photos = []
-          }
+          const photosArray = Array.isArray(found.photos) ? found.photos : []
           
           // 앨범 데이터 복사 (원본 수정 방지)
           const albumData: AlbumWithCategory = {
             ...found,
-            photos: [...found.photos]
+            photos: photosArray
           }
           
+          // 상태 업데이트를 한 번에 처리
           setAlbum(albumData)
           setCurrentPhotoIndex(0)
           setIsLoading(false)
@@ -140,7 +138,7 @@ export default function AlbumDetail() {
       if (!cancelled) {
         console.log('[AlbumDetail] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
-        loadAlbum()
+        loadAlbum(true)
       }
     }
 
@@ -148,7 +146,7 @@ export default function AlbumDetail() {
       if (!cancelled) {
         console.log('[AlbumDetail] focus 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
-        loadAlbum()
+        loadAlbum(true)
       }
     }
 
@@ -157,7 +155,7 @@ export default function AlbumDetail() {
       if (!cancelled && !document.hidden) {
         console.log('[AlbumDetail] visibilitychange 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
-        loadAlbum()
+        loadAlbum(true)
       }
     }
 
@@ -225,12 +223,13 @@ export default function AlbumDetail() {
   }
 
   useEffect(() => {
-    if (!isAutoPlay || photos.length === 0) return
+    if (!isAutoPlay || !album || !album.photos || album.photos.length === 0) return
+    const photosLength = album.photos.length
     const timer = setInterval(() => {
-      setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
+      setCurrentPhotoIndex((prev) => (prev + 1) % photosLength)
     }, 4000)
     return () => clearInterval(timer)
-  }, [isAutoPlay, photos.length])
+  }, [isAutoPlay, album?.photos?.length])
 
   const handleDownload = async () => {
     const photo = photos[currentPhotoIndex]
