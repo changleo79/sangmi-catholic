@@ -27,58 +27,15 @@ export default function PdfViewerModal({
       setActiveTab('pdf')
       setTextContent('')
       setError('')
-      // 모달이 닫힐 때 스크롤 위치 복원
-      const savedPosition = scrollPositionRef.current
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      document.documentElement.style.overflow = ''
-      // 약간의 지연 후 스크롤 복원 (레이아웃 재계산 대기)
-      setTimeout(() => {
-        window.scrollTo(0, savedPosition)
-      }, 10)
+      // 모달이 닫힐 때는 특별한 처리 불필요 (body 스크롤이 이미 활성화되어 있음)
       return
     }
 
-    // 모달이 열릴 때 현재 스크롤 위치 저장
+    // 모달이 열릴 때 현재 스크롤 위치 저장 (스크롤 복원용)
     scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
     
-    // PC에서 body 스크롤 완전히 차단 (모바일은 모달 내부만 스크롤)
-    if (window.innerWidth >= 768) {
-      document.body.style.overflow = 'hidden'
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollPositionRef.current}px`
-      document.body.style.width = '100%'
-      // 추가로 html도 스크롤 방지
-      document.documentElement.style.overflow = 'hidden'
-    } else {
-      // 모바일에서는 body 스크롤만 방지 (모달 내부 스크롤 허용)
-      document.body.style.overflow = 'hidden'
-      document.body.style.position = 'relative'
-    }
-    
-    // 모달 컨텐츠를 상단으로 스크롤 (PC에서 윗부분이 잘리는 문제 해결)
-    const scrollToTop = () => {
-      const modalContent = document.querySelector('[data-pdf-modal-content]') as HTMLElement
-      if (modalContent) {
-        modalContent.scrollTop = 0
-        // iframe도 상단으로 스크롤
-        const iframe = modalContent.querySelector('iframe') as HTMLIFrameElement
-        if (iframe && iframe.contentWindow) {
-          try {
-            iframe.contentWindow.scrollTo(0, 0)
-          } catch (e) {
-            // CORS 문제로 접근 불가할 수 있음
-          }
-        }
-      }
-    }
-    
-    // 즉시 실행 및 지연 실행
-    scrollToTop()
-    setTimeout(scrollToTop, 150)
-    setTimeout(scrollToTop, 300)
+    // body 스크롤은 허용 (모달 바깥에서 스크롤)
+    // 모달은 fixed로 배치하되, body는 자유롭게 스크롤 가능
     
     // ESC 키로 닫기
     const handleEscape = (e: KeyboardEvent) => {
@@ -89,11 +46,6 @@ export default function PdfViewerModal({
     window.addEventListener('keydown', handleEscape)
     
     return () => {
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      document.documentElement.style.overflow = ''
       window.removeEventListener('keydown', handleEscape)
     }
   }, [isOpen, onClose])
@@ -161,7 +113,7 @@ export default function PdfViewerModal({
         }
       }}
     >
-      <div className="relative w-full h-full sm:h-auto sm:max-w-6xl bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden sm:my-4 sm:my-8 max-h-[100vh] sm:max-h-[95vh] flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
+      <div className="relative w-full h-full bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-visible flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
@@ -221,10 +173,8 @@ export default function PdfViewerModal({
 
         <div 
           data-pdf-modal-content
-          className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto" 
+          className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-visible" 
           style={{ 
-            height: window.innerWidth < 768 ? 'calc(100vh - 140px)' : 'calc(100vh - 220px)',
-            maxHeight: window.innerWidth < 768 ? 'calc(100vh - 140px)' : 'calc(100vh - 220px)',
             scrollBehavior: 'auto'
           } as React.CSSProperties}
         >
@@ -235,10 +185,8 @@ export default function PdfViewerModal({
                              fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
                              (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
               
-              const contentHeight = window.innerWidth < 768 ? 'calc(100vh - 140px)' : 'calc(100vh - 220px)'
-              
               return isImage ? (
-                <div className="relative w-full rounded-2xl overflow-y-auto border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ height: contentHeight, minHeight: contentHeight, maxHeight: contentHeight }}>
+                <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
                   <img
                     src={fileUrl}
                     alt={title}
@@ -256,7 +204,7 @@ export default function PdfViewerModal({
                       const parent = target.parentElement
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="flex flex-col items-center justify-center h-full p-8 text-gray-500">
+                          <div class="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
                             <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -277,33 +225,22 @@ export default function PdfViewerModal({
                   />
                 </div>
               ) : (
-                <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ height: contentHeight, minHeight: contentHeight, maxHeight: contentHeight }}>
+                <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: '600px', height: '80vh' }}>
                   <iframe
                     key={`iframe-${fileUrl}`}
                     src={`${fileUrl}#toolbar=0&zoom=page-fit&view=FitH`}
                     title={title}
                     className="w-full h-full"
-                    style={{ border: 'none' }}
+                    style={{ border: 'none', minHeight: '600px' }}
                     onLoad={() => {
                       console.log('[PdfViewerModal] iframe 로드 성공:', fileUrl)
-                      // iframe 로드 후 상단으로 스크롤
-                      try {
-                        const iframe = document.querySelector(`iframe[src*="${fileUrl.split('#')[0]}"]`) as HTMLIFrameElement
-                        if (iframe && iframe.contentWindow) {
-                          setTimeout(() => {
-                            iframe.contentWindow?.scrollTo(0, 0)
-                          }, 100)
-                        }
-                      } catch (e) {
-                        // CORS 문제로 접근 불가할 수 있음
-                      }
                     }}
                   />
                 </div>
               )
             })()
           ) : (
-            <div className="w-full overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700" style={{ height: window.innerWidth < 768 ? 'calc(100vh - 140px)' : 'calc(100vh - 200px)', minHeight: window.innerWidth < 768 ? 'calc(100vh - 140px)' : 'calc(100vh - 200px)', maxHeight: window.innerWidth < 768 ? 'calc(100vh - 140px)' : 'calc(100vh - 200px)' }}>
+            <div className="w-full border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700" style={{ minHeight: '400px' }}>
               {isLoading && <p className="text-gray-500">본문을 불러오는 중입니다...</p>}
               {error && !isLoading && <p className="text-red-500">{error}</p>}
               {!isLoading && !error && textContent && (

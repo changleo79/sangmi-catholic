@@ -135,6 +135,24 @@ export default function AlbumDetail() {
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
     window.addEventListener('focus', handleFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    // 모바일에서도 이벤트가 제대로 작동하도록 추가 체크
+    if (window.innerWidth < 768) {
+      const intervalId = setInterval(() => {
+        if (mountedRef.current && !document.hidden && !isLoadingRef.current && id) {
+          console.log('[AlbumDetail] 모바일 주기적 체크:', id)
+          loadedAlbumIdRef.current = null
+          loadAlbumData(id)
+        }
+      }, 3000) // 3초마다 체크
+      
+      return () => {
+        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
+        window.removeEventListener('focus', handleFocus)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
+      }
+    }
 
     return () => {
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)

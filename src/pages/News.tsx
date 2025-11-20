@@ -230,13 +230,16 @@ export default function News() {
                       if (window.innerWidth < 768) {
                         e.preventDefault()
                         e.stopPropagation()
-                        console.log('[News] 주보 터치 (모바일):', bulletin.title, 'fileUrl:', bulletin.fileUrl, 'thumbnailUrl:', bulletin.thumbnailUrl)
+                        console.log('[News] 주보 터치 (모바일):', {
+                          title: bulletin.title,
+                          fileUrl: bulletin.fileUrl,
+                          thumbnailUrl: bulletin.thumbnailUrl,
+                          bulletin: bulletin
+                        })
                         if (bulletin && bulletin.fileUrl) {
-                          // 약간의 지연 후 모달 열기 (이중 클릭 방지)
-                          setTimeout(() => {
-                            setSelectedBulletin(bulletin)
-                            setIsPdfModalOpen(true)
-                          }, 100)
+                          // 즉시 모달 열기 (지연 제거)
+                          setSelectedBulletin(bulletin)
+                          setIsPdfModalOpen(true)
                         } else {
                           console.error('[News] 주보 데이터 없음 (모바일):', bulletin)
                           alert('주보 파일을 불러올 수 없습니다.')
