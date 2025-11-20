@@ -344,10 +344,14 @@ export const exportFAQs = (): void => {
 
 // 앨범 관리
 export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
-  // forceRefresh가 true이면 캐시 무시하고 localStorage에서 직접 읽기
+  // forceRefresh가 true이면 캐시 완전히 무시하고 localStorage에서 직접 읽기
   if (forceRefresh) {
     // 캐시 무효화
     cachedData.albums = undefined
+    // window 객체의 캐시도 무효화
+    if ((window as any).__albumsCache) {
+      delete (window as any).__albumsCache
+    }
   } else if (cachedData.albums) {
     return cachedData.albums
   }
@@ -382,7 +386,11 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
           photos: Array.isArray(album.photos) ? album.photos : []
         }))
         
-        cachedData.albums = validAlbums
+        // forceRefresh가 true이면 캐시에 저장하지 않음 (다음 호출 시 다시 읽기)
+        if (!forceRefresh) {
+          cachedData.albums = validAlbums
+        }
+        console.log('[getAlbums] localStorage에서 로드:', validAlbums.length, '개 앨범', forceRefresh ? '(강제 새로고침)' : '(캐시 사용)')
         return validAlbums
       }
     } catch (e) {
@@ -544,24 +552,35 @@ export const exportCatechismInfo = (): void => {
 
 // 주보 안내 관리
 export const getBulletins = (forceRefresh = false): BulletinItem[] => {
-  // 강제 새로고침이 요청되면 캐시 무시
+  // 강제 새로고침이 요청되면 캐시 완전히 무시
   if (forceRefresh) {
     cachedData.bulletins = undefined
+    // window 객체의 캐시도 무효화
+    if ((window as any).__bulletinsCache) {
+      delete (window as any).__bulletinsCache
+    }
   }
   
-  if (cachedData.bulletins) return cachedData.bulletins
+  if (!forceRefresh && cachedData.bulletins) {
+    return cachedData.bulletins
+  }
   
   const stored = localStorage.getItem(BULLETINS_KEY)
   if (stored) {
     try {
       const parsed = JSON.parse(stored)
-      cachedData.bulletins = parsed
+      // forceRefresh가 true이면 캐시에 저장하지 않음 (다음 호출 시 다시 읽기)
+      if (!forceRefresh) {
+        cachedData.bulletins = parsed
+      }
+      console.log('[getBulletins] localStorage에서 로드:', parsed.length, '개 주보', forceRefresh ? '(강제 새로고침)' : '(캐시 사용)')
       return parsed
     } catch (e) {
       // JSON 파싱 실패 시 무시
       console.error('[getBulletins] JSON 파싱 오류:', e)
     }
   }
+  console.log('[getBulletins] 주보 데이터 없음')
   return []
 }
 

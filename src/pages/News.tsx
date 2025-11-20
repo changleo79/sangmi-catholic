@@ -41,9 +41,16 @@ export default function News() {
       ])
     }
 
-    // 주보 데이터 강제 새로고침
+    // 주보 데이터 강제 새로고침 (캐시 완전히 무효화)
+    if ((window as any).__bulletinsCache) {
+      delete (window as any).__bulletinsCache
+    }
+    // storage.ts의 cachedData도 무효화
+    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+      (window as any).cachedData.bulletins = undefined
+    }
     const storedBulletins = getBulletins(true)
-    console.log('[News] 주보 로드:', storedBulletins.length, '개')
+    console.log('[News] 주보 로드:', storedBulletins.length, '개', storedBulletins)
     setBulletins(storedBulletins)
   }
 
@@ -53,25 +60,67 @@ export default function News() {
     // 주보 업데이트 이벤트 리스너
     const handleBulletinsUpdate = () => {
       console.log('[News] bulletinsUpdated 이벤트 수신')
-      // 캐시 무효화 후 다시 로드
+      // 캐시 완전히 무효화
       if ((window as any).__bulletinsCache) {
         delete (window as any).__bulletinsCache
       }
+      // storage.ts의 cachedData도 무효화
+      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+        (window as any).cachedData.bulletins = undefined
+      }
       const storedBulletins = getBulletins(true)
-      console.log('[News] 주보 업데이트 후 로드:', storedBulletins.length, '개')
+      console.log('[News] 주보 업데이트 후 로드:', storedBulletins.length, '개', storedBulletins)
       setBulletins(storedBulletins)
     }
     
     // 포커스 및 visibilitychange 이벤트도 추가
     const handleFocus = () => {
       console.log('[News] focus 이벤트 - 주보 다시 로드')
+      // 캐시 완전히 무효화
+      if ((window as any).__bulletinsCache) {
+        delete (window as any).__bulletinsCache
+      }
+      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+        (window as any).cachedData.bulletins = undefined
+      }
       loadData()
     }
     
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log('[News] visibilitychange 이벤트 - 주보 다시 로드')
+        // 캐시 완전히 무효화
+        if ((window as any).__bulletinsCache) {
+          delete (window as any).__bulletinsCache
+        }
+        if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+          (window as any).cachedData.bulletins = undefined
+        }
         loadData()
+      }
+    }
+    
+    // 모바일에서도 주기적으로 체크
+    if (window.innerWidth < 768) {
+      const intervalId = setInterval(() => {
+        if (!document.hidden) {
+          console.log('[News] 모바일 주기적 체크 - 주보 다시 로드')
+          // 캐시 완전히 무효화
+          if ((window as any).__bulletinsCache) {
+            delete (window as any).__bulletinsCache
+          }
+          if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+            (window as any).cachedData.bulletins = undefined
+          }
+          loadData()
+        }
+      }, 3000) // 3초마다 체크
+      
+      return () => {
+        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+        window.removeEventListener('focus', handleFocus)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
       }
     }
     

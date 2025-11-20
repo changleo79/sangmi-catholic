@@ -113,7 +113,7 @@ export default function PdfViewerModal({
         }
       }}
     >
-      <div className="relative w-full h-full bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-visible flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
+      <div className="relative w-full h-full sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-visible flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>

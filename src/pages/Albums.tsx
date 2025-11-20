@@ -89,14 +89,36 @@ export default function Albums() {
 
   const loadAlbums = () => {
     try {
+      // 캐시 완전히 무효화
+      if ((window as any).__albumsCache) {
+        delete (window as any).__albumsCache
+      }
+      // storage.ts의 cachedData도 무효화
+      if ((window as any).cachedData && (window as any).cachedData.albums) {
+        (window as any).cachedData.albums = undefined
+      }
       ensureDefaultAlbumExists()
       const albums = getAlbums(true) // 강제 새로고침
-      console.log('[Albums] getAlbums()로 로드:', albums.length, '개 앨범')
+      console.log('[Albums] getAlbums()로 로드:', albums.length, '개 앨범', albums)
       setAlbums(albums)
     } catch (error) {
       console.error('[Albums] 로드 오류:', error)
-      const fallback = getAlbums(true) // 강제 새로고침
-      setAlbums(fallback)
+      // 에러 발생 시 localStorage에서 직접 읽기
+      try {
+        const stored = localStorage.getItem('admin_albums')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          console.log('[Albums] localStorage에서 직접 로드:', parsed.length, '개 앨범')
+          setAlbums(parsed)
+        } else {
+          const fallback = getAlbums(true)
+          setAlbums(fallback)
+        }
+      } catch (e) {
+        console.error('[Albums] localStorage 읽기 실패:', e)
+        const fallback = getAlbums(true)
+        setAlbums(fallback)
+      }
     }
   }
 
