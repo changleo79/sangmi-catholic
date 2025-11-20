@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getAlbums, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
 import ImageLightbox from '../components/ImageLightbox'
@@ -11,6 +11,8 @@ export default function AlbumDetail() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [isAutoPlay, setIsAutoPlay] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const loadedAlbumIdRef = useRef<string | null>(null)
+  const isLoadingRef = useRef(false)
   
   // photos 배열을 안정적으로 가져오기 (useMemo 제거하여 무한 루프 방지)
   const photos = album?.photos && Array.isArray(album.photos) ? album.photos : []
@@ -20,24 +22,40 @@ export default function AlbumDetail() {
       console.error('[AlbumDetail] 앨범 ID가 없습니다.')
       setAlbum(null)
       setIsLoading(false)
+      loadedAlbumIdRef.current = null
+      return
+    }
+
+    // 이미 같은 앨범이 로드되어 있으면 다시 로드하지 않음
+    if (loadedAlbumIdRef.current === id && album && album.id === id) {
+      console.log('[AlbumDetail] 이미 같은 앨범이 로드되어 있습니다. 다시 로드하지 않습니다.')
+      setIsLoading(false)
       return
     }
 
     let cancelled = false
     let retryCount = 0
     const maxRetries = 5
-    let isLoadingInProgress = false
     let defaultAlbumChecked = false
 
     const loadAlbum = async (retry = false) => {
-      if (cancelled || isLoadingInProgress) return
+      if (cancelled || isLoadingRef.current) {
+        console.log('[AlbumDetail] 로드 취소됨 또는 이미 로딩 중')
+        return
+      }
       
-      isLoadingInProgress = true
+      isLoadingRef.current = true
       
       try {
         // 재시도 시 대기 시간 증가
         const delay = retry ? Math.min(200 * retryCount, 1000) : 50
         await new Promise(resolve => setTimeout(resolve, delay))
+        
+        // ID가 변경되었으면 취소
+        if (cancelled) {
+          isLoadingRef.current = false
+          return
+        }
         
         // 캐시 명시적으로 무효화
         if ((window as any).__albumsCache) {
@@ -94,18 +112,20 @@ export default function AlbumDetail() {
             photos: photosArray
           }
           
-          // 상태 업데이트를 한 번에 처리 (함수형 업데이트로 무한 루프 방지)
-          setAlbum((prevAlbum) => {
-            // 이미 같은 앨범이 로드되어 있으면 업데이트하지 않음
-            if (prevAlbum && prevAlbum.id === albumData.id) {
-              console.log('[AlbumDetail] 이미 같은 앨범이 로드되어 있습니다. 업데이트하지 않습니다.')
-              return prevAlbum
-            }
-            return albumData
-          })
+          // 이미 같은 앨범이 로드되어 있으면 업데이트하지 않음
+          if (loadedAlbumIdRef.current === albumData.id) {
+            console.log('[AlbumDetail] 이미 같은 앨범이 로드되어 있습니다. 업데이트하지 않습니다.')
+            setIsLoading(false)
+            isLoadingRef.current = false
+            return
+          }
+          
+          // 상태 업데이트를 한 번에 처리
+          loadedAlbumIdRef.current = albumData.id
+          setAlbum(albumData)
           setCurrentPhotoIndex(0)
           setIsLoading(false)
-          isLoadingInProgress = false
+          isLoadingRef.current = false
           return
         }
         
@@ -121,7 +141,7 @@ export default function AlbumDetail() {
         if (retryCount < maxRetries) {
           console.warn(`[AlbumDetail] 재시도 중... (${retryCount + 1}/${maxRetries})`)
           retryCount++
-          isLoadingInProgress = false
+          isLoadingRef.current = false
           setTimeout(() => loadAlbum(true), 300)
           return
         }
@@ -134,16 +154,18 @@ export default function AlbumDetail() {
           availableTitles: albums.map(a => a.title)
         })
         
+        loadedAlbumIdRef.current = null
         setAlbum(null)
         setIsLoading(false)
-        isLoadingInProgress = false
+        isLoadingRef.current = false
       } catch (error) {
         console.error('[AlbumDetail] 앨범 로드 오류:', error)
-        isLoadingInProgress = false
+        isLoadingRef.current = false
         if (retryCount < maxRetries) {
           retryCount++
           setTimeout(() => loadAlbum(true), 300)
         } else {
+          loadedAlbumIdRef.current = null
           setAlbum(null)
           setIsLoading(false)
         }
@@ -153,33 +175,30 @@ export default function AlbumDetail() {
     // 초기 로드
     loadAlbum()
 
-    const handleAlbumsUpdate = (e: Event) => {
-      if (!cancelled && !isLoadingInProgress) {
-        const customEvent = e as CustomEvent
-        // 기본 앨범 생성으로 인한 이벤트는 무시
-        if (customEvent.detail?.isDefaultAlbum) {
-          console.log('[AlbumDetail] 기본 앨범 생성 이벤트 무시')
-          return
-        }
+    const handleAlbumsUpdate = () => {
+      if (!cancelled && !isLoadingRef.current && id) {
         console.log('[AlbumDetail] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
+        loadedAlbumIdRef.current = null // 강제로 다시 로드
         loadAlbum(true)
       }
     }
 
     const handleFocus = () => {
-      if (!cancelled && !isLoadingInProgress) {
+      if (!cancelled && !isLoadingRef.current && id) {
         console.log('[AlbumDetail] focus 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
+        loadedAlbumIdRef.current = null // 강제로 다시 로드
         loadAlbum(true)
       }
     }
 
     // visibilitychange 이벤트도 추가 (탭 전환 시)
     const handleVisibilityChange = () => {
-      if (!cancelled && !document.hidden && !isLoadingInProgress) {
+      if (!cancelled && !document.hidden && !isLoadingRef.current && id) {
         console.log('[AlbumDetail] visibilitychange 이벤트 수신 - 데이터 다시 로드')
         retryCount = 0
+        loadedAlbumIdRef.current = null // 강제로 다시 로드
         loadAlbum(true)
       }
     }
@@ -190,6 +209,7 @@ export default function AlbumDetail() {
 
     return () => {
       cancelled = true
+      isLoadingRef.current = false
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
       window.removeEventListener('focus', handleFocus)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
