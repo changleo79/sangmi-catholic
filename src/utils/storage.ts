@@ -543,15 +543,23 @@ export const exportCatechismInfo = (): void => {
 }
 
 // 주보 안내 관리
-export const getBulletins = (): BulletinItem[] => {
+export const getBulletins = (forceRefresh = false): BulletinItem[] => {
+  // 강제 새로고침이 요청되면 캐시 무시
+  if (forceRefresh) {
+    cachedData.bulletins = undefined
+  }
+  
   if (cachedData.bulletins) return cachedData.bulletins
   
   const stored = localStorage.getItem(BULLETINS_KEY)
   if (stored) {
     try {
-      return JSON.parse(stored)
+      const parsed = JSON.parse(stored)
+      cachedData.bulletins = parsed
+      return parsed
     } catch (e) {
       // JSON 파싱 실패 시 무시
+      console.error('[getBulletins] JSON 파싱 오류:', e)
     }
   }
   return []

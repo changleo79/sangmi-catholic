@@ -80,6 +80,14 @@ export default function AlbumDetail() {
     }
   }
 
+  // 컴포넌트 마운트 시 mountedRef 초기화
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
   // ID가 변경될 때만 앨범 로드
   useEffect(() => {
     if (!id) {
@@ -93,10 +101,6 @@ export default function AlbumDetail() {
     if (loadedAlbumIdRef.current !== id) {
       loadedAlbumIdRef.current = null
       loadAlbumData(id)
-    }
-
-    return () => {
-      mountedRef.current = false
     }
   }, [id])
 
@@ -292,7 +296,10 @@ export default function AlbumDetail() {
           <div className="mb-8">
             <div
               className="relative w-full bg-black rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
-              style={{ height: 'calc(100vh - 400px)', minHeight: '500px' }}
+              style={{ 
+                height: 'clamp(300px, calc(100vh - 300px), 800px)',
+                minHeight: '300px'
+              }}
               onClick={() => setIsLightboxOpen(true)}
             >
               <img

@@ -119,7 +119,7 @@ export default function PdfViewerModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-start sm:items-center justify-center p-0 sm:p-2 sm:p-4 pt-16 sm:pt-4 animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-0 sm:p-2 sm:p-4 animate-fade-in"
       onClick={(e) => {
         // 배경 클릭 시 닫기
         if (e.target === e.currentTarget) {
@@ -127,7 +127,7 @@ export default function PdfViewerModal({
         }
       }}
     >
-      <div className="relative w-full h-full sm:h-auto sm:max-w-6xl bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden my-0 sm:my-4 sm:my-8 max-h-[100vh] sm:max-h-[95vh] flex flex-col">
+      <div className="relative w-full h-full sm:h-auto sm:max-w-6xl bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden sm:my-4 sm:my-8 max-h-[100vh] sm:max-h-[95vh] flex flex-col">
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0 sticky top-0 z-10">
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
@@ -185,7 +185,7 @@ export default function PdfViewerModal({
           </div>
         </div>
 
-        <div className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto">
+        <div className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
           {activeTab === 'pdf' ? (
             (() => {
               // 이미지 파일인지 확인
@@ -194,7 +194,7 @@ export default function PdfViewerModal({
                              (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
               
               return isImage ? (
-                <div className="relative w-full min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] rounded-2xl overflow-y-auto border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4">
+                <div className="relative w-full rounded-2xl overflow-y-auto border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: 'calc(100vh - 250px)', maxHeight: 'calc(100vh - 250px)' }}>
                   <img
                     src={fileUrl}
                     alt={title}
@@ -217,18 +217,18 @@ export default function PdfViewerModal({
                   />
                 </div>
               ) : (
-                <div className="relative w-full min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] rounded-2xl overflow-hidden border border-gray-100 shadow-inner">
+                <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: 'calc(100vh - 250px)', maxHeight: 'calc(100vh - 250px)' }}>
                   <iframe
                     src={`${fileUrl}#toolbar=0`}
                     title={title}
                     className="w-full h-full"
-                    style={{ border: 'none', minHeight: '50vh' }}
+                    style={{ border: 'none' }}
                   />
                 </div>
               )
             })()
           ) : (
-            <div className="w-full min-h-[50vh] sm:min-h-[60vh] md:min-h-[70vh] overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700">
+            <div className="w-full overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700" style={{ minHeight: 'calc(100vh - 250px)', maxHeight: 'calc(100vh - 250px)' }}>
               {isLoading && <p className="text-gray-500">본문을 불러오는 중입니다...</p>}
               {error && !isLoading && <p className="text-red-500">{error}</p>}
               {!isLoading && !error && textContent && (

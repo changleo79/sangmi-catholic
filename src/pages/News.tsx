@@ -18,6 +18,11 @@ export default function News() {
   const itemsPerPage = 10
 
   const loadData = () => {
+    // 캐시 무효화
+    if ((window as any).__bulletinsCache) {
+      delete (window as any).__bulletinsCache
+    }
+    
     const storedNotices = getNotices()
     if (storedNotices.length > 0) {
       setNotices(storedNotices)
@@ -36,7 +41,9 @@ export default function News() {
       ])
     }
 
-    const storedBulletins = getBulletins()
+    // 주보 데이터 강제 새로고침
+    const storedBulletins = getBulletins(true)
+    console.log('[News] 주보 로드:', storedBulletins.length, '개')
     setBulletins(storedBulletins)
   }
 
@@ -46,14 +53,36 @@ export default function News() {
     // 주보 업데이트 이벤트 리스너
     const handleBulletinsUpdate = () => {
       console.log('[News] bulletinsUpdated 이벤트 수신')
-      const storedBulletins = getBulletins()
+      // 캐시 무효화 후 다시 로드
+      if ((window as any).__bulletinsCache) {
+        delete (window as any).__bulletinsCache
+      }
+      const storedBulletins = getBulletins(true)
+      console.log('[News] 주보 업데이트 후 로드:', storedBulletins.length, '개')
       setBulletins(storedBulletins)
     }
     
+    // 포커스 및 visibilitychange 이벤트도 추가
+    const handleFocus = () => {
+      console.log('[News] focus 이벤트 - 주보 다시 로드')
+      loadData()
+    }
+    
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('[News] visibilitychange 이벤트 - 주보 다시 로드')
+        loadData()
+      }
+    }
+    
     window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
       window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
