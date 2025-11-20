@@ -198,56 +198,89 @@ export default function AlbumsManage() {
 
     setIsUploading(true)
     const targetAlbumId = getActiveAlbumId()
-    const body = new FormData()
-    body.append('albumId', targetAlbumId)
-    files.forEach((file) => body.append('files', file))
+    const uploadedPhotos: AlbumPhoto[] = []
+    const failedFiles: string[] = []
 
     try {
       console.log(`[업로드 시작] ${files.length}개 파일, Album ID: ${targetAlbumId}`)
       
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body
-      })
+      // 파일을 하나씩 순차적으로 업로드 (Vercel 요청 본문 크기 제한 회피)
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const body = new FormData()
+        body.append('albumId', targetAlbumId)
+        body.append('files', file)
 
-      console.log(`[업로드 응답] Status: ${response.status}, OK: ${response.ok}`)
-
-      if (!response.ok) {
-        let errorMessage = `서버 오류 (${response.status})`
         try {
-          const result = await response.json()
-          errorMessage = result.message || errorMessage
-          if (result.missingEnv) {
-            errorMessage += `\n\n누락된 환경 변수: ${result.missingEnv.join(', ')}\nVercel 환경 변수 설정을 확인해 주세요.`
+          console.log(`[업로드 중] ${i + 1}/${files.length}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+          
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body
+          })
+
+          console.log(`[업로드 응답] ${i + 1}/${files.length} - Status: ${response.status}, OK: ${response.ok}`)
+
+          if (!response.ok) {
+            let errorMessage = `서버 오류 (${response.status})`
+            try {
+              const result = await response.json()
+              errorMessage = result.message || errorMessage
+              if (result.missingEnv) {
+                errorMessage += `\n\n누락된 환경 변수: ${result.missingEnv.join(', ')}\nVercel 환경 변수 설정을 확인해 주세요.`
+              }
+            } catch {
+              const text = await response.text().catch(() => '')
+              errorMessage = text || errorMessage
+            }
+            throw new Error(errorMessage)
           }
-        } catch {
-          const text = await response.text().catch(() => '')
-          errorMessage = text || errorMessage
+
+          const result = await response.json() as { uploads: { url: string; originalName: string }[] }
+          
+          if (!result.uploads || result.uploads.length === 0) {
+            throw new Error('업로드된 파일이 없습니다.')
+          }
+
+          const uploaded = result.uploads[0]
+          uploadedPhotos.push({
+            src: uploaded.url,
+            alt: file.name || uploaded.originalName || undefined
+          })
+          
+          console.log(`[업로드 성공] ${i + 1}/${files.length}: ${uploaded.url}`)
+          
+          // 진행 상황 업데이트 (선택사항)
+          if (files.length > 1) {
+            setFormData(prev => ({
+              ...prev,
+              id: prev.id || targetAlbumId,
+              photos: [...prev.photos, ...uploadedPhotos]
+            }))
+          }
+        } catch (error) {
+          console.error(`[업로드 실패] ${i + 1}/${files.length}: ${file.name}`, error)
+          failedFiles.push(file.name)
+          // 개별 파일 실패해도 계속 진행
         }
-        throw new Error(errorMessage)
       }
 
-      const result = await response.json() as { uploads: { url: string; originalName: string }[] }
-      
-      if (!result.uploads || result.uploads.length === 0) {
-        throw new Error('업로드된 파일이 없습니다.')
+      // 모든 업로드 완료 후 최종 업데이트
+      if (uploadedPhotos.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          id: prev.id || targetAlbumId,
+          photos: [...prev.photos, ...uploadedPhotos]
+        }))
       }
 
-      console.log(`[업로드 성공] ${result.uploads.length}개 파일 업로드 완료`)
-      console.log('업로드된 URL:', result.uploads.map(u => u.url))
+      console.log(`[업로드 완료] 성공: ${uploadedPhotos.length}개, 실패: ${failedFiles.length}개`)
 
-      const uploadedPhotos: AlbumPhoto[] = result.uploads.map((item, index) => ({
-        src: item.url,
-        alt: files[index]?.name || item.originalName || undefined
-      }))
-
-      setFormData(prev => ({
-        ...prev,
-        id: prev.id || targetAlbumId,
-        photos: [...prev.photos, ...uploadedPhotos]
-      }))
-      
-      alert(`${uploadedPhotos.length}개 이미지가 성공적으로 업로드되었습니다.`)
+      if (failedFiles.length > 0) {
+        alert(`${uploadedPhotos.length}개 이미지가 업로드되었습니다.\n\n다음 파일 업로드에 실패했습니다:\n${failedFiles.join('\n')}\n\n브라우저 개발자 도구(F12)의 Console을 확인해 주세요.`)
+      } else {
+        alert(`${uploadedPhotos.length}개 이미지가 성공적으로 업로드되었습니다.`)
+      }
     } catch (error) {
       console.error('[업로드 실패]', error)
       const errorMessage = error instanceof Error ? error.message : '이미지를 업로드하는 중 오류가 발생했습니다.'
