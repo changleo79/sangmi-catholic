@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getAlbums, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
 import ImageLightbox from '../components/ImageLightbox'
@@ -12,13 +12,8 @@ export default function AlbumDetail() {
   const [isAutoPlay, setIsAutoPlay] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   
-  // photos 배열을 메모이제이션하여 참조 안정성 확보
-  const photos = useMemo(() => {
-    if (!album?.photos || !Array.isArray(album.photos)) {
-      return []
-    }
-    return album.photos
-  }, [album?.photos])
+  // photos 배열을 안정적으로 가져오기 (useMemo 제거하여 무한 루프 방지)
+  const photos = album?.photos && Array.isArray(album.photos) ? album.photos : []
 
   useEffect(() => {
     if (!id) {
@@ -218,15 +213,16 @@ export default function AlbumDetail() {
     )
   }
 
-  const goToPrevious = useCallback(() => {
+  // useCallback 제거하여 무한 루프 방지
+  const goToPrevious = () => {
     if (photos.length === 0) return
     setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)
-  }, [photos.length])
+  }
 
-  const goToNext = useCallback(() => {
+  const goToNext = () => {
     if (photos.length === 0) return
     setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
-  }, [photos.length])
+  }
 
   useEffect(() => {
     if (!isAutoPlay || photos.length === 0) return
