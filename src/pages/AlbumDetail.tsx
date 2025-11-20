@@ -11,195 +11,120 @@ export default function AlbumDetail() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [isAutoPlay, setIsAutoPlay] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  
+  // useRef로 추적하여 무한 루프 방지
   const loadedAlbumIdRef = useRef<string | null>(null)
   const isLoadingRef = useRef(false)
-  
-  // photos 배열을 안정적으로 가져오기 (useMemo 제거하여 무한 루프 방지)
+  const mountedRef = useRef(true)
+
+  // photos 배열을 안정적으로 가져오기
   const photos = album?.photos && Array.isArray(album.photos) ? album.photos : []
 
+  // 앨범 로드 - useEffect와 완전히 분리
+  const loadAlbumData = async (albumId: string) => {
+    if (isLoadingRef.current || !mountedRef.current) {
+      return
+    }
+
+    isLoadingRef.current = true
+    setIsLoading(true)
+
+    try {
+      // 캐시 무효화
+      if ((window as any).__albumsCache) {
+        delete (window as any).__albumsCache
+      }
+
+      // 기본 앨범 확인
+      ensureDefaultAlbumExists()
+
+      // 앨범 데이터 가져오기
+      const albums = getAlbums(true)
+      console.log(`[AlbumDetail] 앨범 로드 시도: ID=${albumId}, 전체 앨범 수=${albums.length}`)
+
+      const found = albums.find(a => a.id === albumId)
+
+      if (found && mountedRef.current) {
+        const photosArray = Array.isArray(found.photos) ? found.photos : []
+        const albumData: AlbumWithCategory = {
+          ...found,
+          photos: photosArray
+        }
+
+        // 이미 같은 앨범이 로드되어 있으면 업데이트하지 않음
+        if (loadedAlbumIdRef.current === albumData.id) {
+          console.log('[AlbumDetail] 이미 로드된 앨범입니다.')
+          setIsLoading(false)
+          isLoadingRef.current = false
+          return
+        }
+
+        loadedAlbumIdRef.current = albumData.id
+        setAlbum(albumData)
+        setCurrentPhotoIndex(0)
+        console.log('[AlbumDetail] 앨범 로드 완료:', { id: albumData.id, title: albumData.title, photosCount: photosArray.length })
+      } else if (mountedRef.current) {
+        console.warn('[AlbumDetail] 앨범을 찾을 수 없습니다:', albumId)
+        setAlbum(null)
+      }
+    } catch (error) {
+      console.error('[AlbumDetail] 앨범 로드 오류:', error)
+      if (mountedRef.current) {
+        setAlbum(null)
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false)
+        isLoadingRef.current = false
+      }
+    }
+  }
+
+  // ID가 변경될 때만 앨범 로드
   useEffect(() => {
     if (!id) {
-      console.error('[AlbumDetail] 앨범 ID가 없습니다.')
       setAlbum(null)
       setIsLoading(false)
       loadedAlbumIdRef.current = null
       return
     }
 
-    // 이미 같은 앨범이 로드되어 있으면 다시 로드하지 않음
-    if (loadedAlbumIdRef.current === id && album && album.id === id) {
-      console.log('[AlbumDetail] 이미 같은 앨범이 로드되어 있습니다. 다시 로드하지 않습니다.')
-      setIsLoading(false)
-      return
+    // ID가 변경되었거나 아직 로드되지 않은 경우에만 로드
+    if (loadedAlbumIdRef.current !== id) {
+      loadedAlbumIdRef.current = null
+      loadAlbumData(id)
     }
 
-    let cancelled = false
-    let retryCount = 0
-    const maxRetries = 5
-    let defaultAlbumChecked = false
-
-    const loadAlbum = async (retry = false) => {
-      if (cancelled || isLoadingRef.current) {
-        console.log('[AlbumDetail] 로드 취소됨 또는 이미 로딩 중')
-        return
-      }
-      
-      isLoadingRef.current = true
-      
-      try {
-        // 재시도 시 대기 시간 증가
-        const delay = retry ? Math.min(200 * retryCount, 1000) : 50
-        await new Promise(resolve => setTimeout(resolve, delay))
-        
-        // ID가 변경되었으면 취소
-        if (cancelled) {
-          isLoadingRef.current = false
-          return
-        }
-        
-        // 캐시 명시적으로 무효화
-        if ((window as any).__albumsCache) {
-          delete (window as any).__albumsCache
-        }
-        
-        // 기본 앨범은 한 번만 확인 (무한 루프 방지)
-        if (!defaultAlbumChecked) {
-          ensureDefaultAlbumExists()
-          defaultAlbumChecked = true
-        }
-        
-        // 캐시 무시하고 최신 데이터 가져오기
-        const albums = getAlbums(true)
-        console.log(`[AlbumDetail] getAlbums(true)로 로드: ${albums.length}개 앨범`)
-        console.log(`[AlbumDetail] 시도 ${retryCount + 1}/${maxRetries} - 검색 ID: ${id}`)
-        console.log(`[AlbumDetail] 로드된 앨범 목록:`, albums.map(a => ({ 
-          id: a.id, 
-          title: a.title, 
-          photosCount: a.photos?.length || 0,
-          hasPhotos: !!a.photos && Array.isArray(a.photos) && a.photos.length > 0
-        })))
-        
-        // ID로 앨범 찾기 (정확한 매칭)
-        const found = albums.find((a) => {
-          const match = a.id === id
-          if (match) {
-            console.log('[AlbumDetail] 앨범 매칭 성공:', { 
-              searchId: id, 
-              foundId: a.id, 
-              title: a.title,
-              photosCount: a.photos?.length || 0
-            })
-          }
-          return match
-        }) || null
-        
-        if (found) {
-          console.log('[AlbumDetail] 앨범 찾음:', { 
-            id: found.id, 
-            title: found.title, 
-            photosCount: found.photos?.length || 0,
-            category: found.category,
-            date: found.date,
-            photos: found.photos?.map(p => ({ src: p.src?.substring(0, 50) + '...', alt: p.alt })) || []
-          })
-          
-          // photos 배열이 없거나 비어있으면 빈 배열로 설정
-          const photosArray = Array.isArray(found.photos) ? found.photos : []
-          
-          // 앨범 데이터 복사 (원본 수정 방지)
-          const albumData: AlbumWithCategory = {
-            ...found,
-            photos: photosArray
-          }
-          
-          // 이미 같은 앨범이 로드되어 있으면 업데이트하지 않음
-          if (loadedAlbumIdRef.current === albumData.id) {
-            console.log('[AlbumDetail] 이미 같은 앨범이 로드되어 있습니다. 업데이트하지 않습니다.')
-            setIsLoading(false)
-            isLoadingRef.current = false
-            return
-          }
-          
-          // 상태 업데이트를 한 번에 처리
-          loadedAlbumIdRef.current = albumData.id
-          setAlbum(albumData)
-          setCurrentPhotoIndex(0)
-          setIsLoading(false)
-          isLoadingRef.current = false
-          return
-        }
-        
-        // 찾지 못한 경우
-        console.warn(`[AlbumDetail] 앨범을 찾을 수 없습니다. ID: ${id}`)
-        console.log('[AlbumDetail] 사용 가능한 앨범 IDs:', albums.map(a => a.id))
-        console.log('[AlbumDetail] ID 타입 비교:', {
-          searchId: id,
-          searchIdType: typeof id,
-          availableIds: albums.map(a => ({ id: a.id, type: typeof a.id }))
-        })
-        
-        if (retryCount < maxRetries) {
-          console.warn(`[AlbumDetail] 재시도 중... (${retryCount + 1}/${maxRetries})`)
-          retryCount++
-          isLoadingRef.current = false
-          setTimeout(() => loadAlbum(true), 300)
-          return
-        }
-        
-        // 최대 재시도 횟수 초과
-        console.error('[AlbumDetail] 최대 재시도 횟수 초과. 앨범을 찾을 수 없습니다.', {
-          searchId: id,
-          searchIdType: typeof id,
-          availableIds: albums.map(a => a.id),
-          availableTitles: albums.map(a => a.title)
-        })
-        
-        loadedAlbumIdRef.current = null
-        setAlbum(null)
-        setIsLoading(false)
-        isLoadingRef.current = false
-      } catch (error) {
-        console.error('[AlbumDetail] 앨범 로드 오류:', error)
-        isLoadingRef.current = false
-        if (retryCount < maxRetries) {
-          retryCount++
-          setTimeout(() => loadAlbum(true), 300)
-        } else {
-          loadedAlbumIdRef.current = null
-          setAlbum(null)
-          setIsLoading(false)
-        }
-      }
+    return () => {
+      mountedRef.current = false
     }
+  }, [id])
 
-    // 초기 로드
-    loadAlbum()
+  // 이벤트 리스너는 별도 useEffect로 분리
+  useEffect(() => {
+    if (!id) return
 
     const handleAlbumsUpdate = () => {
-      if (!cancelled && !isLoadingRef.current && id) {
-        console.log('[AlbumDetail] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
-        retryCount = 0
+      if (mountedRef.current && !isLoadingRef.current) {
+        console.log('[AlbumDetail] albumsUpdated 이벤트 수신')
         loadedAlbumIdRef.current = null // 강제로 다시 로드
-        loadAlbum(true)
+        loadAlbumData(id)
       }
     }
 
     const handleFocus = () => {
-      if (!cancelled && !isLoadingRef.current && id) {
-        console.log('[AlbumDetail] focus 이벤트 수신 - 데이터 다시 로드')
-        retryCount = 0
-        loadedAlbumIdRef.current = null // 강제로 다시 로드
-        loadAlbum(true)
+      if (mountedRef.current && !isLoadingRef.current) {
+        console.log('[AlbumDetail] focus 이벤트 수신')
+        loadedAlbumIdRef.current = null
+        loadAlbumData(id)
       }
     }
 
-    // visibilitychange 이벤트도 추가 (탭 전환 시)
     const handleVisibilityChange = () => {
-      if (!cancelled && !document.hidden && !isLoadingRef.current && id) {
-        console.log('[AlbumDetail] visibilitychange 이벤트 수신 - 데이터 다시 로드')
-        retryCount = 0
-        loadedAlbumIdRef.current = null // 강제로 다시 로드
-        loadAlbum(true)
+      if (mountedRef.current && !document.hidden && !isLoadingRef.current) {
+        console.log('[AlbumDetail] visibilitychange 이벤트 수신')
+        loadedAlbumIdRef.current = null
+        loadAlbumData(id)
       }
     }
 
@@ -208,13 +133,23 @@ export default function AlbumDetail() {
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      cancelled = true
-      isLoadingRef.current = false
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
       window.removeEventListener('focus', handleFocus)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [id])
+
+  // 자동 재생 useEffect는 album이 변경될 때만 실행
+  useEffect(() => {
+    if (!isAutoPlay || !album || !album.photos || album.photos.length === 0) return
+    
+    const photosLength = album.photos.length
+    const timer = setInterval(() => {
+      setCurrentPhotoIndex((prev) => (prev + 1) % photosLength)
+    }, 4000)
+    
+    return () => clearInterval(timer)
+  }, [isAutoPlay, album?.id, album?.photos?.length])
 
   if (isLoading) {
     return (
@@ -256,7 +191,6 @@ export default function AlbumDetail() {
     )
   }
 
-  // useCallback 제거하여 무한 루프 방지
   const goToPrevious = () => {
     if (photos.length === 0) return
     setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)
@@ -266,15 +200,6 @@ export default function AlbumDetail() {
     if (photos.length === 0) return
     setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
   }
-
-  useEffect(() => {
-    if (!isAutoPlay || !album || !album.photos || album.photos.length === 0) return
-    const photosLength = album.photos.length
-    const timer = setInterval(() => {
-      setCurrentPhotoIndex((prev) => (prev + 1) % photosLength)
-    }, 4000)
-    return () => clearInterval(timer)
-  }, [isAutoPlay, album?.photos?.length])
 
   const handleDownload = async () => {
     const photo = photos[currentPhotoIndex]
@@ -371,7 +296,7 @@ export default function AlbumDetail() {
               onClick={() => setIsLightboxOpen(true)}
             >
               <img
-                key={`main-${photos[currentPhotoIndex]?.src}-${currentPhotoIndex}`}
+                key={`main-${album.id}-${currentPhotoIndex}-${photos[currentPhotoIndex]?.src?.substring(0, 20)}`}
                 src={photos[currentPhotoIndex]?.src}
                 alt={photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
@@ -406,7 +331,10 @@ export default function AlbumDetail() {
               {photos.length > 1 && (
                 <>
                   <button
-                    onClick={goToPrevious}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      goToPrevious()
+                    }}
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center group"
                   >
                     <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -414,7 +342,10 @@ export default function AlbumDetail() {
                     </svg>
                   </button>
                   <button
-                    onClick={goToNext}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      goToNext()
+                    }}
                     className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 transition-all duration-300 flex items-center justify-center group"
                   >
                     <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -447,7 +378,7 @@ export default function AlbumDetail() {
               <div className="mt-6 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {photos.map((photo, index) => (
                   <button
-                    key={`${photo.src}-${index}`}
+                    key={`thumb-${album.id}-${index}-${photo.src?.substring(0, 20)}`}
                     onClick={() => setCurrentPhotoIndex(index)}
                     className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       index === currentPhotoIndex
@@ -457,7 +388,7 @@ export default function AlbumDetail() {
                     style={index === currentPhotoIndex ? { borderColor: '#7B1F4B' } : {}}
                   >
                     <img
-                      key={`thumb-${photo.src}-${index}`}
+                      key={`thumb-img-${album.id}-${index}-${photo.src?.substring(0, 20)}`}
                       src={photo.src}
                       alt={photo.alt || `${album.title} - ${index + 1}`}
                       className="w-full h-full object-cover"
@@ -494,4 +425,3 @@ export default function AlbumDetail() {
     </div>
   )
 }
-
