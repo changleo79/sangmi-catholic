@@ -95,7 +95,7 @@ export default function OrganizationTree() {
 
         {/* Mobile View - Optimized Tree */}
         <div className="md:hidden space-y-10">
-          {/* 주임신부님 */}
+          {/* 주임신부 */}
           <div
             className="relative overflow-hidden rounded-3xl p-8 text-white shadow-xl"
             style={{ background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)' }}
@@ -108,10 +108,7 @@ export default function OrganizationTree() {
                 </svg>
               </div>
               <div className="space-y-2">
-                <h2 className="text-2xl font-bold">주임신부님</h2>
-                <p className="text-sm text-white/80 leading-relaxed">
-                  상미성당 공동체를 이끄는 영적 지도자입니다.
-                </p>
+                <h2 className="text-2xl font-bold">주임신부</h2>
               </div>
             </div>
           </div>
@@ -284,7 +281,7 @@ export default function OrganizationTree() {
         <div className="hidden md:block max-w-7xl mx-auto">
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 overflow-x-auto">
             <div className="min-w-[800px]">
-              {/* Level 1: 주임신부님 */}
+              {/* Level 1: 주임신부 */}
               <div className="flex justify-center mb-8">
                 <div className="relative inline-block">
                   <div 
@@ -300,7 +297,7 @@ export default function OrganizationTree() {
                       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
-                      <h2 className="text-2xl md:text-3xl font-bold">주임신부님</h2>
+                      <h2 className="text-2xl md:text-3xl font-bold">주임신부</h2>
                     </div>
                     <p className="text-sm opacity-90 mt-2">상미성당</p>
                   </div>
