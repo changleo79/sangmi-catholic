@@ -189,10 +189,10 @@ export default function AlbumsManage() {
   const handleFileUpload = async (files: File[]) => {
     if (!files.length) return
     
-    // 파일 크기 검증 (10MB 제한)
-    const oversizedFiles = files.filter(f => f.size > 10 * 1024 * 1024)
+    // 파일 크기 검증 (8MB 제한 - Vercel 요청 본문 크기 제한 고려)
+    const oversizedFiles = files.filter(f => f.size > 8 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
-      alert(`다음 파일이 10MB를 초과합니다: ${oversizedFiles.map(f => f.name).join(', ')}\n이미지를 압축한 뒤 다시 시도해 주세요.`)
+      alert(`다음 파일이 8MB를 초과합니다: ${oversizedFiles.map(f => f.name).join(', ')}\n\n파일 크기:\n${oversizedFiles.map(f => `- ${f.name}: ${(f.size / 1024 / 1024).toFixed(2)}MB`).join('\n')}\n\n이미지를 압축한 뒤 다시 시도해 주세요.`)
       return
     }
 
@@ -250,14 +250,7 @@ export default function AlbumsManage() {
           
           console.log(`[업로드 성공] ${i + 1}/${files.length}: ${uploaded.url}`)
           
-          // 진행 상황 업데이트 (선택사항)
-          if (files.length > 1) {
-            setFormData(prev => ({
-              ...prev,
-              id: prev.id || targetAlbumId,
-              photos: [...prev.photos, ...uploadedPhotos]
-            }))
-          }
+          // 중간 업데이트 제거 - 마지막에 한 번만 업데이트하여 중복 방지
         } catch (error) {
           console.error(`[업로드 실패] ${i + 1}/${files.length}: ${file.name}`, error)
           failedFiles.push(file.name)
@@ -265,13 +258,19 @@ export default function AlbumsManage() {
         }
       }
 
-      // 모든 업로드 완료 후 최종 업데이트
+      // 모든 업로드 완료 후 최종 업데이트 (중복 방지)
       if (uploadedPhotos.length > 0) {
-        setFormData(prev => ({
-          ...prev,
-          id: prev.id || targetAlbumId,
-          photos: [...prev.photos, ...uploadedPhotos]
-        }))
+        setFormData(prev => {
+          // 기존 photos와 새로 업로드된 photos를 합치되, 중복 제거
+          const existingUrls = new Set(prev.photos.map(p => p.src))
+          const newPhotos = uploadedPhotos.filter(p => !existingUrls.has(p.src))
+          
+          return {
+            ...prev,
+            id: prev.id || targetAlbumId,
+            photos: [...prev.photos, ...newPhotos]
+          }
+        })
       }
 
       console.log(`[업로드 완료] 성공: ${uploadedPhotos.length}개, 실패: ${failedFiles.length}개`)

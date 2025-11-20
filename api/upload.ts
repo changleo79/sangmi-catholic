@@ -56,7 +56,7 @@ function parseMultipartForm(req: VercelRequest): Promise<{ albumId: string; file
     const files: UploadedFile[] = []
     let albumId = ''
 
-    const busboy = Busboy({ headers: req.headers, limits: { fileSize: 10 * 1024 * 1024, files: 10 } })
+    const busboy = Busboy({ headers: req.headers, limits: { fileSize: 8 * 1024 * 1024, files: 1 } })
 
     busboy.on('field', (name, value) => {
       if (name === 'albumId') {
