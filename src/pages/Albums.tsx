@@ -9,6 +9,20 @@ export default function Albums() {
   const categories = getAlbumCategories()
 
   useEffect(() => {
+    // 초기 데이터 로드
+    const loadData = async () => {
+      await initializeData()
+      await new Promise(resolve => setTimeout(resolve, 100))
+      loadAlbums()
+      // 기본 앨범이 없으면 초기 데이터 생성
+      const stored = getAlbums(true) // 강제 새로고침
+      if (stored.length === 0) {
+        initializeDefaultAlbum()
+        loadAlbums() // 다시 로드
+      }
+    }
+    loadData()
+
     // 페이지 포커스 시 데이터 다시 로드
     const handleFocus = () => {
       console.log('[Albums] focus 이벤트 - 데이터 다시 로드')
@@ -18,13 +32,18 @@ export default function Albums() {
       }
       loadAlbums()
     }
+    
+    // 앨범 업데이트 이벤트 리스너 (모바일/PC 모두 동작)
     const handleAlbumsUpdate = () => {
-      console.log('[Albums] albumsUpdated 이벤트 - 데이터 다시 로드')
+      console.log('[Albums] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
       // 캐시 무시하고 강제 새로고침
       if ((window as any).__albumsCache) {
         delete (window as any).__albumsCache
       }
-      loadAlbums()
+      // 약간의 지연 후 로드 (저장 완료 대기)
+      setTimeout(() => {
+        loadAlbums()
+      }, 100)
     }
     
     // visibilitychange 이벤트 (탭 전환, 모바일에서 앱 전환 등)
@@ -39,24 +58,27 @@ export default function Albums() {
       }
     }
 
-    // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
-    const loadData = async () => {
-      await initializeData()
-      await new Promise(resolve => setTimeout(resolve, 100))
-      loadAlbums()
-      // 기본 앨범이 없으면 초기 데이터 생성
-      const stored = getAlbums(true) // 강제 새로고침
-      if (stored.length === 0) {
-        initializeDefaultAlbum()
-        loadAlbums() // 다시 로드
-      }
-    }
-    loadData()
-
-    // 페이지 포커스 시 데이터 다시 로드 (다른 탭에서 관리자가 수정한 경우)
+    // 이벤트 리스너 등록
     window.addEventListener('focus', handleFocus)
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
     document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    // 모바일에서도 이벤트가 제대로 작동하도록 추가 이벤트
+    if (window.innerWidth < 768) {
+      // 모바일에서는 페이지 표시 시마다 체크
+      const intervalId = setInterval(() => {
+        if (!document.hidden) {
+          loadAlbums()
+        }
+      }, 2000) // 2초마다 체크
+      
+      return () => {
+        window.removeEventListener('focus', handleFocus)
+        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
+      }
+    }
 
     return () => {
       window.removeEventListener('focus', handleFocus)

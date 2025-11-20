@@ -205,28 +205,42 @@ export default function News() {
                   <div
                     key={bulletin.id}
                     onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      console.log('[News] 주보 클릭 (PC):', bulletin.title, 'fileUrl:', bulletin.fileUrl)
-                      if (bulletin && bulletin.fileUrl) {
-                        setSelectedBulletin(bulletin)
-                        setIsPdfModalOpen(true)
-                      } else {
-                        console.error('[News] 주보 데이터 없음:', bulletin)
-                        alert('주보 파일을 불러올 수 없습니다.')
+                      // PC에서만 클릭 처리 (모바일은 onTouchEnd에서 처리)
+                      if (window.innerWidth >= 768) {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log('[News] 주보 클릭 (PC):', bulletin.title, 'fileUrl:', bulletin.fileUrl)
+                        if (bulletin && bulletin.fileUrl) {
+                          setSelectedBulletin(bulletin)
+                          setIsPdfModalOpen(true)
+                        } else {
+                          console.error('[News] 주보 데이터 없음:', bulletin)
+                          alert('주보 파일을 불러올 수 없습니다.')
+                        }
+                      }
+                    }}
+                    onTouchStart={(e) => {
+                      // 모바일 터치 시작 시 이벤트 전파 방지
+                      if (window.innerWidth < 768) {
+                        e.stopPropagation()
                       }
                     }}
                     onTouchEnd={(e) => {
                       // 모바일 터치 종료 시 클릭 처리
-                      e.preventDefault()
-                      e.stopPropagation()
-                      console.log('[News] 주보 터치 (모바일):', bulletin.title, 'fileUrl:', bulletin.fileUrl, 'thumbnailUrl:', bulletin.thumbnailUrl)
-                      if (bulletin && bulletin.fileUrl) {
-                        setSelectedBulletin(bulletin)
-                        setIsPdfModalOpen(true)
-                      } else {
-                        console.error('[News] 주보 데이터 없음 (모바일):', bulletin)
-                        alert('주보 파일을 불러올 수 없습니다.')
+                      if (window.innerWidth < 768) {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        console.log('[News] 주보 터치 (모바일):', bulletin.title, 'fileUrl:', bulletin.fileUrl, 'thumbnailUrl:', bulletin.thumbnailUrl)
+                        if (bulletin && bulletin.fileUrl) {
+                          // 약간의 지연 후 모달 열기 (이중 클릭 방지)
+                          setTimeout(() => {
+                            setSelectedBulletin(bulletin)
+                            setIsPdfModalOpen(true)
+                          }, 100)
+                        } else {
+                          console.error('[News] 주보 데이터 없음 (모바일):', bulletin)
+                          alert('주보 파일을 불러올 수 없습니다.')
+                        }
                       }
                     }}
                     className="bg-white rounded-2xl shadow-lg hover:shadow-2xl active:shadow-xl transition-all duration-500 p-6 border border-gray-100 hover:border-catholic-logo/20 active:border-catholic-logo/40 group cursor-pointer hover:-translate-y-1 active:scale-95 touch-manipulation"
@@ -254,10 +268,12 @@ export default function News() {
                                 width: '100%', 
                                 height: '100%',
                                 objectFit: 'cover',
-                                objectPosition: 'center'
+                                objectPosition: 'center',
+                                backgroundColor: '#f3f4f6' // 로딩 중 배경색
                               }}
                               loading="lazy"
                               decoding="async"
+                              crossOrigin="anonymous"
                               onError={(e) => {
                                 console.error('[News] 썸네일 이미지 로드 실패:', thumbnailUrl)
                                 // 이미지 로드 실패 시 PDF 아이콘 표시
@@ -277,8 +293,14 @@ export default function News() {
                                   `
                                 }
                               }}
-                              onLoad={() => {
+                              onLoad={(e) => {
                                 console.log('[News] 썸네일 이미지 로드 성공:', thumbnailUrl)
+                                // 로드 성공 시 배경색 제거
+                                const target = e.currentTarget
+                                target.style.backgroundColor = 'transparent'
+                              }}
+                              onLoadStart={() => {
+                                console.log('[News] 썸네일 이미지 로드 시작:', thumbnailUrl)
                               }}
                             />
                           </div>

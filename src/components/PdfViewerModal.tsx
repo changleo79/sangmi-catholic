@@ -33,6 +33,7 @@ export default function PdfViewerModal({
       document.body.style.position = ''
       document.body.style.top = ''
       document.body.style.width = ''
+      document.documentElement.style.overflow = ''
       // 약간의 지연 후 스크롤 복원 (레이아웃 재계산 대기)
       setTimeout(() => {
         window.scrollTo(0, savedPosition)
@@ -40,12 +41,22 @@ export default function PdfViewerModal({
       return
     }
 
-    // 모달이 열릴 때 현재 스크롤 위치 저장 및 상단으로 스크롤
+    // 모달이 열릴 때 현재 스크롤 위치 저장
     scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
-    document.body.style.overflow = 'hidden'
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${scrollPositionRef.current}px`
-    document.body.style.width = '100%'
+    
+    // PC에서 body 스크롤 완전히 차단 (모바일은 모달 내부만 스크롤)
+    if (window.innerWidth >= 768) {
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollPositionRef.current}px`
+      document.body.style.width = '100%'
+      // 추가로 html도 스크롤 방지
+      document.documentElement.style.overflow = 'hidden'
+    } else {
+      // 모바일에서는 body 스크롤만 방지 (모달 내부 스크롤 허용)
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'relative'
+    }
     
     // 모달 컨텐츠를 상단으로 스크롤 (PC에서 윗부분이 잘리는 문제 해결)
     const scrollToTop = () => {
@@ -82,6 +93,7 @@ export default function PdfViewerModal({
       document.body.style.position = ''
       document.body.style.top = ''
       document.body.style.width = ''
+      document.documentElement.style.overflow = ''
       window.removeEventListener('keydown', handleEscape)
     }
   }, [isOpen, onClose])
@@ -231,7 +243,12 @@ export default function PdfViewerModal({
                     src={fileUrl}
                     alt={title}
                     className="w-full h-auto object-contain"
-                    style={{ maxWidth: '100%', display: 'block' }}
+                    style={{ 
+                      maxWidth: '100%', 
+                      display: 'block',
+                      backgroundColor: '#f3f4f6' // 로딩 중 배경색
+                    }}
+                    crossOrigin="anonymous"
                     onError={(e) => {
                       console.error('[PdfViewerModal] 이미지 로드 실패:', fileUrl)
                       const target = e.currentTarget
@@ -248,8 +265,14 @@ export default function PdfViewerModal({
                         `
                       }
                     }}
-                    onLoad={() => {
+                    onLoad={(e) => {
                       console.log('[PdfViewerModal] 이미지 로드 성공:', fileUrl)
+                      // 로드 성공 시 배경색 제거
+                      const target = e.currentTarget
+                      target.style.backgroundColor = 'transparent'
+                    }}
+                    onLoadStart={() => {
+                      console.log('[PdfViewerModal] 이미지 로드 시작:', fileUrl)
                     }}
                   />
                 </div>
