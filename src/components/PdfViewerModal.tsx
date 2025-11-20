@@ -185,7 +185,7 @@ export default function PdfViewerModal({
           </div>
         </div>
 
-        <div className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+        <div className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 150px)' }}>
           {activeTab === 'pdf' ? (
             (() => {
               // 이미지 파일인지 확인
@@ -194,7 +194,7 @@ export default function PdfViewerModal({
                              (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
               
               return isImage ? (
-                <div className="relative w-full rounded-2xl overflow-y-auto border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: 'calc(100vh - 250px)', maxHeight: 'calc(100vh - 250px)' }}>
+                <div className="relative w-full rounded-2xl overflow-y-auto border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: 'calc(100vh - 180px)', maxHeight: 'calc(100vh - 180px)' }}>
                   <img
                     src={fileUrl}
                     alt={title}
@@ -217,7 +217,7 @@ export default function PdfViewerModal({
                   />
                 </div>
               ) : (
-                <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: 'calc(100vh - 250px)', maxHeight: 'calc(100vh - 250px)' }}>
+                <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: 'calc(100vh - 180px)', maxHeight: 'calc(100vh - 180px)' }}>
                   <iframe
                     src={`${fileUrl}#toolbar=0`}
                     title={title}
@@ -228,7 +228,7 @@ export default function PdfViewerModal({
               )
             })()
           ) : (
-            <div className="w-full overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700" style={{ minHeight: 'calc(100vh - 250px)', maxHeight: 'calc(100vh - 250px)' }}>
+            <div className="w-full overflow-y-auto border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700" style={{ minHeight: 'calc(100vh - 180px)', maxHeight: 'calc(100vh - 180px)' }}>
               {isLoading && <p className="text-gray-500">본문을 불러오는 중입니다...</p>}
               {error && !isLoading && <p className="text-red-500">{error}</p>}
               {!isLoading && !error && textContent && (
