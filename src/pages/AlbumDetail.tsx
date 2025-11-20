@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getAlbums, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
 import ImageLightbox from '../components/ImageLightbox'
@@ -11,6 +11,14 @@ export default function AlbumDetail() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [isAutoPlay, setIsAutoPlay] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  
+  // photos 배열을 메모이제이션하여 참조 안정성 확보
+  const photos = useMemo(() => {
+    if (!album?.photos || !Array.isArray(album.photos)) {
+      return []
+    }
+    return album.photos
+  }, [album?.photos])
 
   useEffect(() => {
     if (!id) {
@@ -210,17 +218,15 @@ export default function AlbumDetail() {
     )
   }
 
-  const photos = (album?.photos && Array.isArray(album.photos) && album.photos.length > 0) ? album.photos : []
-
   const goToPrevious = useCallback(() => {
     if (photos.length === 0) return
     setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)
-  }, [photos])
+  }, [photos.length])
 
   const goToNext = useCallback(() => {
     if (photos.length === 0) return
     setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
-  }, [photos])
+  }, [photos.length])
 
   useEffect(() => {
     if (!isAutoPlay || photos.length === 0) return
@@ -228,7 +234,7 @@ export default function AlbumDetail() {
       setCurrentPhotoIndex((prev) => (prev + 1) % photos.length)
     }, 4000)
     return () => clearInterval(timer)
-  }, [isAutoPlay, photos])
+  }, [isAutoPlay, photos.length])
 
   const handleDownload = async () => {
     const photo = photos[currentPhotoIndex]
@@ -325,10 +331,12 @@ export default function AlbumDetail() {
               onClick={() => setIsLightboxOpen(true)}
             >
               <img
+                key={`main-${photos[currentPhotoIndex]?.src}-${currentPhotoIndex}`}
                 src={photos[currentPhotoIndex]?.src}
                 alt={photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                 style={{ objectPosition: 'center' }}
+                loading="eager"
                 onError={(e) => {
                   console.error('[AlbumDetail] 이미지 로드 실패:', photos[currentPhotoIndex]?.src)
                   const target = e.currentTarget
@@ -378,7 +386,7 @@ export default function AlbumDetail() {
 
               {/* Photo Counter */}
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md text-white text-sm flex items-center gap-3">
-                <span>{currentPhotoIndex + 1} / {album.photos.length}</span>
+                <span>{currentPhotoIndex + 1} / {photos.length}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
@@ -399,7 +407,7 @@ export default function AlbumDetail() {
               <div className="mt-6 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {photos.map((photo, index) => (
                   <button
-                    key={index}
+                    key={`${photo.src}-${index}`}
                     onClick={() => setCurrentPhotoIndex(index)}
                     className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       index === currentPhotoIndex
@@ -409,9 +417,11 @@ export default function AlbumDetail() {
                     style={index === currentPhotoIndex ? { borderColor: '#7B1F4B' } : {}}
                   >
                     <img
+                      key={`thumb-${photo.src}-${index}`}
                       src={photo.src}
                       alt={photo.alt || `${album.title} - ${index + 1}`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </button>
                 ))}
