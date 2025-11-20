@@ -207,7 +207,7 @@ export default function News() {
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      console.log('[News] 주보 클릭:', bulletin.title, 'fileUrl:', bulletin.fileUrl)
+                      console.log('[News] 주보 클릭 (PC):', bulletin.title, 'fileUrl:', bulletin.fileUrl)
                       if (bulletin && bulletin.fileUrl) {
                         setSelectedBulletin(bulletin)
                         setIsPdfModalOpen(true)
@@ -220,16 +220,17 @@ export default function News() {
                       // 모바일 터치 종료 시 클릭 처리
                       e.preventDefault()
                       e.stopPropagation()
-                      console.log('[News] 주보 터치:', bulletin.title, 'fileUrl:', bulletin.fileUrl)
+                      console.log('[News] 주보 터치 (모바일):', bulletin.title, 'fileUrl:', bulletin.fileUrl, 'thumbnailUrl:', bulletin.thumbnailUrl)
                       if (bulletin && bulletin.fileUrl) {
                         setSelectedBulletin(bulletin)
                         setIsPdfModalOpen(true)
                       } else {
-                        console.error('[News] 주보 데이터 없음:', bulletin)
+                        console.error('[News] 주보 데이터 없음 (모바일):', bulletin)
+                        alert('주보 파일을 불러올 수 없습니다.')
                       }
                     }}
                     className="bg-white rounded-2xl shadow-lg hover:shadow-2xl active:shadow-xl transition-all duration-500 p-6 border border-gray-100 hover:border-catholic-logo/20 active:border-catholic-logo/40 group cursor-pointer hover:-translate-y-1 active:scale-95 touch-manipulation"
-                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                    style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
                   >
                     <div className="flex flex-col h-full">
                       {(() => {
@@ -243,21 +244,29 @@ export default function News() {
                         const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
                         
                         return thumbnailUrl ? (
-                          <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gray-100" style={{ minHeight: '200px' }}>
+                          <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gray-100" style={{ minHeight: '200px', maxHeight: '400px' }}>
                             <img
                               src={thumbnailUrl}
                               alt={bulletin.title}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                              style={{ display: 'block', width: '100%', height: '100%' }}
+                              style={{ 
+                                display: 'block', 
+                                width: '100%', 
+                                height: '100%',
+                                objectFit: 'cover',
+                                objectPosition: 'center'
+                              }}
                               loading="lazy"
+                              decoding="async"
                               onError={(e) => {
+                                console.error('[News] 썸네일 이미지 로드 실패:', thumbnailUrl)
                                 // 이미지 로드 실패 시 PDF 아이콘 표시
                                 const target = e.currentTarget
                                 target.style.display = 'none'
                                 const parent = target.parentElement
                                 if (parent) {
                                   parent.innerHTML = `
-                                    <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center" style="min-height: 200px;">
+                                    <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center" style="min-height: 200px; max-height: 400px;">
                                       <div class="text-center p-4">
                                         <svg class="w-16 h-16 mx-auto mb-3 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -267,6 +276,9 @@ export default function News() {
                                     </div>
                                   `
                                 }
+                              }}
+                              onLoad={() => {
+                                console.log('[News] 썸네일 이미지 로드 성공:', thumbnailUrl)
                               }}
                             />
                           </div>
@@ -325,7 +337,7 @@ export default function News() {
           </section>
         </div>
       </div>
-      {selectedBulletin && (
+      {selectedBulletin && selectedBulletin.fileUrl && (
         <PdfViewerModal
           isOpen={isPdfModalOpen}
           title={selectedBulletin.title}

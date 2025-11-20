@@ -45,10 +45,23 @@ export default function AlbumsManage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
+    console.log('[AlbumsManage] handleSubmit 시작:', {
+      formDataPhotos: formData.photos.length,
+      formDataCover: formData.cover,
+      formDataTitle: formData.title
+    })
+    
+    // photos 배열이 없거나 비어있으면 경고
+    if (!formData.photos || formData.photos.length === 0) {
+      alert('사진을 추가해 주세요.')
+      return
+    }
+    
     // 커버 이미지가 없으면 첫 번째 사진을 자동으로 사용
     let finalCover = formData.cover
     if (!finalCover && formData.photos.length > 0) {
       finalCover = formData.photos[0].src
+      console.log('[AlbumsManage] 커버 이미지 자동 설정 (저장 시):', finalCover)
     }
     
     let resolvedAlbumId = getActiveAlbumId()
@@ -58,11 +71,19 @@ export default function AlbumsManage() {
       resolvedAlbumId = Date.now().toString()
     }
 
-    const albumData = {
+    const albumData: AlbumWithCategory = {
       ...formData,
       id: resolvedAlbumId,
-      cover: finalCover || '' // 여전히 없으면 빈 문자열
+      cover: finalCover || formData.photos[0]?.src || '', // 여전히 없으면 첫 번째 사진
+      photos: Array.isArray(formData.photos) ? formData.photos : [] // 배열 보장
     }
+    
+    console.log('[AlbumsManage] 저장할 앨범 데이터:', {
+      id: albumData.id,
+      title: albumData.title,
+      photosCount: albumData.photos.length,
+      cover: albumData.cover
+    })
     
     const newAlbums = [...albums]
     
@@ -77,12 +98,34 @@ export default function AlbumsManage() {
       filteredAlbums.unshift(albumData)
       setAlbums(filteredAlbums)
       saveAlbums(filteredAlbums)
+      console.log('[AlbumsManage] 새 앨범 저장 완료:', {
+        총앨범수: filteredAlbums.length,
+        저장된앨범: {
+          id: albumData.id,
+          title: albumData.title,
+          photosCount: albumData.photos.length,
+          cover: albumData.cover
+        }
+      })
+      // 이벤트 발생 확인
+      window.dispatchEvent(new CustomEvent('albumsUpdated'))
       resetForm()
       return
     }
     
     setAlbums(newAlbums)
     saveAlbums(newAlbums)
+    console.log('[AlbumsManage] 앨범 수정 저장 완료:', {
+      총앨범수: newAlbums.length,
+      수정된앨범: {
+        id: albumData.id,
+        title: albumData.title,
+        photosCount: albumData.photos.length,
+        cover: albumData.cover
+      }
+    })
+    // 이벤트 발생 확인
+    window.dispatchEvent(new CustomEvent('albumsUpdated'))
     resetForm()
   }
 
@@ -278,16 +321,29 @@ export default function AlbumsManage() {
             기존: prev.photos.length,
             새로추가: newPhotos.length,
             총합: updatedPhotos.length,
-            커버: updatedCover
+            커버: updatedCover,
+            photos: updatedPhotos.map(p => p.src)
           })
           
-          return {
+          const updated = {
             ...prev,
             id: prev.id || targetAlbumId,
             photos: updatedPhotos,
             cover: updatedCover
           }
+          
+          // 상태 업데이트 후 즉시 확인
+          setTimeout(() => {
+            console.log('[AlbumsManage] 상태 업데이트 후 확인:', {
+              formDataPhotos: updated.photos.length,
+              formDataCover: updated.cover
+            })
+          }, 0)
+          
+          return updated
         })
+      } else {
+        console.warn('[AlbumsManage] 업로드된 사진이 없습니다.')
       }
 
       console.log(`[업로드 완료] 성공: ${uploadedPhotos.length}개, 실패: ${failedFiles.length}개`)
