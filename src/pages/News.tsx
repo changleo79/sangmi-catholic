@@ -207,21 +207,26 @@ export default function News() {
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      console.log('[News] 주보 클릭:', bulletin.title)
-                      setSelectedBulletin(bulletin)
-                      setIsPdfModalOpen(true)
-                    }}
-                    onTouchStart={(e) => {
-                      // 모바일 터치 이벤트 처리
-                      e.stopPropagation()
+                      console.log('[News] 주보 클릭:', bulletin.title, 'fileUrl:', bulletin.fileUrl)
+                      if (bulletin && bulletin.fileUrl) {
+                        setSelectedBulletin(bulletin)
+                        setIsPdfModalOpen(true)
+                      } else {
+                        console.error('[News] 주보 데이터 없음:', bulletin)
+                        alert('주보 파일을 불러올 수 없습니다.')
+                      }
                     }}
                     onTouchEnd={(e) => {
                       // 모바일 터치 종료 시 클릭 처리
                       e.preventDefault()
                       e.stopPropagation()
-                      console.log('[News] 주보 터치:', bulletin.title)
-                      setSelectedBulletin(bulletin)
-                      setIsPdfModalOpen(true)
+                      console.log('[News] 주보 터치:', bulletin.title, 'fileUrl:', bulletin.fileUrl)
+                      if (bulletin && bulletin.fileUrl) {
+                        setSelectedBulletin(bulletin)
+                        setIsPdfModalOpen(true)
+                      } else {
+                        console.error('[News] 주보 데이터 없음:', bulletin)
+                      }
                     }}
                     className="bg-white rounded-2xl shadow-lg hover:shadow-2xl active:shadow-xl transition-all duration-500 p-6 border border-gray-100 hover:border-catholic-logo/20 active:border-catholic-logo/40 group cursor-pointer hover:-translate-y-1 active:scale-95 touch-manipulation"
                     style={{ WebkitTapHighlightColor: 'transparent' }}

@@ -265,10 +265,27 @@ export default function AlbumsManage() {
           const existingUrls = new Set(prev.photos.map(p => p.src))
           const newPhotos = uploadedPhotos.filter(p => !existingUrls.has(p.src))
           
+          const updatedPhotos = [...prev.photos, ...newPhotos]
+          
+          // 커버 이미지가 없으면 첫 번째 사진을 자동으로 사용
+          let updatedCover = prev.cover
+          if (!updatedCover && updatedPhotos.length > 0) {
+            updatedCover = updatedPhotos[0].src
+            console.log('[AlbumsManage] 커버 이미지 자동 설정:', updatedCover)
+          }
+          
+          console.log('[AlbumsManage] 업로드 후 photos 업데이트:', {
+            기존: prev.photos.length,
+            새로추가: newPhotos.length,
+            총합: updatedPhotos.length,
+            커버: updatedCover
+          })
+          
           return {
             ...prev,
             id: prev.id || targetAlbumId,
-            photos: [...prev.photos, ...newPhotos]
+            photos: updatedPhotos,
+            cover: updatedCover
           }
         })
       }
