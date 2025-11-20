@@ -81,7 +81,8 @@ export default function AlbumDetail() {
             title: found.title, 
             photosCount: found.photos?.length || 0,
             category: found.category,
-            date: found.date
+            date: found.date,
+            photos: found.photos?.map(p => ({ src: p.src?.substring(0, 50) + '...', alt: p.alt })) || []
           })
           
           // photos 배열이 없거나 비어있으면 빈 배열로 설정
@@ -93,8 +94,15 @@ export default function AlbumDetail() {
             photos: photosArray
           }
           
-          // 상태 업데이트를 한 번에 처리
-          setAlbum(albumData)
+          // 상태 업데이트를 한 번에 처리 (함수형 업데이트로 무한 루프 방지)
+          setAlbum((prevAlbum) => {
+            // 이미 같은 앨범이 로드되어 있으면 업데이트하지 않음
+            if (prevAlbum && prevAlbum.id === albumData.id) {
+              console.log('[AlbumDetail] 이미 같은 앨범이 로드되어 있습니다. 업데이트하지 않습니다.')
+              return prevAlbum
+            }
+            return albumData
+          })
           setCurrentPhotoIndex(0)
           setIsLoading(false)
           isLoadingInProgress = false
