@@ -168,7 +168,8 @@ export default function Albums() {
         console.log('[Albums] localStorage 직접 확인: 데이터 없음')
       }
       
-      albums = loadedAlbums
+      // setAlbums로 상태 업데이트
+      setAlbums(loadedAlbums)
       
       // 유효성 검사 및 필터링
       const validAlbums = albums.map((album: any) => ({
