@@ -25,10 +25,10 @@ export default function Bulletins() {
     
     // 모바일/PC 모두 동일하게 getBulletins 사용 (localStorage 우선, JSON 파일 무시)
     // getBulletins는 이미 localStorage를 우선시하도록 구현되어 있음
-    storedBulletins = getBulletins(true) // forceRefresh=true: localStorage 직접 읽기
+    const loadedBulletins = getBulletins(true) // forceRefresh=true: localStorage 직접 읽기
     
     const isMobileDevice = isMobile()
-    console.log('[Bulletins]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', storedBulletins.length, '개 주보', storedBulletins.map(b => ({ id: b.id, title: b.title })))
+    console.log('[Bulletins]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))
     
     // 디버깅: localStorage 직접 확인
     const directCheck = localStorage.getItem('admin_bulletins')
@@ -40,7 +40,7 @@ export default function Bulletins() {
     }
     
     // 최신순 정렬
-    const sortedBulletins = storedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
+    const sortedBulletins = loadedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime()
     })
     

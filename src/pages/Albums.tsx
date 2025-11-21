@@ -154,10 +154,10 @@ export default function Albums() {
       // 모바일/PC 모두 동일하게 getAlbums 사용 (localStorage 우선, JSON 파일 무시)
       // getAlbums는 이미 localStorage를 우선시하도록 구현되어 있음
       ensureDefaultAlbumExists()
-      albums = getAlbums(true) // forceRefresh=true: localStorage 직접 읽기
+      const loadedAlbums = getAlbums(true) // forceRefresh=true: localStorage 직접 읽기
       
       const isMobileDevice = isMobile()
-      console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- getAlbums로 로드:', albums.length, '개 앨범', albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
+      console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- getAlbums로 로드:', loadedAlbums.length, '개 앨범', loadedAlbums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
       
       // 디버깅: localStorage 직접 확인
       const directCheck = localStorage.getItem('admin_albums')
@@ -167,6 +167,8 @@ export default function Albums() {
       } else {
         console.log('[Albums] localStorage 직접 확인: 데이터 없음')
       }
+      
+      albums = loadedAlbums
       
       // 유효성 검사 및 필터링
       const validAlbums = albums.map((album: any) => ({
