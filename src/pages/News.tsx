@@ -269,30 +269,57 @@ export default function News() {
                       }
                     }}
                     onTouchStart={(e) => {
-                      // 모바일 터치 시작 시 이벤트 전파 방지
+                      // 모바일 터치 시작 시 이벤트 전파 방지 및 터치 위치 저장
                       if (window.innerWidth < 768) {
                         e.stopPropagation()
+                        // 터치 시작 위치 저장 (스크롤과 클릭 구분용)
+                        const touch = e.touches[0]
+                        if (touch) {
+                          (e.currentTarget as any).__touchStartX = touch.clientX
+                          ;(e.currentTarget as any).__touchStartY = touch.clientY
+                        }
+                      }
+                    }}
+                    onTouchMove={(e) => {
+                      // 모바일에서 스크롤 중임을 표시
+                      if (window.innerWidth < 768) {
+                        const touch = e.touches[0]
+                        if (touch && (e.currentTarget as any).__touchStartX !== undefined) {
+                          const deltaX = Math.abs(touch.clientX - (e.currentTarget as any).__touchStartX)
+                          const deltaY = Math.abs(touch.clientY - (e.currentTarget as any).__touchStartY)
+                          // 10px 이상 움직이면 스크롤로 간주
+                          if (deltaX > 10 || deltaY > 10) {
+                            ;(e.currentTarget as any).__isScrolling = true
+                          }
+                        }
                       }
                     }}
                     onTouchEnd={(e) => {
-                      // 모바일 터치 종료 시 클릭 처리
+                      // 모바일 터치 종료 시 클릭 처리 (스크롤이 아닐 때만)
                       if (window.innerWidth < 768) {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        console.log('[News] 주보 터치 (모바일):', {
-                          title: bulletin.title,
-                          fileUrl: bulletin.fileUrl,
-                          thumbnailUrl: bulletin.thumbnailUrl,
-                          bulletin: bulletin
-                        })
-                        if (bulletin && bulletin.fileUrl) {
-                          // 즉시 모달 열기 (지연 제거)
-                          setSelectedBulletin(bulletin)
-                          setIsPdfModalOpen(true)
-                        } else {
-                          console.error('[News] 주보 데이터 없음 (모바일):', bulletin)
-                          alert('주보 파일을 불러올 수 없습니다.')
+                        const isScrolling = (e.currentTarget as any).__isScrolling
+                        // 스크롤 중이 아니면 클릭으로 처리
+                        if (!isScrolling) {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          console.log('[News] 주보 클릭 (모바일):', {
+                            title: bulletin.title,
+                            fileUrl: bulletin.fileUrl,
+                            thumbnailUrl: bulletin.thumbnailUrl,
+                            bulletin: bulletin
+                          })
+                          if (bulletin && bulletin.fileUrl) {
+                            setSelectedBulletin(bulletin)
+                            setIsPdfModalOpen(true)
+                          } else {
+                            console.error('[News] 주보 데이터 없음 (모바일):', bulletin)
+                            alert('주보 파일을 불러올 수 없습니다.')
+                          }
                         }
+                        // 터치 상태 초기화
+                        delete (e.currentTarget as any).__touchStartX
+                        delete (e.currentTarget as any).__touchStartY
+                        delete (e.currentTarget as any).__isScrolling
                       }
                     }}
                     className="bg-white rounded-2xl shadow-lg hover:shadow-2xl active:shadow-xl transition-all duration-500 p-6 border border-gray-100 hover:border-catholic-logo/20 active:border-catholic-logo/40 group cursor-pointer hover:-translate-y-1 active:scale-95 touch-manipulation"
@@ -321,11 +348,14 @@ export default function News() {
                                 height: '100%',
                                 objectFit: 'cover',
                                 objectPosition: 'center',
-                                backgroundColor: '#f3f4f6' // 로딩 중 배경색
+                                backgroundColor: '#f3f4f6', // 로딩 중 배경색
+                                pointerEvents: 'none' // 이미지 클릭 방지 (부모 div에서 처리)
                               }}
                               loading="lazy"
                               decoding="async"
                               crossOrigin="anonymous"
+                              draggable={false}
+                              onDragStart={(e) => e.preventDefault()}
                               onError={(e) => {
                                 console.error('[News] 썸네일 이미지 로드 실패:', thumbnailUrl)
                                 // 이미지 로드 실패 시 PDF 아이콘 표시

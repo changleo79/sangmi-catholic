@@ -76,8 +76,17 @@ export default function Home() {
 
   const loadAlbums = () => {
     try {
+      // 캐시 완전히 무효화
+      if ((window as any).__albumsCache) {
+        delete (window as any).__albumsCache
+      }
+      if ((window as any).cachedData && (window as any).cachedData.albums) {
+        (window as any).cachedData.albums = undefined
+      }
+      
       ensureDefaultAlbumExists()
       const storedAlbums = getAlbums(true) // 강제 새로고침
+      console.log('[Home] 앨범 로드:', storedAlbums.length, '개', storedAlbums)
       
       // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
       const savedAlbums = storedAlbums.filter(album => {
@@ -87,11 +96,13 @@ export default function Home() {
         return true
       })
       
+      // cover가 없으면 첫 번째 사진 사용, 그것도 없으면 빈 문자열 (galleryPhotos 사용 안 함)
       const recentAlbums = savedAlbums.slice(0, 4).map(album => ({
         id: album.id,
-        cover: album.cover || galleryPhotos[0],
+        cover: album.cover || (album.photos && album.photos.length > 0 ? album.photos[0].src : ''),
         title: album.title
       }))
+      console.log('[Home] 표시할 앨범:', recentAlbums)
       setDisplayAlbums(recentAlbums)
     } catch (error) {
       console.error('[Home] 앨범 로드 오류:', error)
@@ -99,7 +110,7 @@ export default function Home() {
       const fallback = getAlbums(true)
       const recentAlbums = fallback.slice(0, 4).map(album => ({
         id: album.id,
-        cover: album.cover || galleryPhotos[0],
+        cover: album.cover || (album.photos && album.photos.length > 0 ? album.photos[0].src : ''),
         title: album.title
       }))
       setDisplayAlbums(recentAlbums)

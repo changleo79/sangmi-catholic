@@ -103,14 +103,20 @@ export default function Albums() {
       setAlbums(albums)
     } catch (error) {
       console.error('[Albums] 로드 오류:', error)
-      // 에러 발생 시 localStorage에서 직접 읽기
+      // 에러 발생 시 localStorage에서 직접 읽기 (ALBUMS_KEY 사용)
       try {
         const stored = localStorage.getItem('admin_albums')
         if (stored) {
           const parsed = JSON.parse(stored)
-          console.log('[Albums] localStorage에서 직접 로드:', parsed.length, '개 앨범')
-          setAlbums(parsed)
+          // 유효성 검사
+          const validAlbums = parsed.map((album: any) => ({
+            ...album,
+            photos: Array.isArray(album.photos) ? album.photos : []
+          }))
+          console.log('[Albums] localStorage에서 직접 로드:', validAlbums.length, '개 앨범', validAlbums)
+          setAlbums(validAlbums)
         } else {
+          console.log('[Albums] localStorage에 앨범 데이터 없음')
           const fallback = getAlbums(true)
           setAlbums(fallback)
         }
