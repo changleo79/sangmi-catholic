@@ -23,41 +23,18 @@ export default function Bulletins() {
       (window as any).cachedData.bulletins = undefined
     }
     
-    // 모바일에서는 항상 localStorage에서 직접 읽기
-    let storedBulletins: BulletinItem[] = []
+    // 모바일/PC 모두 동일하게 getBulletins 사용 (localStorage 우선)
+    // getBulletins는 이미 localStorage를 우선시하도록 구현되어 있음
+    const storedBulletins = getBulletins(true)
     const isMobileDevice = isMobile()
+    console.log('[Bulletins]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', storedBulletins.length, '개 주보', storedBulletins)
     
-    if (isMobileDevice) {
-      try {
-        // 여러 번 시도하여 최신 데이터 확보
-        let stored = localStorage.getItem('admin_bulletins')
-        if (!stored) {
-          await new Promise(resolve => setTimeout(resolve, 50))
-          stored = localStorage.getItem('admin_bulletins')
-        }
-        
-        if (stored) {
-          const parsed = JSON.parse(stored)
-          // 유효성 검사 및 정렬 (최신순)
-          storedBulletins = Array.isArray(parsed) ? parsed.sort((a: BulletinItem, b: BulletinItem) => {
-            return new Date(b.date).getTime() - new Date(a.date).getTime()
-          }) : []
-          console.log('[Bulletins] 모바일 - localStorage에서 직접 로드:', storedBulletins.length, '개 주보')
-        } else {
-          console.log('[Bulletins] 모바일 - localStorage에 주보 데이터 없음')
-          storedBulletins = []
-        }
-      } catch (e) {
-        console.error('[Bulletins] 모바일 - localStorage 읽기 실패:', e)
-        storedBulletins = []
-      }
-    } else {
-      // PC에서는 getBulletins 사용 (강제 새로고침)
-      storedBulletins = getBulletins(true)
-      console.log('[Bulletins] PC - getBulletins로 로드:', storedBulletins.length, '개 주보')
-    }
+    // 최신순 정렬
+    const sortedBulletins = storedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
+    })
     
-    setBulletins(storedBulletins)
+    setBulletins(sortedBulletins)
   }
 
   useEffect(() => {
@@ -103,8 +80,18 @@ export default function Bulletins() {
     const checkBulletinsChange = () => {
       const currentData = localStorage.getItem('admin_bulletins')
       if (currentData !== lastBulletinsData) {
-        console.log('[Bulletins] localStorage 변경 감지 - 데이터 다시 로드')
+        console.log('[Bulletins] localStorage 변경 감지 - 데이터 다시 로드', {
+          oldLength: lastBulletinsData ? JSON.parse(lastBulletinsData).length : 0,
+          newLength: currentData ? JSON.parse(currentData).length : 0
+        })
         lastBulletinsData = currentData
+        // 캐시 무효화 후 로드
+        if ((window as any).__bulletinsCache) {
+          delete (window as any).__bulletinsCache
+        }
+        if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+          (window as any).cachedData.bulletins = undefined
+        }
         loadBulletins()
       }
     }

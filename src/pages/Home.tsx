@@ -654,6 +654,19 @@ export default function Home() {
               ) : (
                 <div className="p-10 text-center text-gray-500">{activeNoticeContent.emptyText}</div>
               )}
+              {activeNoticeTab === 'bulletin' && bulletins.length > 0 && (
+                <div className="p-6 border-t border-gray-100">
+                  <Link
+                    to="/bulletins"
+                    className="block w-full text-center px-4 py-3 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
+                    style={{ backgroundColor: '#7B1F4B' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                  >
+                    주보 전체보기 ({bulletins.length}개)
+                  </Link>
+                </div>
+              )}
             </div>
 
             <div className="bg-gradient-to-br from-catholic-logo to-catholic-logo-dark text-white rounded-3xl shadow-xl p-6 md:p-8 flex flex-col justify-between">

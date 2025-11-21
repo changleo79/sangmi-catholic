@@ -217,24 +217,21 @@ export const initializeData = async (): Promise<void> => {
     if (!localStorage.getItem(FAQS_KEY) && faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
 
     // localStorage에 이미 앨범 데이터가 있으면 그것을 우선 사용 (어드민에서 등록한 앨범)
-    // JSON 파일의 이전 데이터는 무시
+    // localStorage에 이미 앨범 데이터가 있으면 절대 덮어쓰지 않음 (어드민 데이터 보호)
     const existingAlbumsRaw = localStorage.getItem(ALBUMS_KEY)
     if (existingAlbumsRaw) {
       try {
         const existingAlbums: AlbumWithCategory[] = JSON.parse(existingAlbumsRaw)
-        if (existingAlbums.length > 0) {
-          console.log('[initializeData] localStorage 앨범 데이터 사용:', existingAlbums.length, '개')
-          cachedData.albums = existingAlbums
-          // JSON 파일의 데이터는 무시하고 localStorage 데이터만 사용
-        }
+        // localStorage에 데이터가 있으면 무조건 그것을 사용 (JSON 파일 무시)
+        console.log('[initializeData] localStorage 앨범 데이터 사용 (어드민 데이터 보호):', existingAlbums.length, '개')
+        cachedData.albums = existingAlbums
+        // JSON 파일의 데이터는 완전히 무시
       } catch (error) {
-        console.error('로컬 앨범 데이터 파싱 실패:', error)
-        // 파싱 실패 시 JSON 파일 데이터 사용
-        if (albums.length > 0) {
-          localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
-          cachedData.albums = albums
-        } else {
-          const defaultAlbum = createDefaultAlbum()
+        console.error('[initializeData] 로컬 앨범 데이터 파싱 실패:', error)
+        // 파싱 실패해도 JSON 파일로 덮어쓰지 않음 (데이터 손실 방지)
+        // 대신 기본 앨범만 생성
+        const defaultAlbum = createDefaultAlbum()
+        if (!existingAlbumsRaw.includes(DEFAULT_ALBUM_ID)) {
           localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
           cachedData.albums = [defaultAlbum]
         }
@@ -242,7 +239,7 @@ export const initializeData = async (): Promise<void> => {
     } else {
       // localStorage에 데이터가 없을 때만 JSON 파일 사용
       if (albums.length > 0) {
-        console.log('[initializeData] JSON 파일 앨범 데이터 사용:', albums.length, '개')
+        console.log('[initializeData] JSON 파일 앨범 데이터 사용 (초기 데이터):', albums.length, '개')
         localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
         cachedData.albums = albums
       } else {
@@ -256,31 +253,29 @@ export const initializeData = async (): Promise<void> => {
     if (!localStorage.getItem(SACRAMENTS_KEY) && sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
     if (!localStorage.getItem(CATECHISM_KEY) && catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
     
-    // localStorage에 이미 주보 데이터가 있으면 그것을 우선 사용 (어드민에서 등록한 주보)
-    // JSON 파일의 이전 데이터는 무시
+    // localStorage에 이미 주보 데이터가 있으면 절대 덮어쓰지 않음 (어드민 데이터 보호)
     const existingBulletinsRaw = localStorage.getItem(BULLETINS_KEY)
     if (existingBulletinsRaw) {
       try {
         const existingBulletins: BulletinItem[] = JSON.parse(existingBulletinsRaw)
-        if (existingBulletins.length > 0) {
-          console.log('[initializeData] localStorage 주보 데이터 사용:', existingBulletins.length, '개')
-          cachedData.bulletins = existingBulletins
-          // JSON 파일의 데이터는 무시하고 localStorage 데이터만 사용
-        }
+        // localStorage에 데이터가 있으면 무조건 그것을 사용 (JSON 파일 무시)
+        console.log('[initializeData] localStorage 주보 데이터 사용 (어드민 데이터 보호):', existingBulletins.length, '개')
+        cachedData.bulletins = existingBulletins
+        // JSON 파일의 데이터는 완전히 무시
       } catch (error) {
-        console.error('로컬 주보 데이터 파싱 실패:', error)
-        // 파싱 실패 시 JSON 파일 데이터 사용
-        if (bulletins.length > 0) {
-          localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
-          cachedData.bulletins = bulletins
-        }
+        console.error('[initializeData] 로컬 주보 데이터 파싱 실패:', error)
+        // 파싱 실패해도 JSON 파일로 덮어쓰지 않음 (데이터 손실 방지)
+        // 빈 배열로 설정
+        cachedData.bulletins = []
       }
     } else {
       // localStorage에 데이터가 없을 때만 JSON 파일 사용
       if (bulletins.length > 0) {
-        console.log('[initializeData] JSON 파일 주보 데이터 사용:', bulletins.length, '개')
+        console.log('[initializeData] JSON 파일 주보 데이터 사용 (초기 데이터):', bulletins.length, '개')
         localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
         cachedData.bulletins = bulletins
+      } else {
+        cachedData.bulletins = []
       }
     }
     
