@@ -39,11 +39,11 @@ export default function Home() {
   const galleryPhotos = [img01, img02, img03, img04]
   const slideImages = [imgMain, img01, img02]
 
-  const loadData = () => {
-    const storedNotices = getNotices()
+  const loadData = async () => {
+    const storedNotices = await getNotices()
     setNotices(storedNotices.length > 0 ? storedNotices : defaultNotices)
 
-    const storedRecruitments = getRecruitments()
+    const storedRecruitments = await getRecruitments()
     if (storedRecruitments.length > 0) {
       setRecruitments(storedRecruitments.slice(0, 6))
     } else {
@@ -60,7 +60,7 @@ export default function Home() {
     if ((window as any).cachedData && (window as any).cachedData.bulletins) {
       (window as any).cachedData.bulletins = undefined
     }
-    const storedBulletins = getBulletins(true) // 강제 새로고침
+    const storedBulletins = await getBulletins(true) // 강제 새로고침 - await 추가
     console.log('[Home] 주보 로드:', storedBulletins.length, '개', storedBulletins)
     setBulletins(storedBulletins.slice(0, 6))
   }
@@ -69,7 +69,7 @@ export default function Home() {
     loadData()
     
     // 주보 업데이트 이벤트 리스너
-    const handleBulletinsUpdate = () => {
+    const handleBulletinsUpdate = async () => {
       console.log('[Home] bulletinsUpdated 이벤트 수신')
       // 캐시 무효화하고 강제 새로고침
       if ((window as any).__bulletinsCache) {
@@ -78,7 +78,7 @@ export default function Home() {
       if ((window as any).cachedData && (window as any).cachedData.bulletins) {
         (window as any).cachedData.bulletins = undefined
       }
-      const storedBulletins = getBulletins(true) // 강제 새로고침
+      const storedBulletins = await getBulletins(true) // 강제 새로고침 - await 추가
       console.log('[Home] 주보 업데이트 후 로드:', storedBulletins.length, '개', storedBulletins)
       setBulletins(storedBulletins.slice(0, 6))
     }
@@ -90,7 +90,7 @@ export default function Home() {
     }
   }, [])
 
-  const loadAlbums = () => {
+  const loadAlbums = async () => {
     try {
       // 캐시 완전히 무효화
       if ((window as any).__albumsCache) {
@@ -100,8 +100,8 @@ export default function Home() {
         (window as any).cachedData.albums = undefined
       }
       
-      ensureDefaultAlbumExists()
-      const storedAlbums = getAlbums(true) // 강제 새로고침
+      await ensureDefaultAlbumExists()
+      const storedAlbums = await getAlbums(true) // 강제 새로고침 - await 추가
       console.log('[Home] 앨범 로드:', storedAlbums.length, '개', storedAlbums)
       
       // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
@@ -122,8 +122,8 @@ export default function Home() {
       setDisplayAlbums(recentAlbums)
     } catch (error) {
       console.error('[Home] 앨범 로드 오류:', error)
-      ensureDefaultAlbumExists()
-      const fallback = getAlbums(true)
+      await ensureDefaultAlbumExists()
+      const fallback = await getAlbums(true) // await 추가
       const recentAlbums = fallback.slice(0, 4).map(album => ({
         id: album.id,
         cover: album.cover || (album.photos && album.photos.length > 0 ? album.photos[0].src : ''),
@@ -136,20 +136,20 @@ export default function Home() {
   useEffect(() => {
     loadAlbums()
     
-    const handleAlbumsUpdate = () => {
+    const handleAlbumsUpdate = async () => {
       console.log('[Home] albumsUpdated 이벤트 - 앨범 다시 로드')
-      loadAlbums()
+      await loadAlbums()
     }
     
-    const handleFocus = () => {
+    const handleFocus = async () => {
       console.log('[Home] focus 이벤트 - 앨범 다시 로드')
-      loadAlbums()
+      await loadAlbums()
     }
     
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (!document.hidden) {
         console.log('[Home] visibilitychange 이벤트 - 앨범 다시 로드')
-        loadAlbums()
+        await loadAlbums()
       }
     }
     
