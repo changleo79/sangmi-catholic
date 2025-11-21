@@ -97,6 +97,35 @@ export default function Albums() {
       if ((window as any).cachedData && (window as any).cachedData.albums) {
         (window as any).cachedData.albums = undefined
       }
+      
+      // 모바일에서는 localStorage에서 직접 읽기 (JSON 파일 무시)
+      if (window.innerWidth < 768) {
+        try {
+          const stored = localStorage.getItem('admin_albums')
+          if (stored) {
+            const parsed = JSON.parse(stored)
+            // 유효성 검사
+            const validAlbums = parsed.map((album: any) => ({
+              ...album,
+              photos: Array.isArray(album.photos) ? album.photos : []
+            })).filter((album: any) => {
+              // draft-로 시작하지만 실제로 저장된 앨범만 표시
+              if (album.id.startsWith('draft-')) {
+                return album.photos && album.photos.length > 0 && album.title && album.title.trim() !== ''
+              }
+              return true
+            })
+            console.log('[Albums] 모바일 - localStorage에서 직접 로드:', validAlbums.length, '개 앨범', validAlbums)
+            setAlbums(validAlbums)
+            return
+          } else {
+            console.log('[Albums] 모바일 - localStorage에 앨범 데이터 없음')
+          }
+        } catch (e) {
+          console.error('[Albums] 모바일 - localStorage 읽기 실패:', e)
+        }
+      }
+      
       ensureDefaultAlbumExists()
       const albums = getAlbums(true) // 강제 새로고침
       console.log('[Albums] getAlbums()로 로드:', albums.length, '개 앨범', albums)

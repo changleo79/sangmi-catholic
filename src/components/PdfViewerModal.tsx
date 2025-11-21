@@ -194,11 +194,12 @@ export default function PdfViewerModal({
                     style={{ 
                       maxWidth: '100%', 
                       display: 'block',
-                      backgroundColor: '#f3f4f6' // 로딩 중 배경색
+                      backgroundColor: '#f3f4f6', // 로딩 중 배경색
+                      minHeight: '400px'
                     }}
-                    crossOrigin="anonymous"
+                    crossOrigin={fileUrl.startsWith('http') && !fileUrl.startsWith('data:') ? 'anonymous' : undefined}
                     onError={(e) => {
-                      console.error('[PdfViewerModal] 이미지 로드 실패:', fileUrl)
+                      console.error('[PdfViewerModal] 이미지 로드 실패:', fileUrl, e)
                       const target = e.currentTarget
                       target.style.display = 'none'
                       const parent = target.parentElement
@@ -209,11 +210,14 @@ export default function PdfViewerModal({
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <p>이미지를 불러올 수 없습니다.</p>
+                            <p class="text-xs text-gray-400 mt-2">URL: ${fileUrl.substring(0, 50)}...</p>
                           </div>
                         `
                       }
                     }}
                     onLoad={(e) => {
+                      // 로드 성공 시 배경색 제거
+                      e.currentTarget.style.backgroundColor = ''
                       console.log('[PdfViewerModal] 이미지 로드 성공:', fileUrl)
                       // 로드 성공 시 배경색 제거
                       const target = e.currentTarget

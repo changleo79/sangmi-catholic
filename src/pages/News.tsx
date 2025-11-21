@@ -49,7 +49,26 @@ export default function News() {
     if ((window as any).cachedData && (window as any).cachedData.bulletins) {
       (window as any).cachedData.bulletins = undefined
     }
-    const storedBulletins = getBulletins(true)
+    
+    // 모바일에서는 localStorage에서 직접 읽기
+    let storedBulletins: BulletinItem[] = []
+    if (window.innerWidth < 768) {
+      try {
+        const stored = localStorage.getItem('admin_bulletins')
+        if (stored) {
+          storedBulletins = JSON.parse(stored)
+          console.log('[News] 모바일 - localStorage에서 직접 로드:', storedBulletins.length, '개 주보', storedBulletins)
+        } else {
+          storedBulletins = getBulletins(true)
+        }
+      } catch (e) {
+        console.error('[News] 모바일 - localStorage 읽기 실패:', e)
+        storedBulletins = getBulletins(true)
+      }
+    } else {
+      storedBulletins = getBulletins(true)
+    }
+    
     console.log('[News] 주보 로드:', storedBulletins.length, '개', storedBulletins)
     setBulletins(storedBulletins)
   }
@@ -336,6 +355,15 @@ export default function News() {
                         )
                         const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
                         
+                        console.log('[News] 주보 썸네일 확인:', {
+                          id: bulletin.id,
+                          title: bulletin.title,
+                          thumbnailUrl: bulletin.thumbnailUrl,
+                          fileUrl: bulletin.fileUrl,
+                          isImageFile,
+                          finalThumbnailUrl: thumbnailUrl
+                        })
+                        
                         return thumbnailUrl ? (
                           <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gray-100" style={{ minHeight: '200px', maxHeight: '400px' }}>
                             <img
@@ -353,11 +381,11 @@ export default function News() {
                               }}
                               loading="lazy"
                               decoding="async"
-                              crossOrigin="anonymous"
+                              crossOrigin={thumbnailUrl.startsWith('http') && !thumbnailUrl.startsWith('data:') ? 'anonymous' : undefined}
                               draggable={false}
                               onDragStart={(e) => e.preventDefault()}
                               onError={(e) => {
-                                console.error('[News] 썸네일 이미지 로드 실패:', thumbnailUrl)
+                                console.error('[News] 썸네일 이미지 로드 실패:', thumbnailUrl, e)
                                 // 이미지 로드 실패 시 PDF 아이콘 표시
                                 const target = e.currentTarget
                                 target.style.display = 'none'
@@ -377,6 +405,8 @@ export default function News() {
                               }}
                               onLoad={(e) => {
                                 console.log('[News] 썸네일 이미지 로드 성공:', thumbnailUrl)
+                                // 로드 성공 시 배경색 제거
+                                e.currentTarget.style.backgroundColor = ''
                                 // 로드 성공 시 배경색 제거
                                 const target = e.currentTarget
                                 target.style.backgroundColor = 'transparent'
