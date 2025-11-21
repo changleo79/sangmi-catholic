@@ -97,7 +97,7 @@ export default function AlbumsManage() {
       const filteredAlbums = newAlbums.filter(a => !a.id.startsWith('draft-'))
       filteredAlbums.unshift(albumData)
       setAlbums(filteredAlbums)
-      await saveAlbums(filteredAlbums)
+      saveAlbums(filteredAlbums) // await 제거됨
       console.log('[AlbumsManage] 새 앨범 저장 완료:', {
         총앨범수: filteredAlbums.length,
         저장된앨범: {
