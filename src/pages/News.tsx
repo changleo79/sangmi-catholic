@@ -50,9 +50,16 @@ export default function News() {
       (window as any).cachedData.bulletins = undefined
     }
     
+    // 모바일 감지 함수
+    const isMobile = () => {
+      return window.innerWidth < 768 || 
+             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+             (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
+    }
+    
     // 모바일에서는 localStorage에서 직접 읽기
     let storedBulletins: BulletinItem[] = []
-    if (window.innerWidth < 768) {
+    if (isMobile()) {
       try {
         const stored = localStorage.getItem('admin_bulletins')
         if (stored) {
@@ -119,21 +126,44 @@ export default function News() {
       }
     }
     
+    // localStorage 변경 감지
+    let lastBulletinsData: string | null = null
+    const checkBulletinsChange = () => {
+      const currentData = localStorage.getItem('admin_bulletins')
+      if (currentData !== lastBulletinsData) {
+        console.log('[News] localStorage 변경 감지 - 주보 다시 로드')
+        lastBulletinsData = currentData
+        loadData()
+      }
+    }
+    
+    // 초기값 설정
+    lastBulletinsData = localStorage.getItem('admin_bulletins')
+    
+    // 모바일 감지
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
+    
     // 모바일에서도 주기적으로 체크
-    if (window.innerWidth < 768) {
+    if (isMobileDevice) {
       const intervalId = setInterval(() => {
         if (!document.hidden) {
-          console.log('[News] 모바일 주기적 체크 - 주보 다시 로드')
-          // 캐시 완전히 무효화
-          if ((window as any).__bulletinsCache) {
-            delete (window as any).__bulletinsCache
-          }
-          if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-            (window as any).cachedData.bulletins = undefined
-          }
-          loadData()
+          checkBulletinsChange()
         }
-      }, 3000) // 3초마다 체크
+      }, 1000) // 모바일: 1초마다 체크
+      
+      return () => {
+        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+        window.removeEventListener('focus', handleFocus)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
+      }
+    } else {
+      // PC에서는 덜 자주 체크
+      const intervalId = setInterval(() => {
+        if (!document.hidden) {
+          checkBulletinsChange()
+        }
+      }, 3000) // PC: 3초마다 체크
       
       return () => {
         window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)

@@ -64,13 +64,43 @@ export default function Albums() {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
     // 모바일에서도 이벤트가 제대로 작동하도록 추가 이벤트
-    if (window.innerWidth < 768) {
-      // 모바일에서는 페이지 표시 시마다 체크
+    // localStorage 변경 감지 (storage 이벤트는 다른 탭에서만 발생하므로 직접 체크)
+    let lastAlbumsData: string | null = null
+    const checkAlbumsChange = () => {
+      const currentData = localStorage.getItem('admin_albums')
+      if (currentData !== lastAlbumsData) {
+        console.log('[Albums] localStorage 변경 감지 - 데이터 다시 로드')
+        lastAlbumsData = currentData
+        loadAlbums()
+      }
+    }
+    
+    // 초기값 설정
+    lastAlbumsData = localStorage.getItem('admin_albums')
+    
+    // 모바일에서는 더 자주 체크
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
+    if (isMobileDevice) {
+      // 모바일에서는 페이지 표시 시마다 체크 (더 자주)
       const intervalId = setInterval(() => {
         if (!document.hidden) {
-          loadAlbums()
+          checkAlbumsChange()
         }
-      }, 2000) // 2초마다 체크
+      }, 1000) // 1초마다 체크
+      
+      return () => {
+        window.removeEventListener('focus', handleFocus)
+        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
+      }
+    } else {
+      // PC에서는 덜 자주 체크
+      const intervalId = setInterval(() => {
+        if (!document.hidden) {
+          checkAlbumsChange()
+        }
+      }, 3000) // 3초마다 체크
       
       return () => {
         window.removeEventListener('focus', handleFocus)
@@ -87,6 +117,13 @@ export default function Albums() {
     }
   }, [])
 
+  // 모바일 감지 함수 (더 정확한 감지)
+  const isMobile = () => {
+    return window.innerWidth < 768 || 
+           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
+  }
+
   const loadAlbums = () => {
     try {
       // 캐시 완전히 무효화
@@ -98,8 +135,8 @@ export default function Albums() {
         (window as any).cachedData.albums = undefined
       }
       
-      // 모바일에서는 localStorage에서 직접 읽기 (JSON 파일 무시)
-      if (window.innerWidth < 768) {
+      // 모바일에서는 항상 localStorage에서 직접 읽기 (JSON 파일 무시)
+      if (isMobile()) {
         try {
           const stored = localStorage.getItem('admin_albums')
           if (stored) {
