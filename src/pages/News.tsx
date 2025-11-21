@@ -23,14 +23,14 @@ export default function News() {
       delete (window as any).__bulletinsCache
     }
     
-    const storedNotices = getNotices()
+    const storedNotices = await getNotices()
     if (storedNotices.length > 0) {
       setNotices(storedNotices)
     } else {
       setNotices(defaultNotices)
     }
 
-    const storedRecruitments = getRecruitments()
+    const storedRecruitments = await getRecruitments()
     if (storedRecruitments.length > 0) {
       setRecruit(storedRecruitments)
     } else {
