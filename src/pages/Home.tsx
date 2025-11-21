@@ -570,19 +570,30 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap gap-2 mb-8">
-            {Object.entries(noticeTabs).map(([key, tab]) => (
-              <button
-                key={key}
-                onClick={() => setActiveNoticeTab(key as NoticeTabKey)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  activeNoticeTab === key
-                    ? 'bg-gradient-to-r from-catholic-logo to-catholic-logo-dark text-white shadow-lg'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-catholic-logo/30 hover:text-catholic-logo'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {Object.entries(noticeTabs)
+              .filter(([key]) => {
+                // 모바일에서는 주보 탭 숨김
+                if (typeof window !== 'undefined') {
+                  const isMobile = window.innerWidth < 768
+                  if (isMobile && key === 'bulletin') {
+                    return false
+                  }
+                }
+                return true
+              })
+              .map(([key, tab]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveNoticeTab(key as NoticeTabKey)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    activeNoticeTab === key
+                      ? 'bg-gradient-to-r from-catholic-logo to-catholic-logo-dark text-white shadow-lg'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:border-catholic-logo/30 hover:text-catholic-logo'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
           </div>
 
           <div className="grid lg:grid-cols-[2fr,1fr] gap-6">
@@ -791,7 +802,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={gallerySectionRef} className="py-20">
+      {/* 모바일에서는 앨범 섹션 숨김 - 메뉴에서 직접 접근 */}
+      <section ref={gallerySectionRef} className="py-20 hidden md:block">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div>
