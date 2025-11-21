@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
 interface District {
-  zone: string
   alias: string
   area: string
 }
@@ -15,48 +14,66 @@ const jurisdictionData: Region[] = [
   {
     name: '1지역',
     districts: [
-      { zone: '구역 1', alias: '신갈2', area: '신갈동 32, 33, 39, 40, 43~47, 49~53번지' },
-      { zone: '구역 3', alias: '원대', area: '신갈로102 원대마을 한신 101동~106동' },
-      { zone: '구역 5', alias: '롯데스카이', area: '중부대로 375(신갈동 기흥역롯데캐슬스카이), 101~103동; 경기도 용인시 기흥구 중부대로 376 이안두드림기흥역' },
+      { alias: '신갈2', area: '신갈동 32, 33, 39, 40, 43～47, 49～53번지' },
+      { alias: '신갈3', area: '신갈동 17, 34, 42번지' },
+      { alias: '원대', area: '신갈로102 원대마을 한신 101동～106동' },
+      { alias: '구갈1', area: '신갈동 64～66번지 / 구갈동 402～414, 540, 541번지' },
+      { alias: '롯데스카이', area: '중부대로 375(신갈동. 기흥역롯데캐슬스카이), 101～103동\n경기도 용인시 기흥구 중부대로 376 이안두드림기흥역' },
+      { alias: '우림,풍림', area: '신구로42번길15 우림아파트 / 신구로42번길22 풍림아파트' },
     ]
   },
   {
     name: '2지역',
     districts: [
-      { zone: '구역 1', alias: '신갈1', area: '신갈동 16, 35~38, 57, 60~63, 68~71번지' },
-      { zone: '구역 3', alias: '롯데캐슬1', area: '신정로 25(신갈동, 신흥덕롯데캐슬레이시티) 101동~105동' },
-      { zone: '5', alias: '우방', area: '신정로41번길 31(신갈동, 용인기흥우방아이유쉘)' },
+      { alias: '신갈1', area: '신갈동 16, 35～38, 57, 60～63, 68～71번지' },
+      { alias: '상미', area: '신갈동 410～456번지, 신역동 전체' },
+      { alias: '롯데캐슬1', area: '신정로 25(신갈동, 신흥덕롯데캐슬레이시티) 101동~105동' },
+      { alias: '롯데캐슬2', area: '신정로 25(신갈동, 신흥덕롯데캐슬레이시티) 106동~111동' },
+      { alias: '우방', area: '신정로41번길 31(신갈동, 용인기흥우방아이유쉘)' },
     ]
   },
   {
     name: '3지역',
     districts: [
-      { zone: '구역 1', alias: '두진1', area: '덕영대로2077번길 8(영덕동, 두진아파트) 101동~102동' },
-      { zone: '구역 3', alias: '신일1', area: '덕영대로2077번길 20(영덕동, 청현마을 신일아파트) 101동~105동, 107동' },
-      { zone: '구역 7', alias: '힉스', area: '중부대로 184(영덕동) 힉스유타워 A동, B동, C동' },
+      { alias: '두진1', area: '덕영대로2077번길 8(영덕동, 두진아파트) 101동~102동' },
+      { alias: '두진2', area: '덕영대로2077번길 8(영덕동, 두진아파트) 103동~104동' },
+      { alias: '신일1', area: '덕영대로2077번길 20(영덕동, 청현마을 신일아파트) 101동~105동, 107동' },
+      { alias: '신일2', area: '덕영대로2077번길 20(영덕동, 청현마을 신일아파트) 106동, 109동, 201동~203동' },
+      { alias: '태영', area: '덕영대로2077번길 53(영덕동, 청현마을 태영데시앙) 201동~207동' },
+      { alias: '대명', area: '덕영대로2077번길 55(영덕동, 청현마을 대명레이크빌) 101동~107동' },
+      { alias: '힉스', area: '중부대로 184(영덕동) 힉스유타워 A동, B동, C동' },
     ]
   },
   {
     name: '4지역',
     districts: [
-      { zone: '구역 1', alias: '효성1', area: '덕영대로2077번길 33(영덕동, 기흥효성해링턴플레이스) 101동~105동' },
-      { zone: '구역 4', alias: '포레피스', area: '덕영대로2063, (영덕동, 기흥 푸르지오 포레피스) 101동~106동' },
+      { alias: '효성1', area: '덕영대로2077번길 33(영덕동, 기흥효성해링턴플레이스) 101동~105동' },
+      { alias: '효성2', area: '덕영대로2077번길 33(영덕동, 기흥효성해링턴플레이스) 106동~111동' },
+      { alias: '효성3', area: '덕영대로2077번길 33(영덕동, 기흥효성해링턴플레이스) 112동~117동, T101동~106동' },
+      { alias: '포레피스', area: '덕영대로2063,(영덕동, 기흥 푸르지오 포레피스) 101동~106동' },
     ]
   },
   {
     name: '5지역',
     districts: [
-      { zone: '구역 1', alias: '지웰1', area: '기흥역로 16(구갈동, 기흥역 더퍼스트푸르지오) 101동, 102동' },
-      { zone: '구역 4', alias: '롯데기흥', area: '기흥역로 9 (구갈동, 기흥역 롯데캐슬 레이시티/주상복합) A동, B동' },
-      { zone: '구역 6', alias: '힉스2', area: '기흥역로 63 (구갈동, 힐스테이트 기흥) 203동~205동' },
+      { alias: '지웰1', area: '기흥역로 16(구갈동, 기흥역 더퍼스트푸르지오) 101동, 102동' },
+      { alias: '지웰2', area: '기흥역로 16(구갈동, 기흥역 더퍼스트푸르지오) 103동, 104동' },
+      { alias: '지웰3', area: '기흥역로 16(구갈동, 기흥역 더퍼스트푸르지오) 105동, 106동' },
+      { alias: '롯데기흥', area: '기흥역로 9 (구갈동, 기흥역 롯데캐슬 레이시티/주상복합) A동, B동' },
+      { alias: '힐스1', area: '기흥역로 63 (구갈동, 힐스테이트 기흥) 201동, 202동' },
+      { alias: '힐스2', area: '기흥역로 63 (구갈동, 힐스테이트 기흥) 203동~205동' },
     ]
   },
   {
     name: '6지역',
     districts: [
-      { zone: '구역 1', alias: '센트럴1', area: '기흥역로58번길 10 (구갈동, 기흥역 센트럴푸르지오) 201동~203동' },
-      { zone: '구역 3', alias: '파크1', area: '기흥역로58번길 56 (구갈동, 기흥역 파크푸르지오) 301동~303동' },
-      { zone: '구역 7', alias: '더샵3', area: '기흥역로58번길 78(구갈동, 기흥역 더샵) 101동, 106동' },
+      { alias: '센트럴1', area: '기흥역로58번길 10 (구갈동, 기흥역 센트럴푸르지오) 201동~203동' },
+      { alias: '센트럴2', area: '기흥역로58번길 10 (구갈동, 기흥역 센트럴푸르지오) 204동~207동' },
+      { alias: '파크1', area: '기흥역로58번길 56 (구갈동, 기흥역 파크푸르지오) 301동~303동' },
+      { alias: '파크2', area: '기흥역로58번길 56 (구갈동, 기흥역 파크푸르지오) 304동~306동' },
+      { alias: '더샵1', area: '기흥역로58번길 78(구갈동, 기흥역 더샵) 102동, 103동, 201동' },
+      { alias: '더샵2', area: '기흥역로58번길 78(구갈동, 기흥역 더샵) 104동, 105동' },
+      { alias: '더샵3', area: '기흥역로58번길 78(구갈동, 기흥역 더샵) 101동, 106동' },
     ]
   },
 ]
@@ -120,16 +137,11 @@ export default function Jurisdiction() {
                         key={`${region.name}-${index}`}
                         className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 hover:border-catholic-logo/30 hover:shadow-md transition-all duration-300"
                       >
-                        <div className="flex items-start gap-3 mb-3">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ backgroundColor: '#7B1F4B' }}>
-                            {district.zone}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-900 text-lg mb-1">{district.alias}</h3>
-                          </div>
+                        <div className="mb-3">
+                          <h3 className="font-bold text-gray-900 text-lg mb-1">{district.alias}구역</h3>
                         </div>
                         <div className="mt-3 pt-3 border-t border-gray-200">
-                          <p className="text-sm text-gray-600 leading-relaxed">{district.area}</p>
+                          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{district.area}</p>
                         </div>
                       </div>
                     ))}
