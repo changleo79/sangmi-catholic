@@ -17,7 +17,7 @@ export default function News() {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
   const itemsPerPage = 10
 
-  const loadData = () => {
+  const loadData = async () => {
     // 캐시 무효화
     if ((window as any).__bulletinsCache) {
       delete (window as any).__bulletinsCache
@@ -63,12 +63,22 @@ export default function News() {
     
     if (isMobileDevice) {
       try {
-        const stored = localStorage.getItem('admin_bulletins')
+        // 여러 번 시도하여 최신 데이터 확보
+        let stored = localStorage.getItem('admin_bulletins')
+        if (!stored) {
+          // 약간의 지연 후 다시 시도
+          await new Promise(resolve => setTimeout(resolve, 50))
+          stored = localStorage.getItem('admin_bulletins')
+        }
+        
         if (stored) {
           const parsed = JSON.parse(stored)
-          // 유효성 검사
-          storedBulletins = Array.isArray(parsed) ? parsed : []
-          console.log('[News] 모바일 - localStorage에서 직접 로드:', storedBulletins.length, '개 주보', storedBulletins)
+          // 유효성 검사 및 정렬 (최신순)
+          storedBulletins = Array.isArray(parsed) ? parsed.sort((a: BulletinItem, b: BulletinItem) => {
+            // 날짜 기준 내림차순 정렬
+            return new Date(b.date).getTime() - new Date(a.date).getTime()
+          }) : []
+          console.log('[News] 모바일 - localStorage에서 직접 로드:', storedBulletins.length, '개 주보', storedBulletins.map(b => ({ id: b.id, title: b.title, date: b.date })))
         } else {
           console.log('[News] 모바일 - localStorage에 주보 데이터 없음')
           storedBulletins = []
@@ -82,7 +92,7 @@ export default function News() {
       storedBulletins = getBulletins(true)
     }
     
-    console.log('[News] 주보 로드:', storedBulletins.length, '개', storedBulletins, isMobileDevice ? '(모바일)' : '(PC)')
+    console.log('[News] 주보 로드:', storedBulletins.length, '개', storedBulletins.map(b => ({ id: b.id, title: b.title })), isMobileDevice ? '(모바일)' : '(PC)')
     setBulletins(storedBulletins)
   }
 

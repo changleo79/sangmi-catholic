@@ -69,11 +69,15 @@ export default function PdfViewerModal({
       url: shareUrl
     }
 
-    // Web Share API 사용 (HTTPS 또는 localhost에서만 작동)
-    if (navigator.share && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+    // 모바일 감지
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
+
+    // 모바일에서만 Web Share API 사용 (HTTPS 또는 localhost에서만 작동)
+    if (isMobileDevice && navigator.share && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
       try {
         await navigator.share(shareData)
-        console.log('[PdfViewerModal] 공유 성공')
+        console.log('[PdfViewerModal] 공유 성공 (모바일)')
+        return
       } catch (error: any) {
         // 사용자가 공유를 취소한 경우는 무시
         if (error.name === 'AbortError') {
@@ -85,21 +89,24 @@ export default function PdfViewerModal({
       }
     }
     
-    // Web Share API를 지원하지 않거나 실패한 경우 클립보드에 URL 복사
+    // PC 또는 Web Share API 실패 시 클립보드에 URL 복사
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(shareUrl)
         alert('주보 링크가 클립보드에 복사되었습니다.')
+        console.log('[PdfViewerModal] 클립보드 복사 성공:', shareUrl)
       } else {
         throw new Error('Clipboard API not available')
       }
     } catch (error) {
+      console.error('[PdfViewerModal] 클립보드 복사 실패, execCommand 시도:', error)
       // 클립보드 복사 실패 시 수동 복사 안내
       const textarea = document.createElement('textarea')
       textarea.value = shareUrl
       textarea.style.position = 'fixed'
       textarea.style.left = '-9999px'
       textarea.style.top = '0'
+      textarea.style.opacity = '0'
       document.body.appendChild(textarea)
       textarea.focus()
       textarea.select()
@@ -107,10 +114,12 @@ export default function PdfViewerModal({
         const successful = document.execCommand('copy')
         if (successful) {
           alert('주보 링크가 클립보드에 복사되었습니다.')
+          console.log('[PdfViewerModal] execCommand 복사 성공')
         } else {
           throw new Error('execCommand failed')
         }
       } catch (err) {
+        console.error('[PdfViewerModal] execCommand 복사 실패:', err)
         // 최종 fallback: URL 표시
         const confirmed = confirm(`주보 링크를 복사하려면 다음 URL을 선택하세요:\n\n${shareUrl}\n\n확인을 누르면 URL이 새 창에서 열립니다.`)
         if (confirmed) {
