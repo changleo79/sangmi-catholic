@@ -9,18 +9,14 @@ export default function Albums() {
   const categories = getAlbumCategories()
 
   useEffect(() => {
-    // 초기 데이터 로드
-    // 모바일에서는 initializeData를 호출하지 않음 (localStorage 데이터 보호)
+    // 초기 데이터 로드 - 모든 기기에서 서버에서 로드
     const loadData = async () => {
-      const isMobileDevice = isMobile()
-      if (!isMobileDevice) {
-        // PC에서만 initializeData 호출 (모바일에서는 localStorage 직접 읽기)
-        await initializeData()
-        await new Promise(resolve => setTimeout(resolve, 100))
-      }
+      // 모든 기기에서 서버 데이터 초기화
+      await initializeData()
+      await new Promise(resolve => setTimeout(resolve, 100))
       await loadAlbums()
       // 기본 앨범이 없으면 초기 데이터 생성
-      const stored = getAlbums(true) // 강제 새로고침
+      const stored = await getAlbums(true) // await 추가 - 서버에서 강제 새로고침
       if (stored.length === 0) {
         initializeDefaultAlbum()
         await loadAlbums() // 다시 로드
