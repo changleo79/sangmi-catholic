@@ -61,42 +61,63 @@ export default function PdfViewerModal({
   }
 
   const handleShare = async () => {
+    // 공유할 URL: 현재 페이지 URL 또는 파일 URL
+    const shareUrl = window.location.href || fileUrl
     const shareData = {
       title,
       text: description ? `${title}\n${description}` : title,
-      url: fileUrl
+      url: shareUrl
     }
 
-    if (navigator.share) {
+    // Web Share API 사용 (HTTPS 또는 localhost에서만 작동)
+    if (navigator.share && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
       try {
         await navigator.share(shareData)
+        console.log('[PdfViewerModal] 공유 성공')
       } catch (error: any) {
         // 사용자가 공유를 취소한 경우는 무시
-        if (error.name !== 'AbortError') {
-          console.error('공유 실패:', error)
+        if (error.name === 'AbortError') {
+          console.log('[PdfViewerModal] 공유 취소됨')
+          return
         }
+        console.error('[PdfViewerModal] 공유 실패:', error)
+        // 공유 실패 시 클립보드 복사로 fallback
       }
-    } else {
-      // Web Share API를 지원하지 않는 경우 클립보드에 URL 복사
-      try {
-        await navigator.clipboard.writeText(fileUrl)
+    }
+    
+    // Web Share API를 지원하지 않거나 실패한 경우 클립보드에 URL 복사
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl)
         alert('주보 링크가 클립보드에 복사되었습니다.')
-      } catch (error) {
-        // 클립보드 복사 실패 시 수동 복사 안내
-        const textarea = document.createElement('textarea')
-        textarea.value = fileUrl
-        textarea.style.position = 'fixed'
-        textarea.style.opacity = '0'
-        document.body.appendChild(textarea)
-        textarea.select()
-        try {
-          document.execCommand('copy')
-          alert('주보 링크가 클립보드에 복사되었습니다.')
-        } catch (err) {
-          alert(`주보 링크를 복사하려면 다음 URL을 선택하세요:\n\n${fileUrl}`)
-        }
-        document.body.removeChild(textarea)
+      } else {
+        throw new Error('Clipboard API not available')
       }
+    } catch (error) {
+      // 클립보드 복사 실패 시 수동 복사 안내
+      const textarea = document.createElement('textarea')
+      textarea.value = shareUrl
+      textarea.style.position = 'fixed'
+      textarea.style.left = '-9999px'
+      textarea.style.top = '0'
+      document.body.appendChild(textarea)
+      textarea.focus()
+      textarea.select()
+      try {
+        const successful = document.execCommand('copy')
+        if (successful) {
+          alert('주보 링크가 클립보드에 복사되었습니다.')
+        } else {
+          throw new Error('execCommand failed')
+        }
+      } catch (err) {
+        // 최종 fallback: URL 표시
+        const confirmed = confirm(`주보 링크를 복사하려면 다음 URL을 선택하세요:\n\n${shareUrl}\n\n확인을 누르면 URL이 새 창에서 열립니다.`)
+        if (confirmed) {
+          window.open(shareUrl, '_blank', 'noopener,noreferrer')
+        }
+      }
+      document.body.removeChild(textarea)
     }
   }
 

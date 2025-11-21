@@ -57,26 +57,32 @@ export default function News() {
              (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
     }
     
-    // 모바일에서는 localStorage에서 직접 읽기
+    // 모바일에서는 항상 localStorage에서 직접 읽기 (JSON 파일 무시)
     let storedBulletins: BulletinItem[] = []
-    if (isMobile()) {
+    const isMobileDevice = isMobile()
+    
+    if (isMobileDevice) {
       try {
         const stored = localStorage.getItem('admin_bulletins')
         if (stored) {
-          storedBulletins = JSON.parse(stored)
+          const parsed = JSON.parse(stored)
+          // 유효성 검사
+          storedBulletins = Array.isArray(parsed) ? parsed : []
           console.log('[News] 모바일 - localStorage에서 직접 로드:', storedBulletins.length, '개 주보', storedBulletins)
         } else {
-          storedBulletins = getBulletins(true)
+          console.log('[News] 모바일 - localStorage에 주보 데이터 없음')
+          storedBulletins = []
         }
       } catch (e) {
         console.error('[News] 모바일 - localStorage 읽기 실패:', e)
-        storedBulletins = getBulletins(true)
+        storedBulletins = []
       }
     } else {
+      // PC에서는 getBulletins 사용
       storedBulletins = getBulletins(true)
     }
     
-    console.log('[News] 주보 로드:', storedBulletins.length, '개', storedBulletins)
+    console.log('[News] 주보 로드:', storedBulletins.length, '개', storedBulletins, isMobileDevice ? '(모바일)' : '(PC)')
     setBulletins(storedBulletins)
   }
 
@@ -94,9 +100,8 @@ export default function News() {
       if ((window as any).cachedData && (window as any).cachedData.bulletins) {
         (window as any).cachedData.bulletins = undefined
       }
-      const storedBulletins = getBulletins(true)
-      console.log('[News] 주보 업데이트 후 로드:', storedBulletins.length, '개', storedBulletins)
-      setBulletins(storedBulletins)
+      // 모바일 로직 적용
+      loadData()
     }
     
     // 포커스 및 visibilitychange 이벤트도 추가
