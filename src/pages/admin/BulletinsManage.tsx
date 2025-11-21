@@ -60,6 +60,8 @@ export default function BulletinsManage() {
     // 저장 후 즉시 다시 로드하여 확인
     setTimeout(() => {
       loadBulletins()
+      // 주보 업데이트 이벤트 발생 (다른 컴포넌트에서 데이터 새로고침)
+      window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
     }, 100)
     resetForm()
   }
@@ -89,6 +91,8 @@ export default function BulletinsManage() {
       const newBulletins = bulletins.filter(b => b.id !== id)
       setBulletins(newBulletins)
       saveBulletins(newBulletins)
+      // 주보 업데이트 이벤트 발생
+      window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
     }
   }
 

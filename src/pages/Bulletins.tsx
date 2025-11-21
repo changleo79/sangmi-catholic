@@ -1,0 +1,313 @@
+import { useState, useEffect } from 'react'
+import { getBulletins, type BulletinItem } from '../utils/storage'
+import PdfViewerModal from '../components/PdfViewerModal'
+
+// 모바일 감지 함수
+const isMobile = () => {
+  return window.innerWidth < 768 || 
+         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+         (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
+}
+
+export default function Bulletins() {
+  const [bulletins, setBulletins] = useState<BulletinItem[]>([])
+  const [selectedBulletin, setSelectedBulletin] = useState<BulletinItem | null>(null)
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
+
+  const loadBulletins = async () => {
+    // 캐시 무효화
+    if ((window as any).__bulletinsCache) {
+      delete (window as any).__bulletinsCache
+    }
+    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+      (window as any).cachedData.bulletins = undefined
+    }
+    
+    // 모바일에서는 항상 localStorage에서 직접 읽기
+    let storedBulletins: BulletinItem[] = []
+    const isMobileDevice = isMobile()
+    
+    if (isMobileDevice) {
+      try {
+        // 여러 번 시도하여 최신 데이터 확보
+        let stored = localStorage.getItem('admin_bulletins')
+        if (!stored) {
+          await new Promise(resolve => setTimeout(resolve, 50))
+          stored = localStorage.getItem('admin_bulletins')
+        }
+        
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          // 유효성 검사 및 정렬 (최신순)
+          storedBulletins = Array.isArray(parsed) ? parsed.sort((a: BulletinItem, b: BulletinItem) => {
+            return new Date(b.date).getTime() - new Date(a.date).getTime()
+          }) : []
+          console.log('[Bulletins] 모바일 - localStorage에서 직접 로드:', storedBulletins.length, '개 주보')
+        } else {
+          console.log('[Bulletins] 모바일 - localStorage에 주보 데이터 없음')
+          storedBulletins = []
+        }
+      } catch (e) {
+        console.error('[Bulletins] 모바일 - localStorage 읽기 실패:', e)
+        storedBulletins = []
+      }
+    } else {
+      // PC에서는 getBulletins 사용 (강제 새로고침)
+      storedBulletins = getBulletins(true)
+      console.log('[Bulletins] PC - getBulletins로 로드:', storedBulletins.length, '개 주보')
+    }
+    
+    setBulletins(storedBulletins)
+  }
+
+  useEffect(() => {
+    loadBulletins()
+
+    // 페이지 포커스 시 데이터 다시 로드
+    const handleFocus = () => {
+      console.log('[Bulletins] focus 이벤트 - 데이터 다시 로드')
+      if ((window as any).__bulletinsCache) {
+        delete (window as any).__bulletinsCache
+      }
+      loadBulletins()
+    }
+    
+    // 주보 업데이트 이벤트 리스너
+    const handleBulletinsUpdate = () => {
+      console.log('[Bulletins] bulletinsUpdated 이벤트 수신 - 데이터 다시 로드')
+      if ((window as any).__bulletinsCache) {
+        delete (window as any).__bulletinsCache
+      }
+      setTimeout(() => {
+        loadBulletins()
+      }, 100)
+    }
+    
+    // visibilitychange 이벤트
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('[Bulletins] visibilitychange 이벤트 - 데이터 다시 로드')
+        if ((window as any).__bulletinsCache) {
+          delete (window as any).__bulletinsCache
+        }
+        loadBulletins()
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    // localStorage 변경 감지
+    let lastBulletinsData: string | null = null
+    const checkBulletinsChange = () => {
+      const currentData = localStorage.getItem('admin_bulletins')
+      if (currentData !== lastBulletinsData) {
+        console.log('[Bulletins] localStorage 변경 감지 - 데이터 다시 로드')
+        lastBulletinsData = currentData
+        loadBulletins()
+      }
+    }
+    
+    lastBulletinsData = localStorage.getItem('admin_bulletins')
+    
+    const isMobileDevice = isMobile()
+    if (isMobileDevice) {
+      const intervalId = setInterval(() => {
+        if (!document.hidden) {
+          checkBulletinsChange()
+        }
+      }, 1000) // 모바일: 1초마다 체크
+      
+      return () => {
+        window.removeEventListener('focus', handleFocus)
+        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
+      }
+    } else {
+      const intervalId = setInterval(() => {
+        if (!document.hidden) {
+          checkBulletinsChange()
+        }
+      }, 3000) // PC: 3초마다 체크
+      
+      return () => {
+        window.removeEventListener('focus', handleFocus)
+        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
+      }
+    }
+  }, [])
+
+  const handleBulletinClick = (bulletin: BulletinItem) => {
+    console.log('[Bulletins] 주보 클릭:', bulletin.title, 'fileUrl:', bulletin.fileUrl)
+    if (bulletin && bulletin.fileUrl) {
+      setSelectedBulletin(bulletin)
+      setIsPdfModalOpen(true)
+    } else {
+      console.error('[Bulletins] 주보 데이터 없음:', bulletin)
+      alert('주보 파일을 불러올 수 없습니다.')
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto px-4 py-8 md:py-16">
+        {/* Page Header */}
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+            주보 안내
+          </h1>
+          <div className="w-24 h-1.5 mx-auto rounded-full mb-4" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
+          <p className="text-gray-600 text-lg">
+            {bulletins.length > 0 ? `총 ${bulletins.length}개의 주보가 있습니다.` : '등록된 주보가 없습니다.'}
+          </p>
+        </div>
+
+        {/* Bulletins Grid */}
+        {bulletins.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            {bulletins.map((bulletin) => {
+              // 썸네일 URL 우선, 없으면 fileUrl이 이미지인 경우 사용
+              const isImageFile = bulletin.fileUrl && (
+                bulletin.fileUrl.startsWith('data:image/') || 
+                bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                (bulletin.fileUrl.startsWith('http') && bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
+              )
+              
+              const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
+              
+              return (
+                <div
+                  key={bulletin.id}
+                  onClick={() => handleBulletinClick(bulletin)}
+                  onTouchStart={(e) => {
+                    if (window.innerWidth < 768) {
+                      e.stopPropagation()
+                      const touch = e.touches[0]
+                      if (touch) {
+                        (e.currentTarget as any).__touchStartX = touch.clientX
+                        ;(e.currentTarget as any).__touchStartY = touch.clientY
+                      }
+                    }
+                  }}
+                  onTouchMove={(e) => {
+                    if (window.innerWidth < 768) {
+                      const touch = e.touches[0]
+                      if (touch && (e.currentTarget as any).__touchStartX !== undefined) {
+                        const deltaX = Math.abs(touch.clientX - (e.currentTarget as any).__touchStartX)
+                        const deltaY = Math.abs(touch.clientY - (e.currentTarget as any).__touchStartY)
+                        if (deltaX > 10 || deltaY > 10) {
+                          ;(e.currentTarget as any).__isScrolling = true
+                        }
+                      }
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    if (window.innerWidth < 768) {
+                      const isScrolling = (e.currentTarget as any).__isScrolling
+                      if (!isScrolling) {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleBulletinClick(bulletin)
+                      }
+                      delete (e.currentTarget as any).__touchStartX
+                      delete (e.currentTarget as any).__touchStartY
+                      delete (e.currentTarget as any).__isScrolling
+                    }
+                  }}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl active:shadow-xl transition-all duration-500 border border-gray-100 hover:border-catholic-logo/20 active:border-catholic-logo/40 group cursor-pointer hover:-translate-y-1 active:scale-95 touch-manipulation overflow-hidden"
+                  style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
+                >
+                  <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+                    {thumbnailUrl ? (
+                      <img
+                        src={thumbnailUrl}
+                        alt={bulletin.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        crossOrigin="anonymous"
+                        style={{ backgroundColor: '#f3f4f6', pointerEvents: 'none' }}
+                        onLoad={(e) => {
+                          (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
+                        }}
+                        onError={(e) => {
+                          console.error('[Bulletins] 썸네일 로드 실패:', thumbnailUrl)
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                          const parent = target.parentElement
+                          if (parent) {
+                            parent.innerHTML = `
+                              <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                <div class="text-center p-4">
+                                  <svg class="w-16 h-16 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                  </svg>
+                                  <p class="text-sm text-gray-500">주보</p>
+                                </div>
+                              </div>
+                            `
+                          }
+                        }}
+                        draggable={false}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <div className="text-center p-4">
+                          <svg className="w-16 h-16 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                          </svg>
+                          <p className="text-sm text-gray-500">주보</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-2 group-hover:text-catholic-logo transition-colors">
+                      {bulletin.title}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {new Date(bulletin.date).toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                    {bulletin.description && (
+                      <p className="text-xs text-gray-600 mt-2 line-clamp-2">
+                        {bulletin.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <svg className="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p className="text-gray-500 text-lg">등록된 주보가 없습니다.</p>
+          </div>
+        )}
+
+        {/* PDF Viewer Modal */}
+        {selectedBulletin && (
+          <PdfViewerModal
+            isOpen={isPdfModalOpen}
+            onClose={() => {
+              setIsPdfModalOpen(false)
+              setSelectedBulletin(null)
+            }}
+            fileUrl={selectedBulletin.fileUrl}
+            title={selectedBulletin.title}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+

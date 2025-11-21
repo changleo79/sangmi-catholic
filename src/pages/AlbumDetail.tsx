@@ -30,17 +30,22 @@ export default function AlbumDetail() {
     setIsLoading(true)
 
     try {
-      // 캐시 무효화
+      // 캐시 완전히 무효화
       if ((window as any).__albumsCache) {
         delete (window as any).__albumsCache
+      }
+      // storage.ts의 cachedData도 무효화
+      if ((window as any).cachedData && (window as any).cachedData.albums) {
+        (window as any).cachedData.albums = undefined
       }
 
       // 기본 앨범 확인
       ensureDefaultAlbumExists()
 
-      // 앨범 데이터 가져오기
+      // 앨범 데이터 가져오기 - localStorage 우선 (getAlbums 내부에서 처리)
       const albums = getAlbums(true)
-      console.log(`[AlbumDetail] 앨범 로드 시도: ID=${albumId}, 전체 앨범 수=${albums.length}`)
+      const isMobileDevice = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      console.log(`[AlbumDetail] 앨범 로드 시도: ID=${albumId}, 전체 앨범 수=${albums.length}`, isMobileDevice ? '(모바일)' : '(PC)')
 
       const found = albums.find(a => a.id === albumId)
 
@@ -137,14 +142,36 @@ export default function AlbumDetail() {
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
     // 모바일에서도 이벤트가 제대로 작동하도록 추가 체크
-    if (window.innerWidth < 768) {
+    const isMobileDevice = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    
+    // localStorage 변경 감지
+    let lastAlbumsData: string | null = null
+    const checkAlbumsChange = () => {
+      const currentData = localStorage.getItem('admin_albums')
+      if (currentData !== lastAlbumsData && mountedRef.current && !document.hidden && !isLoadingRef.current && id) {
+        console.log('[AlbumDetail] localStorage 변경 감지 - 데이터 다시 로드:', id)
+        lastAlbumsData = currentData
+        // 캐시 무효화
+        if ((window as any).__albumsCache) {
+          delete (window as any).__albumsCache
+        }
+        if ((window as any).cachedData && (window as any).cachedData.albums) {
+          (window as any).cachedData.albums = undefined
+        }
+        loadedAlbumIdRef.current = null
+        loadAlbumData(id)
+      }
+    }
+    
+    lastAlbumsData = localStorage.getItem('admin_albums')
+    
+    if (isMobileDevice) {
+      // 모바일: localStorage 변경 감지 + 주기적 체크
       const intervalId = setInterval(() => {
         if (mountedRef.current && !document.hidden && !isLoadingRef.current && id) {
-          console.log('[AlbumDetail] 모바일 주기적 체크:', id)
-          loadedAlbumIdRef.current = null
-          loadAlbumData(id)
+          checkAlbumsChange()
         }
-      }, 3000) // 3초마다 체크
+      }, 1000) // 모바일: 1초마다 체크
       
       return () => {
         window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
@@ -152,12 +179,20 @@ export default function AlbumDetail() {
         document.removeEventListener('visibilitychange', handleVisibilityChange)
         clearInterval(intervalId)
       }
-    }
-
-    return () => {
-      window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-      window.removeEventListener('focus', handleFocus)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    } else {
+      // PC: 덜 자주 체크
+      const intervalId = setInterval(() => {
+        if (mountedRef.current && !document.hidden && !isLoadingRef.current && id) {
+          checkAlbumsChange()
+        }
+      }, 3000) // PC: 3초마다 체크
+      
+      return () => {
+        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
+        window.removeEventListener('focus', handleFocus)
+        document.removeEventListener('visibilitychange', handleVisibilityChange)
+        clearInterval(intervalId)
+      }
     }
   }, [id])
 

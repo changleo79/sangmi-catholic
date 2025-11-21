@@ -307,9 +307,22 @@ export default function News() {
 
           {/* 주보 안내 Section */}
           <section>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
-              <h2 className="text-3xl font-bold text-gray-900">주보 안내</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
+                <h2 className="text-3xl font-bold text-gray-900">주보 안내</h2>
+              </div>
+              {bulletins.length > 0 && (
+                <Link
+                  to="/bulletins"
+                  className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
+                  style={{ backgroundColor: '#7B1F4B' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                >
+                  전체보기
+                </Link>
+              )}
             </div>
             {bulletins.length > 0 ? (
               <>

@@ -101,13 +101,13 @@ export default function OrganizationTree() {
             style={{ background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)' }}
           >
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at top, rgba(255,255,255,0.7), transparent 55%)' }}></div>
-            <div className="relative flex items-start gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/25 backdrop-blur">
+            <div className="relative flex items-center gap-4">
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-white/25 backdrop-blur">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <div className="space-y-2">
+              <div>
                 <h2 className="text-2xl font-bold">주임신부</h2>
               </div>
             </div>
@@ -307,10 +307,10 @@ export default function OrganizationTree() {
                     }}
                   >
                     <div className="flex items-center justify-center gap-3 mb-2">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
-                      <h2 className="text-2xl md:text-3xl font-bold">주임신부</h2>
+                      <h2 className="text-2xl md:text-3xl font-bold leading-tight">주임신부</h2>
                     </div>
                     <p className="text-sm opacity-90 mt-2">상미성당</p>
                   </div>

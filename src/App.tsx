@@ -26,6 +26,7 @@ import BulletinsManage from './pages/admin/BulletinsManage'
 import BackupManage from './pages/admin/BackupManage'
 import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
+import Bulletins from './pages/Bulletins'
 import NoticeDetail from './pages/NoticeDetail'
 import RecruitmentDetail from './pages/RecruitmentDetail'
 import Organizations from './pages/Organizations'
@@ -79,6 +80,7 @@ function App() {
                   <Route path="/recruitments/:id" element={<RecruitmentDetail />} />
                   <Route path="/albums" element={<Albums />} />
                   <Route path="/albums/:id" element={<AlbumDetail />} />
+                  <Route path="/bulletins" element={<Bulletins />} />
                   <Route path="/organizations" element={<Organizations />} />
                   <Route path="/organizations/tree" element={<OrganizationTree />} />
                   <Route path="/organizations/:orgType" element={<OrganizationBoard />} />
