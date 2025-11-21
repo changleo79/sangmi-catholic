@@ -465,7 +465,15 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
     return cachedData.albums
   }
   
+  // localStorage에서 직접 읽기 (항상 우선)
   const stored = localStorage.getItem(ALBUMS_KEY)
+  console.log('[getAlbums] localStorage 읽기 시도:', {
+    key: ALBUMS_KEY,
+    hasData: !!stored,
+    dataLength: stored ? JSON.parse(stored).length : 0,
+    forceRefresh
+  })
+  
   if (stored) {
     try {
       const parsed = JSON.parse(stored)
@@ -674,7 +682,15 @@ export const getBulletins = (forceRefresh = false): BulletinItem[] => {
     return cachedData.bulletins
   }
   
+  // localStorage에서 직접 읽기 (항상 우선)
   const stored = localStorage.getItem(BULLETINS_KEY)
+  console.log('[getBulletins] localStorage 읽기 시도:', {
+    key: BULLETINS_KEY,
+    hasData: !!stored,
+    dataLength: stored ? JSON.parse(stored).length : 0,
+    forceRefresh
+  })
+  
   if (stored) {
     try {
       const parsed = JSON.parse(stored)

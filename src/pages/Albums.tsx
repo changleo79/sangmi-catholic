@@ -151,34 +151,21 @@ export default function Albums() {
         (window as any).cachedData.albums = undefined
       }
       
-      const isMobileDevice = isMobile()
-      let albums: AlbumWithCategory[] = []
+      // 모바일/PC 모두 동일하게 getAlbums 사용 (localStorage 우선, JSON 파일 무시)
+      // getAlbums는 이미 localStorage를 우선시하도록 구현되어 있음
+      ensureDefaultAlbumExists()
+      albums = getAlbums(true) // forceRefresh=true: localStorage 직접 읽기
       
-      // 모바일에서는 localStorage에서 직접 읽기 (PC와 동일한 키 사용)
-      if (isMobileDevice) {
-        try {
-          // 'admin_albums' 키에서 직접 읽기 (PC와 동일)
-          const stored = localStorage.getItem('admin_albums')
-          if (stored) {
-            const parsed = JSON.parse(stored)
-            if (Array.isArray(parsed)) {
-              albums = parsed
-              console.log('[Albums] 모바일 - localStorage 직접 읽기:', albums.length, '개 앨범', albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
-            }
-          } else {
-            console.log('[Albums] 모바일 - localStorage에 앨범 데이터 없음 (빈 배열 반환, JSON 파일 데이터 방지)')
-            albums = []
-          }
-        } catch (e) {
-          console.error('[Albums] 모바일 - localStorage 읽기 실패:', e)
-          // 실패 시 빈 배열 반환 (getAlbums 호출하지 않음 - JSON 파일 데이터 방지)
-          albums = []
-        }
+      const isMobileDevice = isMobile()
+      console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- getAlbums로 로드:', albums.length, '개 앨범', albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
+      
+      // 디버깅: localStorage 직접 확인
+      const directCheck = localStorage.getItem('admin_albums')
+      if (directCheck) {
+        const directParsed = JSON.parse(directCheck)
+        console.log('[Albums] localStorage 직접 확인:', directParsed.length, '개 앨범', directParsed.map((a: any) => ({ id: a.id, title: a.title })))
       } else {
-        // PC에서는 getAlbums 사용
-        ensureDefaultAlbumExists()
-        albums = getAlbums(true)
-        console.log('[Albums] PC - getAlbums로 로드:', albums.length, '개 앨범')
+        console.log('[Albums] localStorage 직접 확인: 데이터 없음')
       }
       
       // 유효성 검사 및 필터링

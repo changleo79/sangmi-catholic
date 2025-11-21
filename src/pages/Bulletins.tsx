@@ -23,42 +23,20 @@ export default function Bulletins() {
       (window as any).cachedData.bulletins = undefined
     }
     
-    const isMobileDevice = isMobile()
-    let storedBulletins: BulletinItem[] = []
+    // 모바일/PC 모두 동일하게 getBulletins 사용 (localStorage 우선, JSON 파일 무시)
+    // getBulletins는 이미 localStorage를 우선시하도록 구현되어 있음
+    storedBulletins = getBulletins(true) // forceRefresh=true: localStorage 직접 읽기
     
-    // 모바일에서는 localStorage에서 직접 읽기 (PC와 동일한 키 사용)
-    if (isMobileDevice) {
-      try {
-        // 'admin_bulletins' 키에서 직접 읽기 (PC와 동일)
-        // 여러 번 시도하여 최신 데이터 확보
-        let stored = localStorage.getItem('admin_bulletins')
-        if (!stored) {
-          // 약간의 지연 후 다시 시도
-          await new Promise(resolve => setTimeout(resolve, 100))
-          stored = localStorage.getItem('admin_bulletins')
-        }
-        
-        if (stored) {
-          const parsed = JSON.parse(stored)
-          if (Array.isArray(parsed)) {
-            storedBulletins = parsed
-            console.log('[Bulletins] 모바일 - localStorage 직접 읽기 성공:', storedBulletins.length, '개 주보', storedBulletins.map(b => ({ id: b.id, title: b.title })))
-          } else {
-            console.warn('[Bulletins] 모바일 - 파싱된 데이터가 배열이 아님:', parsed)
-          }
-        } else {
-          console.log('[Bulletins] 모바일 - localStorage에 주보 데이터 없음 (빈 배열 반환)')
-          storedBulletins = []
-        }
-      } catch (e) {
-        console.error('[Bulletins] 모바일 - localStorage 읽기 실패:', e)
-        // 실패 시 빈 배열 반환 (getBulletins 호출하지 않음 - JSON 파일 데이터 방지)
-        storedBulletins = []
-      }
+    const isMobileDevice = isMobile()
+    console.log('[Bulletins]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', storedBulletins.length, '개 주보', storedBulletins.map(b => ({ id: b.id, title: b.title })))
+    
+    // 디버깅: localStorage 직접 확인
+    const directCheck = localStorage.getItem('admin_bulletins')
+    if (directCheck) {
+      const directParsed = JSON.parse(directCheck)
+      console.log('[Bulletins] localStorage 직접 확인:', directParsed.length, '개 주보', directParsed.map((b: any) => ({ id: b.id, title: b.title })))
     } else {
-      // PC에서는 getBulletins 사용
-      storedBulletins = getBulletins(true)
-      console.log('[Bulletins] PC - getBulletins로 로드:', storedBulletins.length, '개 주보')
+      console.log('[Bulletins] localStorage 직접 확인: 데이터 없음')
     }
     
     // 최신순 정렬
