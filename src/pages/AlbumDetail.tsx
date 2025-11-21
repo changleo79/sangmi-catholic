@@ -158,59 +158,8 @@ export default function AlbumDetail() {
     window.addEventListener('focus', handleFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
-    // 모바일에서도 이벤트가 제대로 작동하도록 추가 체크
-    const isMobileDevice = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-    
-    // localStorage 변경 감지
-    let lastAlbumsData: string | null = null
-    const checkAlbumsChange = () => {
-      const currentData = localStorage.getItem('admin_albums')
-      if (currentData !== lastAlbumsData && mountedRef.current && !document.hidden && !isLoadingRef.current && id) {
-        console.log('[AlbumDetail] localStorage 변경 감지 - 데이터 다시 로드:', id)
-        lastAlbumsData = currentData
-        // 캐시 무효화
-        if ((window as any).__albumsCache) {
-          delete (window as any).__albumsCache
-        }
-        if ((window as any).cachedData && (window as any).cachedData.albums) {
-          (window as any).cachedData.albums = undefined
-        }
-        loadedAlbumIdRef.current = null
-        loadAlbumData(id)
-      }
-    }
-    
-    lastAlbumsData = localStorage.getItem('admin_albums')
-    
-    if (isMobileDevice) {
-      // 모바일: localStorage 변경 감지 + 주기적 체크
-      const intervalId = setInterval(() => {
-        if (mountedRef.current && !document.hidden && !isLoadingRef.current && id) {
-          checkAlbumsChange()
-        }
-      }, 1000) // 모바일: 1초마다 체크
-      
-      return () => {
-        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-        window.removeEventListener('focus', handleFocus)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
-    } else {
-      // PC: 덜 자주 체크
-      const intervalId = setInterval(() => {
-        if (mountedRef.current && !document.hidden && !isLoadingRef.current && id) {
-          checkAlbumsChange()
-        }
-      }, 3000) // PC: 3초마다 체크
-      
-      return () => {
-        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-        window.removeEventListener('focus', handleFocus)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
-    }
+    // localStorage는 더 이상 사용하지 않음 - 서버에서만 데이터 로드
+    // 이벤트 리스너만으로 충분
   }, [id])
 
   // 자동 재생 useEffect는 album이 변경될 때만 실행
