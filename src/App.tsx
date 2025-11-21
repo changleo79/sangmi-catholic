@@ -52,6 +52,7 @@ function ScrollToTopOnRouteChange() {
 function App() {
   useEffect(() => {
     // 앱 시작 시 JSON 파일에서 데이터 로드
+    // 모바일에서는 initializeData가 앨범/주보를 건드리지 않도록 이미 구현되어 있음
     initializeData()
   }, [])
 

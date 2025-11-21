@@ -64,20 +64,30 @@ export default function News() {
     if (isMobileDevice) {
       try {
         // 'admin_bulletins' 키에서 직접 읽기 (PC와 동일)
-        const stored = localStorage.getItem('admin_bulletins')
+        // 여러 번 시도하여 최신 데이터 확보
+        let stored = localStorage.getItem('admin_bulletins')
+        if (!stored) {
+          // 약간의 지연 후 다시 시도
+          await new Promise(resolve => setTimeout(resolve, 100))
+          stored = localStorage.getItem('admin_bulletins')
+        }
+        
         if (stored) {
           const parsed = JSON.parse(stored)
           if (Array.isArray(parsed)) {
             storedBulletins = parsed
-            console.log('[News] 모바일 - localStorage 직접 읽기:', storedBulletins.length, '개 주보', storedBulletins.map(b => ({ id: b.id, title: b.title })))
+            console.log('[News] 모바일 - localStorage 직접 읽기 성공:', storedBulletins.length, '개 주보', storedBulletins.map(b => ({ id: b.id, title: b.title })))
+          } else {
+            console.warn('[News] 모바일 - 파싱된 데이터가 배열이 아님:', parsed)
           }
         } else {
-          console.log('[News] 모바일 - localStorage에 주보 데이터 없음')
+          console.log('[News] 모바일 - localStorage에 주보 데이터 없음 (빈 배열 반환)')
+          storedBulletins = []
         }
       } catch (e) {
         console.error('[News] 모바일 - localStorage 읽기 실패:', e)
-        // 실패 시 getBulletins 사용
-        storedBulletins = getBulletins(true)
+        // 실패 시 빈 배열 반환 (getBulletins 호출하지 않음 - JSON 파일 데이터 방지)
+        storedBulletins = []
       }
     } else {
       // PC에서는 getBulletins 사용

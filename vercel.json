@@ -12,7 +12,8 @@
   "functions": {
     "api/upload.ts": {
       "maxDuration": 30,
-      "memory": 1024
+      "memory": 1024,
+      "maxRequestBodySize": "20mb"
     }
   }
 }

@@ -195,6 +195,8 @@ export const initializeData = async (): Promise<void> => {
       (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
     )
     
+    console.log('[initializeData] 실행 시작', isMobileDevice ? '(모바일)' : '(PC)')
+    
     // 모바일에서는 앨범/주보 데이터를 건드리지 않음 (localStorage 직접 읽기)
     if (isMobileDevice) {
       console.log('[initializeData] 모바일 감지 - 앨범/주보 데이터 초기화 건너뜀 (어드민 데이터 보호)')

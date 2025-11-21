@@ -93,6 +93,16 @@ function parseMultipartForm(req: VercelRequest): Promise<{ albumId: string; file
   })
 }
 
+// Vercel 서버리스 함수 설정
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '20mb',
+    },
+  },
+  maxDuration: 30,
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS 헤더 설정
   res.setHeader('Access-Control-Allow-Origin', '*')
