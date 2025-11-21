@@ -166,16 +166,13 @@ export default function Albums() {
               console.log('[Albums] 모바일 - localStorage 직접 읽기:', albums.length, '개 앨범', albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
             }
           } else {
-            console.log('[Albums] 모바일 - localStorage에 앨범 데이터 없음')
-            // 기본 앨범 확인
-            ensureDefaultAlbumExists()
-            albums = getAlbums(true)
+            console.log('[Albums] 모바일 - localStorage에 앨범 데이터 없음 (빈 배열 반환, JSON 파일 데이터 방지)')
+            albums = []
           }
         } catch (e) {
           console.error('[Albums] 모바일 - localStorage 읽기 실패:', e)
-          // 실패 시 getAlbums 사용
-          ensureDefaultAlbumExists()
-          albums = getAlbums(true)
+          // 실패 시 빈 배열 반환 (getAlbums 호출하지 않음 - JSON 파일 데이터 방지)
+          albums = []
         }
       } else {
         // PC에서는 getAlbums 사용
