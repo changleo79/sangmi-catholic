@@ -8,6 +8,11 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/upload.ts": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
 }
-

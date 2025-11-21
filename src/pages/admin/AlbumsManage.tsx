@@ -232,10 +232,10 @@ export default function AlbumsManage() {
   const handleFileUpload = async (files: File[]) => {
     if (!files.length) return
     
-    // 파일 크기 검증 (12MB 제한)
-    const oversizedFiles = files.filter(f => f.size > 12 * 1024 * 1024)
+    // 파일 크기 검증 (20MB 제한 - Vercel Pro 플랜 기준)
+    const oversizedFiles = files.filter(f => f.size > 20 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
-      alert(`다음 파일이 12MB를 초과합니다: ${oversizedFiles.map(f => f.name).join(', ')}\n\n파일 크기:\n${oversizedFiles.map(f => `- ${f.name}: ${(f.size / 1024 / 1024).toFixed(2)}MB`).join('\n')}\n\n이미지를 압축한 뒤 다시 시도해 주세요.`)
+      alert(`다음 파일이 20MB를 초과합니다: ${oversizedFiles.map(f => f.name).join(', ')}\n\n파일 크기:\n${oversizedFiles.map(f => `- ${f.name}: ${(f.size / 1024 / 1024).toFixed(2)}MB`).join('\n')}\n\n이미지를 압축한 뒤 다시 시도해 주세요.`)
       return
     }
 

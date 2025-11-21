@@ -56,7 +56,9 @@ function parseMultipartForm(req: VercelRequest): Promise<{ albumId: string; file
     const files: UploadedFile[] = []
     let albumId = ''
 
-    const busboy = Busboy({ headers: req.headers, limits: { fileSize: 12 * 1024 * 1024, files: 1 } })
+    // Vercel 서버리스 함수 제한: Hobby 4.5MB, Pro 50MB
+    // 요청 본문 크기 제한을 고려하여 더 큰 파일도 허용 (20MB)
+    const busboy = Busboy({ headers: req.headers, limits: { fileSize: 20 * 1024 * 1024, files: 1 } })
 
     busboy.on('field', (name, value) => {
       if (name === 'albumId') {
@@ -205,7 +207,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json({ uploads })
   } catch (error) {
     if ((error as Error)?.message === 'FILE_TOO_LARGE') {
-      res.status(413).json({ message: '파일 크기가 12MB를 초과했습니다. 이미지를 압축한 뒤 다시 시도해 주세요.' })
+      res.status(413).json({ message: '파일 크기가 20MB를 초과했습니다. 이미지를 압축한 뒤 다시 시도해 주세요.' })
       return
     }
     console.error('이미지 업로드 실패:', error)

@@ -185,8 +185,76 @@ let cachedData: {
 } = {}
 
 // 데이터 초기화 (페이지 로드 시 한 번만 실행)
+// 모바일에서는 앨범/주보 데이터를 절대 초기화하지 않음 (어드민 데이터 보호)
 export const initializeData = async (): Promise<void> => {
   try {
+    // 모바일 감지
+    const isMobileDevice = typeof window !== 'undefined' && (
+      window.innerWidth < 768 || 
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
+    )
+    
+    // 모바일에서는 앨범/주보 데이터를 건드리지 않음 (localStorage 직접 읽기)
+    if (isMobileDevice) {
+      console.log('[initializeData] 모바일 감지 - 앨범/주보 데이터 초기화 건너뜀 (어드민 데이터 보호)')
+      // 다른 데이터만 초기화
+      const [notices, recruitments, faqs, massSchedule, sacraments, catechism, organizationPosts] = await Promise.all([
+        loadJSON<NoticeItem[]>('/data/notices.json', []),
+        loadJSON<RecruitmentItem[]>('/data/recruitments.json', []),
+        loadJSON<FAQItem[]>('/data/faqs.json', []),
+        loadJSON<MassScheduleItem[]>('/data/mass-schedule.json', []),
+        loadJSON<SacramentItem[]>('/data/sacraments.json', []),
+        loadJSON<CatechismInfo | null>('/data/catechism.json', null),
+        loadJSON<OrganizationPost[]>('/data/organization-posts.json', [])
+      ])
+      
+      cachedData = {
+        notices,
+        recruitments,
+        faqs,
+        massSchedule,
+        sacraments,
+        catechism,
+        organizationPosts
+      }
+      
+      // localStorage에 캐시 (오프라인 지원) - 앨범/주보는 제외
+      if (!localStorage.getItem(NOTICES_KEY) && notices.length > 0) localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
+      if (!localStorage.getItem(RECRUITMENTS_KEY) && recruitments.length > 0) localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
+      if (!localStorage.getItem(FAQS_KEY) && faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
+      if (!localStorage.getItem(MASS_SCHEDULE_KEY) && massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
+      if (!localStorage.getItem(SACRAMENTS_KEY) && sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
+      if (!localStorage.getItem(CATECHISM_KEY) && catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
+      if (!localStorage.getItem(ORGANIZATION_POSTS_KEY) && organizationPosts.length > 0) localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(organizationPosts))
+      
+      // 앨범/주보는 localStorage에서 직접 읽기 (이미 저장된 어드민 데이터 사용)
+      const existingAlbumsRaw = localStorage.getItem(ALBUMS_KEY)
+      if (existingAlbumsRaw) {
+        try {
+          const existingAlbums: AlbumWithCategory[] = JSON.parse(existingAlbumsRaw)
+          cachedData.albums = existingAlbums
+          console.log('[initializeData] 모바일 - localStorage 앨범 데이터 사용:', existingAlbums.length, '개')
+        } catch (error) {
+          console.error('[initializeData] 모바일 - 앨범 데이터 파싱 실패:', error)
+        }
+      }
+      
+      const existingBulletinsRaw = localStorage.getItem(BULLETINS_KEY)
+      if (existingBulletinsRaw) {
+        try {
+          const existingBulletins: BulletinItem[] = JSON.parse(existingBulletinsRaw)
+          cachedData.bulletins = existingBulletins
+          console.log('[initializeData] 모바일 - localStorage 주보 데이터 사용:', existingBulletins.length, '개')
+        } catch (error) {
+          console.error('[initializeData] 모바일 - 주보 데이터 파싱 실패:', error)
+        }
+      }
+      
+      return // 모바일에서는 여기서 종료
+    }
+    
+    // PC에서만 JSON 파일 로드
     const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins, organizationPosts] = await Promise.all([
       loadJSON<NoticeItem[]>('/data/notices.json', []),
       loadJSON<RecruitmentItem[]>('/data/recruitments.json', []),
@@ -223,7 +291,7 @@ export const initializeData = async (): Promise<void> => {
       try {
         const existingAlbums: AlbumWithCategory[] = JSON.parse(existingAlbumsRaw)
         // localStorage에 데이터가 있으면 무조건 그것을 사용 (JSON 파일 무시)
-        console.log('[initializeData] localStorage 앨범 데이터 사용 (어드민 데이터 보호):', existingAlbums.length, '개')
+        console.log('[initializeData] PC - localStorage 앨범 데이터 사용 (어드민 데이터 보호):', existingAlbums.length, '개')
         cachedData.albums = existingAlbums
         // JSON 파일의 데이터는 완전히 무시
       } catch (error) {
@@ -239,7 +307,7 @@ export const initializeData = async (): Promise<void> => {
     } else {
       // localStorage에 데이터가 없을 때만 JSON 파일 사용
       if (albums.length > 0) {
-        console.log('[initializeData] JSON 파일 앨범 데이터 사용 (초기 데이터):', albums.length, '개')
+        console.log('[initializeData] PC - JSON 파일 앨범 데이터 사용 (초기 데이터):', albums.length, '개')
         localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
         cachedData.albums = albums
       } else {
@@ -259,7 +327,7 @@ export const initializeData = async (): Promise<void> => {
       try {
         const existingBulletins: BulletinItem[] = JSON.parse(existingBulletinsRaw)
         // localStorage에 데이터가 있으면 무조건 그것을 사용 (JSON 파일 무시)
-        console.log('[initializeData] localStorage 주보 데이터 사용 (어드민 데이터 보호):', existingBulletins.length, '개')
+        console.log('[initializeData] PC - localStorage 주보 데이터 사용 (어드민 데이터 보호):', existingBulletins.length, '개')
         cachedData.bulletins = existingBulletins
         // JSON 파일의 데이터는 완전히 무시
       } catch (error) {
@@ -271,7 +339,7 @@ export const initializeData = async (): Promise<void> => {
     } else {
       // localStorage에 데이터가 없을 때만 JSON 파일 사용
       if (bulletins.length > 0) {
-        console.log('[initializeData] JSON 파일 주보 데이터 사용 (초기 데이터):', bulletins.length, '개')
+        console.log('[initializeData] PC - JSON 파일 주보 데이터 사용 (초기 데이터):', bulletins.length, '개')
         localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
         cachedData.bulletins = bulletins
       } else {
