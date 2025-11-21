@@ -255,7 +255,35 @@ export const initializeData = async (): Promise<void> => {
     if (!localStorage.getItem(MASS_SCHEDULE_KEY) && massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
     if (!localStorage.getItem(SACRAMENTS_KEY) && sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
     if (!localStorage.getItem(CATECHISM_KEY) && catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
-    if (!localStorage.getItem(BULLETINS_KEY) && bulletins.length > 0) localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
+    
+    // localStorage에 이미 주보 데이터가 있으면 그것을 우선 사용 (어드민에서 등록한 주보)
+    // JSON 파일의 이전 데이터는 무시
+    const existingBulletinsRaw = localStorage.getItem(BULLETINS_KEY)
+    if (existingBulletinsRaw) {
+      try {
+        const existingBulletins: BulletinItem[] = JSON.parse(existingBulletinsRaw)
+        if (existingBulletins.length > 0) {
+          console.log('[initializeData] localStorage 주보 데이터 사용:', existingBulletins.length, '개')
+          cachedData.bulletins = existingBulletins
+          // JSON 파일의 데이터는 무시하고 localStorage 데이터만 사용
+        }
+      } catch (error) {
+        console.error('로컬 주보 데이터 파싱 실패:', error)
+        // 파싱 실패 시 JSON 파일 데이터 사용
+        if (bulletins.length > 0) {
+          localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
+          cachedData.bulletins = bulletins
+        }
+      }
+    } else {
+      // localStorage에 데이터가 없을 때만 JSON 파일 사용
+      if (bulletins.length > 0) {
+        console.log('[initializeData] JSON 파일 주보 데이터 사용:', bulletins.length, '개')
+        localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
+        cachedData.bulletins = bulletins
+      }
+    }
+    
     if (!localStorage.getItem(ORGANIZATION_POSTS_KEY) && organizationPosts.length > 0) localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(organizationPosts))
   } catch (e) {
     console.error('데이터 초기화 실패:', e)

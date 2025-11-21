@@ -21,7 +21,15 @@ export default function BulletinsManage() {
   }, [])
 
   const loadBulletins = () => {
-    const stored = getBulletins()
+    // 캐시 무효화하고 강제 새로고침
+    if ((window as any).__bulletinsCache) {
+      delete (window as any).__bulletinsCache
+    }
+    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+      (window as any).cachedData.bulletins = undefined
+    }
+    const stored = getBulletins(true) // 강제 새로고침
+    console.log('[BulletinsManage] 주보 로드:', stored.length, '개', stored)
     setBulletins(stored)
   }
 
@@ -48,6 +56,11 @@ export default function BulletinsManage() {
 
     setBulletins(newBulletins)
     saveBulletins(newBulletins)
+    console.log('[BulletinsManage] 주보 저장 완료:', newBulletins.length, '개', newBulletins)
+    // 저장 후 즉시 다시 로드하여 확인
+    setTimeout(() => {
+      loadBulletins()
+    }, 100)
     resetForm()
   }
 

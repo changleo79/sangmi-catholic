@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
-import { extractPdfText, fetchPdfBlob } from '../utils/pdf'
+import { useEffect, useRef } from 'react'
+import { fetchPdfBlob } from '../utils/pdf'
 
 interface PdfViewerModalProps {
   isOpen: boolean
@@ -16,17 +16,10 @@ export default function PdfViewerModal({
   fileUrl,
   onClose
 }: PdfViewerModalProps) {
-  const [activeTab, setActiveTab] = useState<'pdf' | 'text'>('pdf')
-  const [isLoading, setIsLoading] = useState(false)
-  const [textContent, setTextContent] = useState<string>('')
-  const [error, setError] = useState<string>('')
   const scrollPositionRef = useRef<number>(0)
 
   useEffect(() => {
     if (!isOpen) {
-      setActiveTab('pdf')
-      setTextContent('')
-      setError('')
       // 모달이 닫힐 때는 특별한 처리 불필요 (body 스크롤이 이미 활성화되어 있음)
       return
     }
@@ -50,29 +43,7 @@ export default function PdfViewerModal({
     }
   }, [isOpen, onClose])
 
-  useEffect(() => {
-    if (!isOpen || activeTab !== 'text' || textContent || isLoading) return
 
-    const loadText = async () => {
-      setIsLoading(true)
-      setError('')
-      const text = await extractPdfText(fileUrl)
-      if (text) {
-        setTextContent(text)
-      } else {
-        setError('PDF 본문을 불러올 수 없습니다. 파일을 다운로드하여 확인해 주세요.')
-      }
-      setIsLoading(false)
-    }
-
-    loadText()
-  }, [isOpen, activeTab, fileUrl, textContent, isLoading])
-
-  const shareData = useMemo(() => ({
-    title,
-    text: description ? `${title}\n${description}` : title,
-    url: fileUrl
-  }), [title, description, fileUrl])
 
   const handleDownload = async () => {
     const blob = await fetchPdfBlob(fileUrl)
@@ -90,14 +61,42 @@ export default function PdfViewerModal({
   }
 
   const handleShare = async () => {
-    if (!navigator.share) {
-      alert('이 브라우저에서는 공유하기를 지원하지 않습니다. 다운로드 후 직접 공유해 주세요.')
-      return
+    const shareData = {
+      title,
+      text: description ? `${title}\n${description}` : title,
+      url: fileUrl
     }
-    try {
-      await navigator.share(shareData)
-    } catch (error) {
-      console.error('공유 실패:', error)
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+      } catch (error: any) {
+        // 사용자가 공유를 취소한 경우는 무시
+        if (error.name !== 'AbortError') {
+          console.error('공유 실패:', error)
+        }
+      }
+    } else {
+      // Web Share API를 지원하지 않는 경우 클립보드에 URL 복사
+      try {
+        await navigator.clipboard.writeText(fileUrl)
+        alert('주보 링크가 클립보드에 복사되었습니다.')
+      } catch (error) {
+        // 클립보드 복사 실패 시 수동 복사 안내
+        const textarea = document.createElement('textarea')
+        textarea.value = fileUrl
+        textarea.style.position = 'fixed'
+        textarea.style.opacity = '0'
+        document.body.appendChild(textarea)
+        textarea.select()
+        try {
+          document.execCommand('copy')
+          alert('주보 링크가 클립보드에 복사되었습니다.')
+        } catch (err) {
+          alert(`주보 링크를 복사하려면 다음 URL을 선택하세요:\n\n${fileUrl}`)
+        }
+        document.body.removeChild(textarea)
+      }
     }
   }
 
@@ -154,23 +153,6 @@ export default function PdfViewerModal({
           </div>
         </header>
 
-        <div className="px-4 sm:px-6 pt-3 sm:pt-4 flex-shrink-0">
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-600">
-            <button
-              onClick={() => setActiveTab('pdf')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${activeTab === 'pdf' ? 'bg-catholic-logo text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              PDF 보기
-            </button>
-            <button
-              onClick={() => setActiveTab('text')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full transition-all ${activeTab === 'text' ? 'bg-catholic-logo text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            >
-              HTML 보기
-            </button>
-          </div>
-        </div>
-
         <div 
           data-pdf-modal-content
           className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-visible" 
@@ -178,14 +160,13 @@ export default function PdfViewerModal({
             scrollBehavior: 'auto'
           } as React.CSSProperties}
         >
-          {activeTab === 'pdf' ? (
-            (() => {
-              // 이미지 파일인지 확인
-              const isImage = fileUrl.startsWith('data:image/') || 
-                             fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
-                             (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
-              
-              return isImage ? (
+          {(() => {
+            // 이미지 파일인지 확인
+            const isImage = fileUrl.startsWith('data:image/') || 
+                           fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                           (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
+            
+            return isImage ? (
                 <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
                   <img
                     src={fileUrl}
@@ -242,20 +223,7 @@ export default function PdfViewerModal({
                   />
                 </div>
               )
-            })()
-          ) : (
-            <div className="w-full border border-gray-100 rounded-2xl p-4 sm:p-6 bg-gray-50 text-xs sm:text-sm leading-relaxed text-gray-700" style={{ minHeight: '400px' }}>
-              {isLoading && <p className="text-gray-500">본문을 불러오는 중입니다...</p>}
-              {error && !isLoading && <p className="text-red-500">{error}</p>}
-              {!isLoading && !error && textContent && (
-                <div className="space-y-4 whitespace-pre-wrap">
-                  {textContent.split('\n').map((paragraph, idx) => (
-                    <p key={`${idx}-${paragraph.slice(0, 10)}`}>{paragraph}</p>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          })()}
         </div>
       </div>
     </div>

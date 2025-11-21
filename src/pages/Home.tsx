@@ -53,7 +53,15 @@ export default function Home() {
       ])
     }
 
-    const storedBulletins = getBulletins()
+    // 캐시 무효화하고 강제 새로고침
+    if ((window as any).__bulletinsCache) {
+      delete (window as any).__bulletinsCache
+    }
+    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+      (window as any).cachedData.bulletins = undefined
+    }
+    const storedBulletins = getBulletins(true) // 강제 새로고침
+    console.log('[Home] 주보 로드:', storedBulletins.length, '개', storedBulletins)
     setBulletins(storedBulletins.slice(0, 6))
   }
 
@@ -63,7 +71,15 @@ export default function Home() {
     // 주보 업데이트 이벤트 리스너
     const handleBulletinsUpdate = () => {
       console.log('[Home] bulletinsUpdated 이벤트 수신')
-      const storedBulletins = getBulletins()
+      // 캐시 무효화하고 강제 새로고침
+      if ((window as any).__bulletinsCache) {
+        delete (window as any).__bulletinsCache
+      }
+      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+        (window as any).cachedData.bulletins = undefined
+      }
+      const storedBulletins = getBulletins(true) // 강제 새로고침
+      console.log('[Home] 주보 업데이트 후 로드:', storedBulletins.length, '개', storedBulletins)
       setBulletins(storedBulletins.slice(0, 6))
     }
     
