@@ -146,11 +146,38 @@ export default function Albums() {
         (window as any).cachedData.albums = undefined
       }
       
-      // 모바일/PC 모두 동일하게 getAlbums(true) 사용
-      // getAlbums 함수 내부에서 localStorage를 우선시하도록 이미 구현되어 있음
-      ensureDefaultAlbumExists()
-      const albums = getAlbums(true) // 강제 새로고침 - localStorage 우선
-      console.log('[Albums] getAlbums()로 로드:', albums.length, '개 앨범', isMobile() ? '(모바일)' : '(PC)', albums)
+      const isMobileDevice = isMobile()
+      let albums: AlbumWithCategory[] = []
+      
+      // 모바일에서는 localStorage에서 직접 읽기 (PC와 동일한 키 사용)
+      if (isMobileDevice) {
+        try {
+          // 'admin_albums' 키에서 직접 읽기 (PC와 동일)
+          const stored = localStorage.getItem('admin_albums')
+          if (stored) {
+            const parsed = JSON.parse(stored)
+            if (Array.isArray(parsed)) {
+              albums = parsed
+              console.log('[Albums] 모바일 - localStorage 직접 읽기:', albums.length, '개 앨범', albums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
+            }
+          } else {
+            console.log('[Albums] 모바일 - localStorage에 앨범 데이터 없음')
+            // 기본 앨범 확인
+            ensureDefaultAlbumExists()
+            albums = getAlbums(true)
+          }
+        } catch (e) {
+          console.error('[Albums] 모바일 - localStorage 읽기 실패:', e)
+          // 실패 시 getAlbums 사용
+          ensureDefaultAlbumExists()
+          albums = getAlbums(true)
+        }
+      } else {
+        // PC에서는 getAlbums 사용
+        ensureDefaultAlbumExists()
+        albums = getAlbums(true)
+        console.log('[Albums] PC - getAlbums로 로드:', albums.length, '개 앨범')
+      }
       
       // 유효성 검사 및 필터링
       const validAlbums = albums.map((album: any) => ({
