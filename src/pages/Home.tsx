@@ -315,7 +315,15 @@ export default function Home() {
     }
   }
 
-  const activeNoticeContent = noticeTabs[activeNoticeTab]
+  // 모바일에서는 주보 탭이 없으므로 notice로 강제 변경
+  const effectiveTab = (() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768 && activeNoticeTab === 'bulletin') {
+      return 'notice'
+    }
+    return activeNoticeTab
+  })()
+
+  const activeNoticeContent = noticeTabs[effectiveTab]
   const massHighlights = [
     { title: '주일 미사', time: '오전 10시 (교중) · 오후 3시 (어린이)' },
     { title: '평일 미사', time: '월 6:30 새벽 · 화/목 7:30 저녁 · 수/금 10:00 아침' },
@@ -600,7 +608,7 @@ export default function Home() {
             <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
               {activeNoticeContent.items.length > 0 ? (
                 activeNoticeContent.items.map(item => {
-                  const isBulletin = activeNoticeTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
+                  const isBulletin = effectiveTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
                   let bulletinItem: BulletinItem | null = null
                   if (isBulletin && 'bulletin' in item) {
                     bulletinItem = item.bulletin as BulletinItem
@@ -665,7 +673,7 @@ export default function Home() {
               ) : (
                 <div className="p-10 text-center text-gray-500">{activeNoticeContent.emptyText}</div>
               )}
-              {activeNoticeTab === 'bulletin' && bulletins.length > 0 && (
+              {effectiveTab === 'bulletin' && bulletins.length > 0 && (
                 <div className="p-6 border-t border-gray-100">
                   <Link
                     to="/bulletins"
