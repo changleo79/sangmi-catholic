@@ -258,7 +258,20 @@ export default function OrganizationTree() {
                                 <div className="flex-1">
                                   <p className="text-sm font-semibold text-gray-900">{subInfo.name}</p>
                                   <p className="text-xs text-gray-600 mt-1 leading-relaxed line-clamp-2">
-                                    {subInfo.description}
+                                    {/* 소공동체위원회 하위 지역인 경우 별칭만 간단히 표시 */}
+                                    {org === '소공동체위원회' && (subOrg === '1지역' || subOrg === '2지역' || subOrg === '3지역' || subOrg === '4지역' || subOrg === '5지역' || subOrg === '6지역')
+                                      ? (() => {
+                                          const regionAliases: Record<string, string> = {
+                                            '1지역': '신갈2, 신갈3, 원대, 구갈1, 롯데스카이, 우림·풍림',
+                                            '2지역': '신갈1, 상미, 롯데캐슬1, 롯데캐슬2, 우방',
+                                            '3지역': '두진1, 두진2, 신일1, 신일2, 태영, 대명, 힉스',
+                                            '4지역': '효성1, 효성2, 효성3, 포레피스',
+                                            '5지역': '지웰1, 지웰2, 지웰3, 롯데기흥, 힐스1, 힐스2',
+                                            '6지역': '센트럴1, 센트럴2, 파크1, 파크2, 더샵1, 더샵2, 더샵'
+                                          }
+                                          return regionAliases[subOrg] || subInfo.description
+                                        })()
+                                      : subInfo.description}
                                   </p>
                                 </div>
                                 <span className="text-xs font-semibold" style={{ color: accent.primary }}>
