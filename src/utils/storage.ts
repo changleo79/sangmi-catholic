@@ -774,23 +774,9 @@ export const getBulletins = (forceRefresh = false): BulletinItem[] => {
   }
   
   // localStorage에 데이터가 없으면 서버에서 로드 시도 (모바일 동기화)
+  // 비동기이므로 백그라운드에서 로드하고, 다음 호출 시 사용
   if (!stored && forceRefresh) {
-    try {
-      console.log('[getBulletins] 서버에서 로드 시도...')
-      const response = await fetch('/api/load-metadata?type=bulletins')
-      if (response.ok) {
-        const result = await response.json()
-        if (result.data && Array.isArray(result.data) && result.data.length > 0) {
-          // 서버에서 가져온 데이터를 localStorage에 저장
-          localStorage.setItem(BULLETINS_KEY, JSON.stringify(result.data))
-          cachedData.bulletins = result.data
-          console.log('[getBulletins] 서버에서 로드 성공:', result.data.length, '개 주보')
-          return result.data
-        }
-      }
-    } catch (serverError) {
-      console.warn('[getBulletins] 서버 로드 실패:', serverError)
-    }
+    loadBulletinsFromServer().catch(console.error)
   }
   
   console.log('[getBulletins] 주보 데이터 없음')
