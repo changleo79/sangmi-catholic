@@ -452,6 +452,26 @@ export const exportFAQs = (): void => {
 }
 
 // 앨범 관리
+// 서버에서 메타데이터 로드 (모바일 동기화용)
+const loadAlbumsFromServer = async (): Promise<AlbumWithCategory[] | null> => {
+  try {
+    const response = await fetch('/api/load-metadata?type=albums')
+    if (response.ok) {
+      const result = await response.json()
+      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+        // 서버에서 가져온 데이터를 localStorage에 저장
+        localStorage.setItem(ALBUMS_KEY, JSON.stringify(result.data))
+        cachedData.albums = result.data
+        console.log('[loadAlbumsFromServer] 서버에서 로드 성공:', result.data.length, '개 앨범')
+        return result.data
+      }
+    }
+  } catch (serverError) {
+    console.warn('[loadAlbumsFromServer] 서버 로드 실패:', serverError)
+  }
+  return null
+}
+
 export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
   // forceRefresh가 true이면 캐시 완전히 무시하고 localStorage에서 직접 읽기
   if (forceRefresh) {
@@ -531,8 +551,35 @@ export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
 
 export const saveAlbums = (albums: AlbumWithCategory[], skipEvent = false): void => {
   try {
+    // localStorage에 저장
     localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
     cachedData.albums = albums
+    
+    // 서버에도 저장 (모바일 동기화를 위해) - 비동기로 백그라운드 실행
+    fetch('/api/save-metadata', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        type: 'albums',
+        data: albums
+      })
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log('[saveAlbums] 서버 저장 성공:', albums.length, '개 앨범')
+      } else {
+        return response.text().then(text => {
+          console.warn('[saveAlbums] 서버 저장 실패 (localStorage는 저장됨):', text)
+        })
+      }
+    })
+    .catch(serverError => {
+      console.warn('[saveAlbums] 서버 저장 오류 (localStorage는 저장됨):', serverError)
+      // 서버 저장 실패해도 localStorage는 저장되었으므로 계속 진행
+    })
+    
     if (!skipEvent) {
       window.dispatchEvent(new CustomEvent('albumsUpdated'))
     }
@@ -668,6 +715,26 @@ export const exportCatechismInfo = (): void => {
 }
 
 // 주보 안내 관리
+// 서버에서 메타데이터 로드 (모바일 동기화용)
+const loadBulletinsFromServer = async (): Promise<BulletinItem[] | null> => {
+  try {
+    const response = await fetch('/api/load-metadata?type=bulletins')
+    if (response.ok) {
+      const result = await response.json()
+      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+        // 서버에서 가져온 데이터를 localStorage에 저장
+        localStorage.setItem(BULLETINS_KEY, JSON.stringify(result.data))
+        cachedData.bulletins = result.data
+        console.log('[loadBulletinsFromServer] 서버에서 로드 성공:', result.data.length, '개 주보')
+        return result.data
+      }
+    }
+  } catch (serverError) {
+    console.warn('[loadBulletinsFromServer] 서버 로드 실패:', serverError)
+  }
+  return null
+}
+
 export const getBulletins = (forceRefresh = false): BulletinItem[] => {
   // 강제 새로고침이 요청되면 캐시 완전히 무시
   if (forceRefresh) {
@@ -705,13 +772,61 @@ export const getBulletins = (forceRefresh = false): BulletinItem[] => {
       console.error('[getBulletins] JSON 파싱 오류:', e)
     }
   }
+  
+  // localStorage에 데이터가 없으면 서버에서 로드 시도 (모바일 동기화)
+  if (!stored && forceRefresh) {
+    try {
+      console.log('[getBulletins] 서버에서 로드 시도...')
+      const response = await fetch('/api/load-metadata?type=bulletins')
+      if (response.ok) {
+        const result = await response.json()
+        if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+          // 서버에서 가져온 데이터를 localStorage에 저장
+          localStorage.setItem(BULLETINS_KEY, JSON.stringify(result.data))
+          cachedData.bulletins = result.data
+          console.log('[getBulletins] 서버에서 로드 성공:', result.data.length, '개 주보')
+          return result.data
+        }
+      }
+    } catch (serverError) {
+      console.warn('[getBulletins] 서버 로드 실패:', serverError)
+    }
+  }
+  
   console.log('[getBulletins] 주보 데이터 없음')
   return []
 }
 
 export const saveBulletins = (bulletins: BulletinItem[]): void => {
+  // localStorage에 저장
   localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
   cachedData.bulletins = bulletins
+  
+  // 서버에도 저장 (모바일 동기화를 위해) - 비동기로 백그라운드 실행
+  fetch('/api/save-metadata', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      type: 'bulletins',
+      data: bulletins
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      console.log('[saveBulletins] 서버 저장 성공:', bulletins.length, '개 주보')
+    } else {
+      response.text().then(text => {
+        console.warn('[saveBulletins] 서버 저장 실패 (localStorage는 저장됨):', text)
+      })
+    }
+  })
+  .catch(serverError => {
+    console.warn('[saveBulletins] 서버 저장 오류 (localStorage는 저장됨):', serverError)
+    // 서버 저장 실패해도 localStorage는 저장되었으므로 계속 진행
+  })
+  
   // 다른 페이지에서 업데이트를 감지할 수 있도록 이벤트 발생
   window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
 }

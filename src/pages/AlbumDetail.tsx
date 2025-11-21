@@ -61,7 +61,7 @@ export default function AlbumDetail() {
             }
           } else {
             console.log('[AlbumDetail] 모바일 - localStorage에 앨범 데이터 없음')
-            albums = getAlbums(true)
+            albums = await getAlbums(true)
           }
         } catch (e) {
           console.error('[AlbumDetail] 모바일 - localStorage 읽기 실패:', e)

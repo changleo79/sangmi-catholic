@@ -57,9 +57,9 @@ export default function News() {
              (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
     }
     
-    // 모바일/PC 모두 동일하게 getBulletins 사용 (localStorage 우선, JSON 파일 무시)
-    // getBulletins는 이미 localStorage를 우선시하도록 구현되어 있음
-    const loadedBulletins = getBulletins(true) // forceRefresh=true: localStorage 직접 읽기
+    // 모바일/PC 모두 동일하게 getBulletins 사용 (localStorage 우선, 서버 동기화)
+    // getBulletins는 이미 localStorage를 우선시하고, 없으면 서버에서 로드하도록 구현됨
+    const loadedBulletins = getBulletins(true) // forceRefresh=true: localStorage 직접 읽기, 없으면 서버에서 로드 시도
     
     const isMobileDevice = isMobile()
     console.log('[News]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))

@@ -69,7 +69,7 @@ export default function Home() {
     loadData()
     
     // 주보 업데이트 이벤트 리스너
-    const handleBulletinsUpdate = () => {
+    const handleBulletinsUpdate = async () => {
       console.log('[Home] bulletinsUpdated 이벤트 수신')
       // 캐시 무효화하고 강제 새로고침
       if ((window as any).__bulletinsCache) {

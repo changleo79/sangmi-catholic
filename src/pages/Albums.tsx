@@ -151,10 +151,10 @@ export default function Albums() {
         (window as any).cachedData.albums = undefined
       }
       
-      // 모바일/PC 모두 동일하게 getAlbums 사용 (localStorage 우선, JSON 파일 무시)
-      // getAlbums는 이미 localStorage를 우선시하도록 구현되어 있음
+      // 모바일/PC 모두 동일하게 getAlbums 사용 (localStorage 우선, 서버 동기화)
+      // getAlbums는 이미 localStorage를 우선시하고, 없으면 서버에서 로드하도록 구현됨
       ensureDefaultAlbumExists()
-      const loadedAlbums = getAlbums(true) // forceRefresh=true: localStorage 직접 읽기
+      const loadedAlbums = getAlbums(true) // forceRefresh=true: localStorage 직접 읽기, 없으면 서버에서 로드 시도
       
       const isMobileDevice = isMobile()
       console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- getAlbums로 로드:', loadedAlbums.length, '개 앨범', loadedAlbums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
