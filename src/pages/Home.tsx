@@ -70,16 +70,18 @@ export default function Home() {
     
     // 주보 업데이트 이벤트 리스너
     const handleBulletinsUpdate = async () => {
-      console.log('[Home] bulletinsUpdated 이벤트 수신')
-      // 캐시 무효화하고 강제 새로고침
+      console.log('[Home] bulletinsUpdated 이벤트 수신 - 주보 다시 로드')
+      // 캐시 완전히 무효화
       if ((window as any).__bulletinsCache) {
         delete (window as any).__bulletinsCache
       }
       if ((window as any).cachedData && (window as any).cachedData.bulletins) {
         (window as any).cachedData.bulletins = undefined
       }
-      const storedBulletins = await getBulletins(true) // 강제 새로고침 - await 추가
-      console.log('[Home] 주보 업데이트 후 로드:', storedBulletins.length, '개', storedBulletins)
+      
+      // 서버에서 강제로 최신 데이터 가져오기
+      const storedBulletins = await getBulletins(true)
+      console.log('[Home] 주보 업데이트 후 로드 완료:', storedBulletins.length, '개', storedBulletins.map(b => ({ id: b.id, title: b.title })))
       setBulletins(storedBulletins.slice(0, 6))
     }
     
@@ -315,15 +317,7 @@ export default function Home() {
     }
   }
 
-  // 모바일에서는 주보 탭이 없으므로 notice로 강제 변경
-  const effectiveTab = (() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768 && activeNoticeTab === 'bulletin') {
-      return 'notice'
-    }
-    return activeNoticeTab
-  })()
-
-  const activeNoticeContent = noticeTabs[effectiveTab]
+  const activeNoticeContent = noticeTabs[activeNoticeTab]
   const massHighlights = [
     { title: '주일 미사', time: '오전 10시 (교중) · 오후 3시 (어린이)' },
     { title: '평일 미사', time: '월 6:30 새벽 · 화/목 7:30 저녁 · 수/금 10:00 아침' },
@@ -578,37 +572,26 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap gap-2 mb-8">
-            {Object.entries(noticeTabs)
-              .filter(([key]) => {
-                // 모바일에서는 주보 탭 숨김
-                if (typeof window !== 'undefined') {
-                  const isMobile = window.innerWidth < 768
-                  if (isMobile && key === 'bulletin') {
-                    return false
-                  }
-                }
-                return true
-              })
-              .map(([key, tab]) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveNoticeTab(key as NoticeTabKey)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    activeNoticeTab === key
-                      ? 'bg-gradient-to-r from-catholic-logo to-catholic-logo-dark text-white shadow-lg'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:border-catholic-logo/30 hover:text-catholic-logo'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {Object.entries(noticeTabs).map(([key, tab]) => (
+              <button
+                key={key}
+                onClick={() => setActiveNoticeTab(key as NoticeTabKey)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  activeNoticeTab === key
+                    ? 'bg-gradient-to-r from-catholic-logo to-catholic-logo-dark text-white shadow-lg'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-catholic-logo/30 hover:text-catholic-logo'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           <div className="grid lg:grid-cols-[2fr,1fr] gap-6">
             <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
               {activeNoticeContent.items.length > 0 ? (
                 activeNoticeContent.items.map(item => {
-                  const isBulletin = effectiveTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
+                  const isBulletin = activeNoticeTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
                   let bulletinItem: BulletinItem | null = null
                   if (isBulletin && 'bulletin' in item) {
                     bulletinItem = item.bulletin as BulletinItem
@@ -673,7 +656,7 @@ export default function Home() {
               ) : (
                 <div className="p-10 text-center text-gray-500">{activeNoticeContent.emptyText}</div>
               )}
-              {effectiveTab === 'bulletin' && bulletins.length > 0 && (
+              {activeNoticeTab === 'bulletin' && bulletins.length > 0 && (
                 <div className="p-6 border-t border-gray-100">
                   <Link
                     to="/bulletins"
@@ -810,8 +793,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 모바일에서는 앨범 섹션 숨김 - 메뉴에서 직접 접근 */}
-      <section ref={gallerySectionRef} className="py-20 hidden md:block">
+      <section ref={gallerySectionRef} className="py-20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div>

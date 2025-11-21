@@ -56,11 +56,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const body = await response.Body?.transformToString()
       
       if (!body) {
+        console.log(`[load-metadata] ${type} 파일 없음, 빈 배열 반환`)
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
         res.status(200).json({ data: [] })
         return
       }
 
       const data = JSON.parse(body)
+      console.log(`[load-metadata] ${type} 로드 성공:`, Array.isArray(data) ? `${data.length}개` : '데이터 있음')
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
       res.status(200).json({ data })
     } catch (error: any) {
       // 파일이 없으면 빈 배열 반환

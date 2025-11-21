@@ -235,16 +235,33 @@ export const initializeData = async (): Promise<void> => {
 // 서버에서 데이터 로드 (공통 함수)
 const loadDataFromServer = async <T>(type: string): Promise<T | null> => {
   try {
-    const response = await fetch(`/api/load-metadata?type=${type}`)
+    // 캐시 방지를 위해 타임스탬프 추가
+    const timestamp = Date.now()
+    const url = `/api/load-metadata?type=${type}&_t=${timestamp}`
+    console.log(`[loadDataFromServer] ${type} 서버에서 로드 시도:`, url)
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
+    
     if (response.ok) {
       const result = await response.json()
       if (result.data !== undefined) {
-        console.log(`[loadDataFromServer] ${type} 서버에서 로드 성공`)
+        console.log(`[loadDataFromServer] ${type} 서버에서 로드 성공:`, Array.isArray(result.data) ? `${result.data.length}개` : '데이터 있음')
         return result.data as T
+      } else {
+        console.warn(`[loadDataFromServer] ${type} 서버 응답에 data 없음`)
       }
+    } else {
+      console.warn(`[loadDataFromServer] ${type} 서버 응답 오류:`, response.status, response.statusText)
     }
   } catch (error) {
-    console.warn(`[loadDataFromServer] ${type} 서버 로드 실패:`, error)
+    console.error(`[loadDataFromServer] ${type} 서버 로드 실패:`, error)
   }
   return null
 }
@@ -543,19 +560,42 @@ export const exportCatechismInfo = async (): Promise<void> => {
 // 주보 안내 관리
 // 주보 관리
 export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]> => {
+  console.log(`[getBulletins] 호출 - forceRefresh: ${forceRefresh}, 캐시 있음: ${!!cachedData.bulletins}`)
+  
+  // forceRefresh가 true이면 무조건 서버에서 가져오기
+  if (forceRefresh) {
+    console.log('[getBulletins] forceRefresh=true, 서버에서 강제 로드')
+    // 캐시 무효화
+    cachedData.bulletins = undefined
+    
+    const serverData = await loadDataFromServer<BulletinItem[]>('bulletins')
+    if (serverData !== null) {
+      cachedData.bulletins = serverData
+      console.log(`[getBulletins] 서버에서 로드 완료: ${serverData.length}개 주보`)
+      return serverData
+    }
+    
+    console.warn('[getBulletins] 서버 데이터 없음, 빈 배열 반환')
+    cachedData.bulletins = []
+    return []
+  }
+  
   // 캐시된 데이터 우선 (forceRefresh가 false일 때만)
-  if (!forceRefresh && cachedData.bulletins) {
+  if (cachedData.bulletins) {
+    console.log(`[getBulletins] 캐시에서 반환: ${cachedData.bulletins.length}개 주보`)
     return cachedData.bulletins
   }
   
-  // 서버에서 로드
+  // 캐시가 없으면 서버에서 로드
+  console.log('[getBulletins] 캐시 없음, 서버에서 로드')
   const serverData = await loadDataFromServer<BulletinItem[]>('bulletins')
   if (serverData !== null) {
     cachedData.bulletins = serverData
+    console.log(`[getBulletins] 서버에서 로드 완료: ${serverData.length}개 주보`)
     return serverData
   }
   
-  // 서버 데이터가 없으면 빈 배열 반환
+  console.warn('[getBulletins] 서버 데이터 없음, 빈 배열 반환')
   cachedData.bulletins = []
   return []
 }
