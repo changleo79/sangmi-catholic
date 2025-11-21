@@ -40,29 +40,11 @@ export default function AlbumDetail() {
       }
 
       // 기본 앨범 확인
-      ensureDefaultAlbumExists()
+      await ensureDefaultAlbumExists()
 
-      // 모바일에서는 localStorage에서 직접 읽기
-      const isMobileDevice = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      let albums: AlbumWithCategory[] = []
-      
-      if (isMobileDevice) {
-        try {
-          // 서버에서만 데이터 로드 (localStorage 사용 안 함)
-          // albums는 이미 getAlbums로 서버에서 로드됨
-          if (albums.length > 0) {
-            console.log('[AlbumDetail] 모바일 - localStorage에 앨범 데이터 없음')
-            albums = getAlbums(true)
-          }
-        } catch (e) {
-          console.error('[AlbumDetail] 모바일 - localStorage 읽기 실패:', e)
-          albums = getAlbums(true)
-        }
-      } else {
-        // PC에서는 getAlbums 사용
-        albums = getAlbums(true)
-        console.log(`[AlbumDetail] PC - getAlbums로 로드: ID=${albumId}, 전체 앨범 수=${albums.length}`)
-      }
+      // 서버에서만 데이터 로드 (모바일/PC 모두 동일)
+      const albums = await getAlbums(true)
+      console.log(`[AlbumDetail] 서버에서 로드: ID=${albumId}, 전체 앨범 수=${albums.length}`)
 
       const found = albums.find(a => a.id === albumId)
 
