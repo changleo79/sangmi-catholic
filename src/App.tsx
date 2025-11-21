@@ -9,6 +9,7 @@ import ProtectedRoute from './components/admin/ProtectedRoute'
 import { initializeData } from './utils/storage'
 import Home from './pages/Home'
 import About from './pages/About'
+import Jurisdiction from './pages/Jurisdiction'
 import Notice from './pages/Notice'
 import Mass from './pages/Mass'
 import News from './pages/News'
@@ -71,6 +72,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/about" element={<About />} />
+                  <Route path="/jurisdiction" element={<Jurisdiction />} />
                   <Route path="/notice" element={<Notice />} />
                   <Route path="/news" element={<News />} />
                   <Route path="/news/:id" element={<NoticeDetail />} />

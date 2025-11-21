@@ -152,6 +152,29 @@ export default function About() {
             </div>
           </div>
 
+          {/* Jurisdiction Link */}
+          <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+              <h2 className="text-3xl font-bold text-gray-900">관할구역 안내</h2>
+            </div>
+            <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+              상미성당의 관할구역을 확인하실 수 있습니다. 지역별 구역 정보를 한눈에 보실 수 있습니다.
+            </p>
+            <Link
+              to="/jurisdiction"
+              className="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-lg hover:scale-105 transition-all duration-300 active:scale-95 shadow-md"
+              style={{ backgroundColor: '#7B1F4B', color: '#ffffff' }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+            >
+              관할구역 보기
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
           {/* Directions Link */}
           <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-10 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
             <h2 className="text-3xl font-bold mb-4">오시는 길</h2>
