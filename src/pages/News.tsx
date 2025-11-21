@@ -64,15 +64,7 @@ export default function News() {
     const isMobileDevice = isMobile()
     console.log('[News]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))
     
-    // 디버깅: localStorage 직접 확인
-    const directCheck = localStorage.getItem('admin_bulletins')
-    if (directCheck) {
-      const directParsed = JSON.parse(directCheck)
-      console.log('[News] localStorage 직접 확인:', directParsed.length, '개 주보', directParsed.map((b: any) => ({ id: b.id, title: b.title })))
-    } else {
-      console.log('[News] localStorage 직접 확인: 데이터 없음')
-    }
-    
+    // 서버에서만 데이터 로드 (localStorage 사용 안 함)
     // 최신순 정렬
     const sortedBulletins = loadedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -126,53 +118,8 @@ export default function News() {
       }
     }
     
-    // localStorage 변경 감지
-    let lastBulletinsData: string | null = null
-    const checkBulletinsChange = () => {
-      const currentData = localStorage.getItem('admin_bulletins')
-      if (currentData !== lastBulletinsData) {
-        console.log('[News] localStorage 변경 감지 - 주보 다시 로드')
-        lastBulletinsData = currentData
-        loadData()
-      }
-    }
-    
-    // 초기값 설정
-    lastBulletinsData = localStorage.getItem('admin_bulletins')
-    
-    // 모바일 감지
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
-    
-    // 모바일에서도 주기적으로 체크
-    if (isMobileDevice) {
-      const intervalId = setInterval(() => {
-        if (!document.hidden) {
-          checkBulletinsChange()
-        }
-      }, 1000) // 모바일: 1초마다 체크
-      
-      return () => {
-        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
-        window.removeEventListener('focus', handleFocus)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
-    } else {
-      // PC에서는 덜 자주 체크
-      const intervalId = setInterval(() => {
-        if (!document.hidden) {
-          checkBulletinsChange()
-        }
-      }, 3000) // PC: 3초마다 체크
-      
-      return () => {
-        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
-        window.removeEventListener('focus', handleFocus)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
-    }
-    
+    // localStorage는 더 이상 사용하지 않음 - 서버에서만 데이터 로드
+    // 이벤트 리스너만으로 충분
     window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
     window.addEventListener('focus', handleFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)

@@ -32,31 +32,48 @@ export default function BackupManage() {
   )
 
   useEffect(() => {
-    const load = () => setEntries(getBackups())
+    const load = async () => {
+      const backups = await getBackups()
+      setEntries(backups)
+    }
     load()
-    window.addEventListener('storageBackupUpdated', load as EventListener)
-    return () => window.removeEventListener('storageBackupUpdated', load as EventListener)
+    const handleUpdate = () => load()
+    window.addEventListener('storageBackupUpdated', handleUpdate)
+    return () => window.removeEventListener('storageBackupUpdated', handleUpdate)
   }, [])
 
   const handleCreateBackup = async () => {
     setIsLoading(true)
-    const result = createBackup(selectedKey)
-    if (!result) {
-      alert('백업 생성에 실패했습니다. 다시 시도해 주세요.')
-    } else {
-      setEntries(getBackups())
+    try {
+      const result = await createBackup(selectedKey)
+      if (!result) {
+        alert('백업 생성에 실패했습니다. 다시 시도해 주세요.')
+      } else {
+        const backups = await getBackups()
+        setEntries(backups)
+      }
+    } catch (error) {
+      console.error('백업 생성 오류:', error)
+      alert('백업 생성 중 오류가 발생했습니다.')
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
-  const handleRestore = (id: string) => {
+  const handleRestore = async (id: string) => {
     if (!confirm('선택한 백업으로 복원하시겠습니까? 현재 데이터가 덮어씌워집니다.')) return
-    const success = restoreBackup(id)
-    if (success) {
-      alert('복원이 완료되었습니다.')
-      setEntries(getBackups())
-    } else {
-      alert('복원에 실패했습니다.')
+    try {
+      const success = await restoreBackup(id)
+      if (success) {
+        alert('복원이 완료되었습니다.')
+        const backups = await getBackups()
+        setEntries(backups)
+      } else {
+        alert('복원에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('복원 오류:', error)
+      alert('복원 중 오류가 발생했습니다.')
     }
   }
 
@@ -70,10 +87,16 @@ export default function BackupManage() {
     URL.revokeObjectURL(url)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('해당 백업을 삭제하시겠습니까?')) return
-    deleteBackup(id)
-    setEntries(getBackups())
+    try {
+      await deleteBackup(id)
+      const backups = await getBackups()
+      setEntries(backups)
+    } catch (error) {
+      console.error('삭제 오류:', error)
+      alert('삭제 중 오류가 발생했습니다.')
+    }
   }
 
   return (

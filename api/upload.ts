@@ -56,9 +56,8 @@ function parseMultipartForm(req: VercelRequest): Promise<{ albumId: string; file
     const files: UploadedFile[] = []
     let albumId = ''
 
-    // Vercel 서버리스 함수 제한: Hobby 4.5MB, Pro 50MB
-    // 요청 본문 크기 제한을 고려하여 더 큰 파일도 허용 (20MB)
-    const busboy = Busboy({ headers: req.headers, limits: { fileSize: 20 * 1024 * 1024, files: 1 } })
+    // 파일 크기 제한 없음 (무제한)
+    const busboy = Busboy({ headers: req.headers, limits: { files: 1 } })
 
     busboy.on('field', (name, value) => {
       if (name === 'albumId') {
@@ -70,10 +69,11 @@ function parseMultipartForm(req: VercelRequest): Promise<{ albumId: string; file
       const { filename, mimeType } = info
       const chunks: Buffer[] = []
       file.on('data', (chunk: Buffer) => chunks.push(chunk))
-      file.on('limit', () => {
-        reject(new Error('FILE_TOO_LARGE'))
-        file.resume()
-      })
+      // 파일 크기 제한 없음 (무제한)
+      // file.on('limit', () => {
+      //   reject(new Error('FILE_TOO_LARGE'))
+      //   file.resume()
+      // })
       file.on('end', () => {
         files.push({
           buffer: Buffer.concat(chunks),
@@ -97,10 +97,10 @@ function parseMultipartForm(req: VercelRequest): Promise<{ albumId: string; file
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '20mb',
+      sizeLimit: '50mb', // 최대한 크게 설정 (Vercel Pro 플랜 기준)
     },
   },
-  maxDuration: 30,
+  maxDuration: 60, // 대용량 파일 업로드를 위해 시간 증가
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -216,10 +216,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     res.status(200).json({ uploads })
   } catch (error) {
-    if ((error as Error)?.message === 'FILE_TOO_LARGE') {
-      res.status(413).json({ message: '파일 크기가 20MB를 초과했습니다. 이미지를 압축한 뒤 다시 시도해 주세요.' })
-      return
-    }
+    // 파일 크기 제한 없음 (무제한)
+    // if ((error as Error)?.message === 'FILE_TOO_LARGE') {
+    //   res.status(413).json({ message: '파일 크기가 20MB를 초과했습니다. 이미지를 압축한 뒤 다시 시도해 주세요.' })
+    //   return
+    // }
     console.error('이미지 업로드 실패:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     res.status(500).json({ 

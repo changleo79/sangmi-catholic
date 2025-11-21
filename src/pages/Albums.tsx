@@ -68,36 +68,8 @@ export default function Albums() {
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
-    // 모바일에서도 이벤트가 제대로 작동하도록 추가 이벤트
-    // localStorage 변경 감지 (storage 이벤트는 다른 탭에서만 발생하므로 직접 체크)
-    let lastAlbumsData: string | null = null
-    const checkAlbumsChange = async () => {
-      // 'admin_albums' 키 사용 (storage.ts의 ALBUMS_KEY)
-      const currentData = localStorage.getItem('admin_albums')
-      if (currentData !== lastAlbumsData) {
-        console.log('[Albums] localStorage 변경 감지 - 데이터 다시 로드', {
-          oldLength: lastAlbumsData ? JSON.parse(lastAlbumsData).length : 0,
-          newLength: currentData ? JSON.parse(currentData).length : 0
-        })
-        lastAlbumsData = currentData
-        // 캐시 무효화 후 로드
-        if ((window as any).__albumsCache) {
-          delete (window as any).__albumsCache
-        }
-        if ((window as any).cachedData && (window as any).cachedData.albums) {
-          (window as any).cachedData.albums = undefined
-        }
-        await loadAlbums()
-      }
-    }
-    
-    // 초기값 설정
-    lastAlbumsData = localStorage.getItem('admin_albums')
-    
-    // 모바일에서는 더 자주 체크
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
-    if (isMobileDevice) {
-      // 모바일에서는 페이지 표시 시마다 체크 (더 자주)
+    // localStorage는 더 이상 사용하지 않음 - 서버에서만 데이터 로드
+    // 이벤트 리스너만으로 충분
       const intervalId = setInterval(() => {
         if (!document.hidden) {
           checkAlbumsChange()
@@ -151,22 +123,12 @@ export default function Albums() {
         (window as any).cachedData.albums = undefined
       }
       
-      // 모바일/PC 모두 동일하게 getAlbums 사용 (localStorage 우선, 서버 동기화)
-      // getAlbums는 이미 localStorage를 우선시하고, 없으면 서버에서 로드하도록 구현됨
-      ensureDefaultAlbumExists()
-      const loadedAlbums = getAlbums(true) // forceRefresh=true: localStorage 직접 읽기, 없으면 서버에서 로드 시도
+      // 서버에서만 데이터 로드 (localStorage 사용 안 함)
+      await ensureDefaultAlbumExists()
+      const loadedAlbums = await getAlbums(true) // forceRefresh=true: 서버에서 최신 데이터 로드
       
       const isMobileDevice = isMobile()
-      console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- getAlbums로 로드:', loadedAlbums.length, '개 앨범', loadedAlbums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
-      
-      // 디버깅: localStorage 직접 확인
-      const directCheck = localStorage.getItem('admin_albums')
-      if (directCheck) {
-        const directParsed = JSON.parse(directCheck)
-        console.log('[Albums] localStorage 직접 확인:', directParsed.length, '개 앨범', directParsed.map((a: any) => ({ id: a.id, title: a.title })))
-      } else {
-        console.log('[Albums] localStorage 직접 확인: 데이터 없음')
-      }
+      console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- 서버에서 로드:', loadedAlbums.length, '개 앨범', loadedAlbums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
       
       // setAlbums로 상태 업데이트
       setAlbums(loadedAlbums)

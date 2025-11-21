@@ -50,8 +50,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { type, data } = req.body
 
-    if (!type || !['albums', 'bulletins'].includes(type)) {
-      res.status(400).json({ message: 'type은 "albums" 또는 "bulletins"여야 합니다.' })
+    const validTypes = ['notices', 'recruitments', 'faqs', 'albums', 'massSchedule', 'sacraments', 'catechism', 'bulletins', 'organizationPosts', 'backups']
+    if (!type || !validTypes.includes(type)) {
+      res.status(400).json({ message: `type은 다음 중 하나여야 합니다: ${validTypes.join(', ')}` })
       return
     }
 

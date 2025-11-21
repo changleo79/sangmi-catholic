@@ -30,15 +30,7 @@ export default function Bulletins() {
     const isMobileDevice = isMobile()
     console.log('[Bulletins]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))
     
-    // 디버깅: localStorage 직접 확인
-    const directCheck = localStorage.getItem('admin_bulletins')
-    if (directCheck) {
-      const directParsed = JSON.parse(directCheck)
-      console.log('[Bulletins] localStorage 직접 확인:', directParsed.length, '개 주보', directParsed.map((b: any) => ({ id: b.id, title: b.title })))
-    } else {
-      console.log('[Bulletins] localStorage 직접 확인: 데이터 없음')
-    }
-    
+    // 서버에서만 데이터 로드 (localStorage 사용 안 함)
     // 최신순 정렬
     const sortedBulletins = loadedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -85,57 +77,8 @@ export default function Bulletins() {
     window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
-    // localStorage 변경 감지
-    let lastBulletinsData: string | null = null
-    const checkBulletinsChange = () => {
-      const currentData = localStorage.getItem('admin_bulletins')
-      if (currentData !== lastBulletinsData) {
-        console.log('[Bulletins] localStorage 변경 감지 - 데이터 다시 로드', {
-          oldLength: lastBulletinsData ? JSON.parse(lastBulletinsData).length : 0,
-          newLength: currentData ? JSON.parse(currentData).length : 0
-        })
-        lastBulletinsData = currentData
-        // 캐시 무효화 후 로드
-        if ((window as any).__bulletinsCache) {
-          delete (window as any).__bulletinsCache
-        }
-        if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-          (window as any).cachedData.bulletins = undefined
-        }
-        loadBulletins()
-      }
-    }
-    
-    lastBulletinsData = localStorage.getItem('admin_bulletins')
-    
-    const isMobileDevice = isMobile()
-    if (isMobileDevice) {
-      const intervalId = setInterval(() => {
-        if (!document.hidden) {
-          checkBulletinsChange()
-        }
-      }, 1000) // 모바일: 1초마다 체크
-      
-      return () => {
-        window.removeEventListener('focus', handleFocus)
-        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
-    } else {
-      const intervalId = setInterval(() => {
-        if (!document.hidden) {
-          checkBulletinsChange()
-        }
-      }, 3000) // PC: 3초마다 체크
-      
-      return () => {
-        window.removeEventListener('focus', handleFocus)
-        window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
-    }
+    // localStorage는 더 이상 사용하지 않음 - 서버에서만 데이터 로드
+    // 이벤트 리스너만으로 충분
   }, [])
 
   const handleBulletinClick = (bulletin: BulletinItem) => {

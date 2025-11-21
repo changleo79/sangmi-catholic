@@ -48,20 +48,11 @@ export default function AlbumDetail() {
       
       if (isMobileDevice) {
         try {
-          // 'admin_albums' 키에서 직접 읽기 (PC와 동일)
-          const stored = localStorage.getItem('admin_albums')
-          if (stored) {
-            const parsed = JSON.parse(stored)
-            if (Array.isArray(parsed)) {
-              albums = parsed.map((album: any) => ({
-                ...album,
-                photos: Array.isArray(album.photos) ? album.photos : []
-              }))
-              console.log(`[AlbumDetail] 모바일 - localStorage 직접 읽기: ID=${albumId}, 전체 앨범 수=${albums.length}`)
-            }
-          } else {
+          // 서버에서만 데이터 로드 (localStorage 사용 안 함)
+          // albums는 이미 getAlbums로 서버에서 로드됨
+          if (albums.length > 0) {
             console.log('[AlbumDetail] 모바일 - localStorage에 앨범 데이터 없음')
-            albums = await getAlbums(true)
+            albums = getAlbums(true)
           }
         } catch (e) {
           console.error('[AlbumDetail] 모바일 - localStorage 읽기 실패:', e)

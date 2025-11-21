@@ -1,5 +1,5 @@
-// JSON 파일 및 로컬스토리지 데이터 관리 유틸리티
-// 우선순위: JSON 파일 > localStorage > 기본값
+// 네이버 클라우드 Object Storage 기반 데이터 관리 유틸리티
+// 모든 데이터는 네이버 클라우드에 저장되며, localStorage는 사용하지 않음
 
 import { NoticeItem } from '../data/notices'
 import type { Album } from '../data/albums'
@@ -185,203 +185,121 @@ let cachedData: {
 } = {}
 
 // 데이터 초기화 (페이지 로드 시 한 번만 실행)
-// 모바일에서는 앨범/주보 데이터를 절대 초기화하지 않음 (어드민 데이터 보호)
+// 모든 데이터는 네이버 클라우드에서 로드 (localStorage 사용 안 함)
 export const initializeData = async (): Promise<void> => {
   try {
-    // 모바일 감지
-    const isMobileDevice = typeof window !== 'undefined' && (
-      window.innerWidth < 768 || 
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-      (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
-    )
+    console.log('[initializeData] 실행 시작 - 네이버 클라우드에서 모든 데이터 로드')
     
-    console.log('[initializeData] 실행 시작', isMobileDevice ? '(모바일)' : '(PC)')
-    
-    // 모바일에서는 앨범/주보 데이터를 건드리지 않음 (localStorage 직접 읽기)
-    if (isMobileDevice) {
-      console.log('[initializeData] 모바일 감지 - 앨범/주보 데이터 초기화 건너뜀 (어드민 데이터 보호)')
-      // 다른 데이터만 초기화
-      const [notices, recruitments, faqs, massSchedule, sacraments, catechism, organizationPosts] = await Promise.all([
-        loadJSON<NoticeItem[]>('/data/notices.json', []),
-        loadJSON<RecruitmentItem[]>('/data/recruitments.json', []),
-        loadJSON<FAQItem[]>('/data/faqs.json', []),
-        loadJSON<MassScheduleItem[]>('/data/mass-schedule.json', []),
-        loadJSON<SacramentItem[]>('/data/sacraments.json', []),
-        loadJSON<CatechismInfo | null>('/data/catechism.json', null),
-        loadJSON<OrganizationPost[]>('/data/organization-posts.json', [])
-      ])
-      
-      cachedData = {
-        notices,
-        recruitments,
-        faqs,
-        massSchedule,
-        sacraments,
-        catechism,
-        organizationPosts
-      }
-      
-      // localStorage에 캐시 (오프라인 지원) - 앨범/주보는 제외
-      if (!localStorage.getItem(NOTICES_KEY) && notices.length > 0) localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
-      if (!localStorage.getItem(RECRUITMENTS_KEY) && recruitments.length > 0) localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
-      if (!localStorage.getItem(FAQS_KEY) && faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
-      if (!localStorage.getItem(MASS_SCHEDULE_KEY) && massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
-      if (!localStorage.getItem(SACRAMENTS_KEY) && sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
-      if (!localStorage.getItem(CATECHISM_KEY) && catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
-      if (!localStorage.getItem(ORGANIZATION_POSTS_KEY) && organizationPosts.length > 0) localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(organizationPosts))
-      
-      // 앨범/주보는 localStorage에서 직접 읽기 (이미 저장된 어드민 데이터 사용)
-      const existingAlbumsRaw = localStorage.getItem(ALBUMS_KEY)
-      if (existingAlbumsRaw) {
-        try {
-          const existingAlbums: AlbumWithCategory[] = JSON.parse(existingAlbumsRaw)
-          cachedData.albums = existingAlbums
-          console.log('[initializeData] 모바일 - localStorage 앨범 데이터 사용:', existingAlbums.length, '개')
-        } catch (error) {
-          console.error('[initializeData] 모바일 - 앨범 데이터 파싱 실패:', error)
-        }
-      }
-      
-      const existingBulletinsRaw = localStorage.getItem(BULLETINS_KEY)
-      if (existingBulletinsRaw) {
-        try {
-          const existingBulletins: BulletinItem[] = JSON.parse(existingBulletinsRaw)
-          cachedData.bulletins = existingBulletins
-          console.log('[initializeData] 모바일 - localStorage 주보 데이터 사용:', existingBulletins.length, '개')
-        } catch (error) {
-          console.error('[initializeData] 모바일 - 주보 데이터 파싱 실패:', error)
-        }
-      }
-      
-      return // 모바일에서는 여기서 종료
-    }
-    
-    // PC에서만 JSON 파일 로드
+    // 모든 데이터를 서버에서 로드
     const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins, organizationPosts] = await Promise.all([
-      loadJSON<NoticeItem[]>('/data/notices.json', []),
-      loadJSON<RecruitmentItem[]>('/data/recruitments.json', []),
-      loadJSON<FAQItem[]>('/data/faqs.json', []),
-      loadJSON<AlbumWithCategory[]>('/data/albums.json', []),
-      loadJSON<MassScheduleItem[]>('/data/mass-schedule.json', []),
-      loadJSON<SacramentItem[]>('/data/sacraments.json', []),
-      loadJSON<CatechismInfo | null>('/data/catechism.json', null),
-      loadJSON<BulletinItem[]>('/data/bulletins.json', []),
-      loadJSON<OrganizationPost[]>('/data/organization-posts.json', [])
+      loadDataFromServer<NoticeItem[]>('notices'),
+      loadDataFromServer<RecruitmentItem[]>('recruitments'),
+      loadDataFromServer<FAQItem[]>('faqs'),
+      loadDataFromServer<AlbumWithCategory[]>('albums'),
+      loadDataFromServer<MassScheduleItem[]>('massSchedule'),
+      loadDataFromServer<SacramentItem[]>('sacraments'),
+      loadDataFromServer<CatechismInfo | null>('catechism'),
+      loadDataFromServer<BulletinItem[]>('bulletins'),
+      loadDataFromServer<OrganizationPost[]>('organizationPosts')
     ])
     
+    // 서버에서 로드한 데이터를 캐시에 저장 (메모리 캐시만 사용)
     cachedData = {
-      notices,
-      recruitments,
-      faqs,
-      albums,
-      massSchedule,
-      sacraments,
-      catechism,
-      bulletins,
-      organizationPosts
+      notices: notices || [],
+      recruitments: recruitments || [],
+      faqs: faqs || [],
+      albums: albums || [],
+      massSchedule: massSchedule || [],
+      sacraments: sacraments || [],
+      catechism: catechism || null,
+      bulletins: bulletins || [],
+      organizationPosts: organizationPosts || []
     }
     
-    // localStorage에 캐시 (오프라인 지원)
-    if (!localStorage.getItem(NOTICES_KEY) && notices.length > 0) localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
-    if (!localStorage.getItem(RECRUITMENTS_KEY) && recruitments.length > 0) localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
-    if (!localStorage.getItem(FAQS_KEY) && faqs.length > 0) localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
-
-    // localStorage에 이미 앨범 데이터가 있으면 그것을 우선 사용 (어드민에서 등록한 앨범)
-    // localStorage에 이미 앨범 데이터가 있으면 절대 덮어쓰지 않음 (어드민 데이터 보호)
-    const existingAlbumsRaw = localStorage.getItem(ALBUMS_KEY)
-    if (existingAlbumsRaw) {
-      try {
-        const existingAlbums: AlbumWithCategory[] = JSON.parse(existingAlbumsRaw)
-        // localStorage에 데이터가 있으면 무조건 그것을 사용 (JSON 파일 무시)
-        console.log('[initializeData] PC - localStorage 앨범 데이터 사용 (어드민 데이터 보호):', existingAlbums.length, '개')
-        cachedData.albums = existingAlbums
-        // JSON 파일의 데이터는 완전히 무시
-      } catch (error) {
-        console.error('[initializeData] 로컬 앨범 데이터 파싱 실패:', error)
-        // 파싱 실패해도 JSON 파일로 덮어쓰지 않음 (데이터 손실 방지)
-        // 대신 기본 앨범만 생성
-        const defaultAlbum = createDefaultAlbum()
-        if (!existingAlbumsRaw.includes(DEFAULT_ALBUM_ID)) {
-          localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
-          cachedData.albums = [defaultAlbum]
-        }
-      }
-    } else {
-      // localStorage에 데이터가 없을 때만 JSON 파일 사용
-      if (albums.length > 0) {
-        console.log('[initializeData] PC - JSON 파일 앨범 데이터 사용 (초기 데이터):', albums.length, '개')
-        localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
-        cachedData.albums = albums
-      } else {
-        const defaultAlbum = createDefaultAlbum()
-        localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
-        cachedData.albums = [defaultAlbum]
-      }
-    }
-
-    if (!localStorage.getItem(MASS_SCHEDULE_KEY) && massSchedule.length > 0) localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(massSchedule))
-    if (!localStorage.getItem(SACRAMENTS_KEY) && sacraments.length > 0) localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
-    if (!localStorage.getItem(CATECHISM_KEY) && catechism) localStorage.setItem(CATECHISM_KEY, JSON.stringify(catechism))
-    
-    // localStorage에 이미 주보 데이터가 있으면 절대 덮어쓰지 않음 (어드민 데이터 보호)
-    const existingBulletinsRaw = localStorage.getItem(BULLETINS_KEY)
-    if (existingBulletinsRaw) {
-      try {
-        const existingBulletins: BulletinItem[] = JSON.parse(existingBulletinsRaw)
-        // localStorage에 데이터가 있으면 무조건 그것을 사용 (JSON 파일 무시)
-        console.log('[initializeData] PC - localStorage 주보 데이터 사용 (어드민 데이터 보호):', existingBulletins.length, '개')
-        cachedData.bulletins = existingBulletins
-        // JSON 파일의 데이터는 완전히 무시
-      } catch (error) {
-        console.error('[initializeData] 로컬 주보 데이터 파싱 실패:', error)
-        // 파싱 실패해도 JSON 파일로 덮어쓰지 않음 (데이터 손실 방지)
-        // 빈 배열로 설정
-        cachedData.bulletins = []
-      }
-    } else {
-      // localStorage에 데이터가 없을 때만 JSON 파일 사용
-      if (bulletins.length > 0) {
-        console.log('[initializeData] PC - JSON 파일 주보 데이터 사용 (초기 데이터):', bulletins.length, '개')
-        localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
-        cachedData.bulletins = bulletins
-      } else {
-        cachedData.bulletins = []
-      }
-    }
-    
-    if (!localStorage.getItem(ORGANIZATION_POSTS_KEY) && organizationPosts.length > 0) localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(organizationPosts))
+    console.log('[initializeData] 서버에서 데이터 로드 완료:', {
+      notices: cachedData.notices?.length || 0,
+      recruitments: cachedData.recruitments?.length || 0,
+      faqs: cachedData.faqs?.length || 0,
+      albums: cachedData.albums?.length || 0,
+      massSchedule: cachedData.massSchedule?.length || 0,
+      sacraments: cachedData.sacraments?.length || 0,
+      catechism: cachedData.catechism ? 1 : 0,
+      bulletins: cachedData.bulletins?.length || 0,
+      organizationPosts: cachedData.organizationPosts?.length || 0
+    })
   } catch (e) {
     console.error('데이터 초기화 실패:', e)
   }
 }
 
-export const getNotices = (): NoticeItem[] => {
-  // 캐시된 데이터 우선
-  if (cachedData.notices) return cachedData.notices
-  
-  // localStorage 확인
-  const stored = localStorage.getItem(NOTICES_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
+// 서버에서 데이터 로드 (공통 함수)
+const loadDataFromServer = async <T>(type: string): Promise<T | null> => {
+  try {
+    const response = await fetch(`/api/load-metadata?type=${type}`)
+    if (response.ok) {
+      const result = await response.json()
+      if (result.data !== undefined) {
+        console.log(`[loadDataFromServer] ${type} 서버에서 로드 성공`)
+        return result.data as T
+      }
     }
+  } catch (error) {
+    console.warn(`[loadDataFromServer] ${type} 서버 로드 실패:`, error)
+  }
+  return null
+}
+
+// 서버에 데이터 저장 (공통 함수)
+const saveDataToServer = async (type: string, data: any): Promise<boolean> => {
+  try {
+    const response = await fetch('/api/save-metadata', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ type, data })
+    })
+    if (response.ok) {
+      console.log(`[saveDataToServer] ${type} 서버 저장 성공`)
+      return true
+    } else {
+      const text = await response.text()
+      console.warn(`[saveDataToServer] ${type} 서버 저장 실패:`, text)
+    }
+  } catch (error) {
+    console.warn(`[saveDataToServer] ${type} 서버 저장 오류:`, error)
+  }
+  return false
+}
+
+export const getNotices = async (forceRefresh = false): Promise<NoticeItem[]> => {
+  // 캐시된 데이터 우선 (forceRefresh가 false일 때만)
+  if (!forceRefresh && cachedData.notices) return cachedData.notices
+  
+  // 서버에서 로드
+  const serverData = await loadDataFromServer<NoticeItem[]>('notices')
+  if (serverData !== null) {
+    cachedData.notices = serverData
+    return serverData
   }
   
+  // 서버 데이터가 없으면 빈 배열 반환
+  cachedData.notices = []
   return []
 }
 
-export const saveNotices = (notices: NoticeItem[]): void => {
-  // localStorage에 저장 (임시)
-  localStorage.setItem(NOTICES_KEY, JSON.stringify(notices))
+export const saveNotices = async (notices: NoticeItem[]): Promise<void> => {
+  // 서버에 저장
+  await saveDataToServer('notices', notices)
   // 캐시 업데이트
   cachedData.notices = notices
+  // 이벤트 발생
+  window.dispatchEvent(new CustomEvent('noticesUpdated'))
 }
 
 // JSON 파일 내보내기 (다운로드)
-export const exportNotices = (): void => {
-  const data = getNotices()
+export const exportNotices = async (): Promise<void> => {
+  const data = await getNotices()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -391,27 +309,27 @@ export const exportNotices = (): void => {
   URL.revokeObjectURL(url)
 }
 
-export const getRecruitments = (): RecruitmentItem[] => {
-  if (cachedData.recruitments) return cachedData.recruitments
+export const getRecruitments = async (forceRefresh = false): Promise<RecruitmentItem[]> => {
+  if (!forceRefresh && cachedData.recruitments) return cachedData.recruitments
   
-  const stored = localStorage.getItem(RECRUITMENTS_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
-    }
+  const serverData = await loadDataFromServer<RecruitmentItem[]>('recruitments')
+  if (serverData !== null) {
+    cachedData.recruitments = serverData
+    return serverData
   }
+  
+  cachedData.recruitments = []
   return []
 }
 
-export const saveRecruitments = (recruitments: RecruitmentItem[]): void => {
-  localStorage.setItem(RECRUITMENTS_KEY, JSON.stringify(recruitments))
+export const saveRecruitments = async (recruitments: RecruitmentItem[]): Promise<void> => {
+  await saveDataToServer('recruitments', recruitments)
   cachedData.recruitments = recruitments
+  window.dispatchEvent(new CustomEvent('recruitmentsUpdated'))
 }
 
-export const exportRecruitments = (): void => {
-  const data = getRecruitments()
+export const exportRecruitments = async (): Promise<void> => {
+  const data = await getRecruitments()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -421,27 +339,27 @@ export const exportRecruitments = (): void => {
   URL.revokeObjectURL(url)
 }
 
-export const getFAQs = (): FAQItem[] => {
-  if (cachedData.faqs) return cachedData.faqs
+export const getFAQs = async (forceRefresh = false): Promise<FAQItem[]> => {
+  if (!forceRefresh && cachedData.faqs) return cachedData.faqs
   
-  const stored = localStorage.getItem(FAQS_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
-    }
+  const serverData = await loadDataFromServer<FAQItem[]>('faqs')
+  if (serverData !== null) {
+    cachedData.faqs = serverData
+    return serverData
   }
+  
+  cachedData.faqs = []
   return []
 }
 
-export const saveFAQs = (faqs: FAQItem[]): void => {
-  localStorage.setItem(FAQS_KEY, JSON.stringify(faqs))
+export const saveFAQs = async (faqs: FAQItem[]): Promise<void> => {
+  await saveDataToServer('faqs', faqs)
   cachedData.faqs = faqs
+  window.dispatchEvent(new CustomEvent('faqsUpdated'))
 }
 
-export const exportFAQs = (): void => {
-  const data = getFAQs()
+export const exportFAQs = async (): Promise<void> => {
+  const data = await getFAQs()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -452,145 +370,52 @@ export const exportFAQs = (): void => {
 }
 
 // 앨범 관리
-// 서버에서 메타데이터 로드 (모바일 동기화용)
-const loadAlbumsFromServer = async (): Promise<AlbumWithCategory[] | null> => {
-  try {
-    const response = await fetch('/api/load-metadata?type=albums')
-    if (response.ok) {
-      const result = await response.json()
-      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
-        // 서버에서 가져온 데이터를 localStorage에 저장
-        localStorage.setItem(ALBUMS_KEY, JSON.stringify(result.data))
-        cachedData.albums = result.data
-        console.log('[loadAlbumsFromServer] 서버에서 로드 성공:', result.data.length, '개 앨범')
-        return result.data
-      }
-    }
-  } catch (serverError) {
-    console.warn('[loadAlbumsFromServer] 서버 로드 실패:', serverError)
-  }
-  return null
-}
-
-export const getAlbums = (forceRefresh = false): AlbumWithCategory[] => {
-  // forceRefresh가 true이면 캐시 완전히 무시하고 localStorage에서 직접 읽기
-  if (forceRefresh) {
-    // 캐시 무효화
-    cachedData.albums = undefined
-    // window 객체의 캐시도 무효화
-    if ((window as any).__albumsCache) {
-      delete (window as any).__albumsCache
-    }
-  } else if (cachedData.albums) {
+export const getAlbums = async (forceRefresh = false): Promise<AlbumWithCategory[]> => {
+  // 캐시된 데이터 우선 (forceRefresh가 false일 때만)
+  if (!forceRefresh && cachedData.albums) {
     return cachedData.albums
   }
   
-  // localStorage에서 직접 읽기 (항상 우선)
-  const stored = localStorage.getItem(ALBUMS_KEY)
-  console.log('[getAlbums] localStorage 읽기 시도:', {
-    key: ALBUMS_KEY,
-    hasData: !!stored,
-    dataLength: stored ? JSON.parse(stored).length : 0,
-    forceRefresh
-  })
-  
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored)
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        let validAlbums = parsed
-        
-        // 기본 앨범이 삭제되었고, 기본 앨범만 남아있으면 제거
-        const defaultAlbumDeleted = localStorage.getItem('default_album_deleted') === 'true'
-        if (defaultAlbumDeleted) {
-          const filtered = validAlbums.filter(album => album.id !== DEFAULT_ALBUM_ID)
-          if (filtered.length !== validAlbums.length) {
-            // 기본 앨범이 있었으면 제거하고 저장
-            validAlbums = filtered
-            if (filtered.length > 0) {
-              localStorage.setItem(ALBUMS_KEY, JSON.stringify(filtered))
-            } else {
-              localStorage.removeItem(ALBUMS_KEY)
-            }
-          }
-        }
-        
-        // draft- 필터링 제거: 모든 앨범을 반환 (필터링은 표시할 때만 수행)
-        // 이렇게 하면 AlbumDetail에서도 draft- 앨범을 찾을 수 있음
-        // photos 배열이 없는 앨범도 유효성 검사
-        validAlbums = validAlbums.map(album => ({
-          ...album,
-          photos: Array.isArray(album.photos) ? album.photos : []
-        }))
-        
-        // forceRefresh가 true이면 캐시에 저장하지 않음 (다음 호출 시 다시 읽기)
-        if (!forceRefresh) {
-          cachedData.albums = validAlbums
-        }
-        console.log('[getAlbums] localStorage에서 로드:', validAlbums.length, '개 앨범', forceRefresh ? '(강제 새로고침)' : '(캐시 사용)')
-        return validAlbums
-      }
-    } catch (e) {
-      console.error('[getAlbums] JSON 파싱 실패:', e)
-      // JSON 파싱 실패 시 무시
-    }
+  // 서버에서 로드
+  const serverData = await loadDataFromServer<AlbumWithCategory[]>('albums')
+  if (serverData !== null) {
+    // photos 배열이 없는 앨범도 유효성 검사
+    const validAlbums = serverData.map(album => ({
+      ...album,
+      photos: Array.isArray(album.photos) ? album.photos : []
+    }))
+    cachedData.albums = validAlbums
+    return validAlbums
   }
   
-  // 기본 앨범이 삭제되지 않았으면 생성
-  if (localStorage.getItem('default_album_deleted') !== 'true') {
-    const defaultAlbum = createDefaultAlbum()
-    localStorage.setItem(ALBUMS_KEY, JSON.stringify([defaultAlbum]))
-    cachedData.albums = [defaultAlbum]
-    return [defaultAlbum]
-  }
-  
-  // 기본 앨범이 삭제되었고 저장된 데이터가 없으면 빈 배열 반환
+  // 서버 데이터가 없으면 빈 배열 반환
   cachedData.albums = []
   return []
 }
 
-export const saveAlbums = (albums: AlbumWithCategory[], skipEvent = false): void => {
+export const saveAlbums = async (albums: AlbumWithCategory[], skipEvent = false): Promise<void> => {
   try {
-    // localStorage에 저장
-    localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums))
-    cachedData.albums = albums
+    // 서버에 저장
+    const success = await saveDataToServer('albums', albums)
+    if (!success) {
+      throw new Error('서버 저장 실패')
+    }
     
-    // 서버에도 저장 (모바일 동기화를 위해) - 비동기로 백그라운드 실행
-    fetch('/api/save-metadata', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'albums',
-        data: albums
-      })
-    })
-    .then(response => {
-      if (response.ok) {
-        console.log('[saveAlbums] 서버 저장 성공:', albums.length, '개 앨범')
-      } else {
-        return response.text().then(text => {
-          console.warn('[saveAlbums] 서버 저장 실패 (localStorage는 저장됨):', text)
-        })
-      }
-    })
-    .catch(serverError => {
-      console.warn('[saveAlbums] 서버 저장 오류 (localStorage는 저장됨):', serverError)
-      // 서버 저장 실패해도 localStorage는 저장되었으므로 계속 진행
-    })
+    // 캐시 업데이트
+    cachedData.albums = albums
     
     if (!skipEvent) {
       window.dispatchEvent(new CustomEvent('albumsUpdated'))
     }
   } catch (error) {
     console.error('앨범 저장 실패:', error)
-    alert('앨범을 저장하는 중 오류가 발생했습니다. 이미지 용량을 줄이거나 일부 사진을 삭제한 뒤 다시 시도해 주세요.')
+    alert('앨범을 저장하는 중 오류가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.')
+    throw error
   }
 }
 
-export const exportAlbums = (): void => {
-  const data = getAlbums()
+export const exportAlbums = async (): Promise<void> => {
+  const data = await getAlbums()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -604,18 +429,18 @@ export const getAlbumCategories = (): string[] => {
   return ['전체', '주일 미사', '행사', '전례', '공동체 활동', '기타']
 }
 
-export const ensureDefaultAlbumExists = (): void => {
+export const ensureDefaultAlbumExists = async (): Promise<void> => {
   // 기본 앨범이 삭제된 경우 다시 생성하지 않음
-  if (localStorage.getItem('default_album_deleted') === 'true') {
-    return
-  }
-  
-  // 캐시 무시하고 최신 데이터 가져오기
-  const albums = getAlbums(true)
-  if (!albums.some(album => album.id === DEFAULT_ALBUM_ID)) {
-    const nextAlbums = [...albums, createDefaultAlbum()]
-    // 기본 앨범 생성 시 이벤트 발생하지 않음 (무한 루프 방지)
-    saveAlbums(nextAlbums, true)
+  // localStorage는 더 이상 사용하지 않으므로 서버에서 확인
+  try {
+    const albums = await getAlbums(true)
+    if (!albums.some(album => album.id === DEFAULT_ALBUM_ID)) {
+      const nextAlbums = [...albums, createDefaultAlbum()]
+      // 기본 앨범 생성 시 이벤트 발생하지 않음 (무한 루프 방지)
+      await saveAlbums(nextAlbums, true)
+    }
+  } catch (error) {
+    console.warn('[ensureDefaultAlbumExists] 기본 앨범 확인 실패:', error)
   }
 }
 
@@ -623,24 +448,25 @@ export const ensureDefaultAlbumExists = (): void => {
 export const getMassSchedule = (): MassScheduleItem[] => {
   if (cachedData.massSchedule) return cachedData.massSchedule
   
-  const stored = localStorage.getItem(MASS_SCHEDULE_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
-    }
+  // 서버에서 로드
+  const serverData = await loadDataFromServer<MassScheduleItem[]>('massSchedule')
+  if (serverData !== null) {
+    cachedData.massSchedule = serverData
+    return serverData
   }
+  
+  cachedData.massSchedule = []
   return []
 }
 
-export const saveMassSchedule = (schedule: MassScheduleItem[]): void => {
-  localStorage.setItem(MASS_SCHEDULE_KEY, JSON.stringify(schedule))
+export const saveMassSchedule = async (schedule: MassScheduleItem[]): Promise<void> => {
+  await saveDataToServer('massSchedule', schedule)
   cachedData.massSchedule = schedule
+  window.dispatchEvent(new CustomEvent('massScheduleUpdated'))
 }
 
-export const exportMassSchedule = (): void => {
-  const data = getMassSchedule()
+export const exportMassSchedule = async (): Promise<void> => {
+  const data = await getMassSchedule()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -651,27 +477,27 @@ export const exportMassSchedule = (): void => {
 }
 
 // 성사 안내 관리
-export const getSacraments = (): SacramentItem[] => {
-  if (cachedData.sacraments) return cachedData.sacraments
+export const getSacraments = async (forceRefresh = false): Promise<SacramentItem[]> => {
+  if (!forceRefresh && cachedData.sacraments) return cachedData.sacraments
   
-  const stored = localStorage.getItem(SACRAMENTS_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
-    }
+  const serverData = await loadDataFromServer<SacramentItem[]>('sacraments')
+  if (serverData !== null) {
+    cachedData.sacraments = serverData
+    return serverData
   }
+  
+  cachedData.sacraments = []
   return []
 }
 
-export const saveSacraments = (sacraments: SacramentItem[]): void => {
-  localStorage.setItem(SACRAMENTS_KEY, JSON.stringify(sacraments))
+export const saveSacraments = async (sacraments: SacramentItem[]): Promise<void> => {
+  await saveDataToServer('sacraments', sacraments)
   cachedData.sacraments = sacraments
+  window.dispatchEvent(new CustomEvent('sacramentsUpdated'))
 }
 
-export const exportSacraments = (): void => {
-  const data = getSacraments()
+export const exportSacraments = async (): Promise<void> => {
+  const data = await getSacraments()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -682,27 +508,27 @@ export const exportSacraments = (): void => {
 }
 
 // 예비신자 교리학교 정보 관리
-export const getCatechismInfo = (): CatechismInfo | null => {
-  if (cachedData.catechism !== undefined) return cachedData.catechism
+export const getCatechismInfo = async (forceRefresh = false): Promise<CatechismInfo | null> => {
+  if (!forceRefresh && cachedData.catechism !== undefined) return cachedData.catechism
   
-  const stored = localStorage.getItem(CATECHISM_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
-    }
+  const serverData = await loadDataFromServer<CatechismInfo | null>('catechism')
+  if (serverData !== null) {
+    cachedData.catechism = serverData
+    return serverData
   }
+  
+  cachedData.catechism = null
   return null
 }
 
-export const saveCatechismInfo = (info: CatechismInfo): void => {
-  localStorage.setItem(CATECHISM_KEY, JSON.stringify(info))
+export const saveCatechismInfo = async (info: CatechismInfo): Promise<void> => {
+  await saveDataToServer('catechism', info)
   cachedData.catechism = info
+  window.dispatchEvent(new CustomEvent('catechismUpdated'))
 }
 
-export const exportCatechismInfo = (): void => {
-  const data = getCatechismInfo()
+export const exportCatechismInfo = async (): Promise<void> => {
+  const data = await getCatechismInfo()
   if (data) {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -715,110 +541,41 @@ export const exportCatechismInfo = (): void => {
 }
 
 // 주보 안내 관리
-// 서버에서 메타데이터 로드 (모바일 동기화용)
-const loadBulletinsFromServer = async (): Promise<BulletinItem[] | null> => {
-  try {
-    const response = await fetch('/api/load-metadata?type=bulletins')
-    if (response.ok) {
-      const result = await response.json()
-      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
-        // 서버에서 가져온 데이터를 localStorage에 저장
-        localStorage.setItem(BULLETINS_KEY, JSON.stringify(result.data))
-        cachedData.bulletins = result.data
-        console.log('[loadBulletinsFromServer] 서버에서 로드 성공:', result.data.length, '개 주보')
-        return result.data
-      }
-    }
-  } catch (serverError) {
-    console.warn('[loadBulletinsFromServer] 서버 로드 실패:', serverError)
-  }
-  return null
-}
-
-export const getBulletins = (forceRefresh = false): BulletinItem[] => {
-  // 강제 새로고침이 요청되면 캐시 완전히 무시
-  if (forceRefresh) {
-    cachedData.bulletins = undefined
-    // window 객체의 캐시도 무효화
-    if ((window as any).__bulletinsCache) {
-      delete (window as any).__bulletinsCache
-    }
-  }
-  
+// 주보 관리
+export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]> => {
+  // 캐시된 데이터 우선 (forceRefresh가 false일 때만)
   if (!forceRefresh && cachedData.bulletins) {
     return cachedData.bulletins
   }
   
-  // localStorage에서 직접 읽기 (항상 우선)
-  const stored = localStorage.getItem(BULLETINS_KEY)
-  console.log('[getBulletins] localStorage 읽기 시도:', {
-    key: BULLETINS_KEY,
-    hasData: !!stored,
-    dataLength: stored ? JSON.parse(stored).length : 0,
-    forceRefresh
-  })
-  
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored)
-      // forceRefresh가 true이면 캐시에 저장하지 않음 (다음 호출 시 다시 읽기)
-      if (!forceRefresh) {
-        cachedData.bulletins = parsed
-      }
-      console.log('[getBulletins] localStorage에서 로드:', parsed.length, '개 주보', forceRefresh ? '(강제 새로고침)' : '(캐시 사용)')
-      return parsed
-    } catch (e) {
-      // JSON 파싱 실패 시 무시
-      console.error('[getBulletins] JSON 파싱 오류:', e)
-    }
+  // 서버에서 로드
+  const serverData = await loadDataFromServer<BulletinItem[]>('bulletins')
+  if (serverData !== null) {
+    cachedData.bulletins = serverData
+    return serverData
   }
   
-  // localStorage에 데이터가 없으면 서버에서 로드 시도 (모바일 동기화)
-  // 비동기이므로 백그라운드에서 로드하고, 다음 호출 시 사용
-  if (!stored && forceRefresh) {
-    loadBulletinsFromServer().catch(console.error)
-  }
-  
-  console.log('[getBulletins] 주보 데이터 없음')
+  // 서버 데이터가 없으면 빈 배열 반환
+  cachedData.bulletins = []
   return []
 }
 
-export const saveBulletins = (bulletins: BulletinItem[]): void => {
-  // localStorage에 저장
-  localStorage.setItem(BULLETINS_KEY, JSON.stringify(bulletins))
-  cachedData.bulletins = bulletins
+export const saveBulletins = async (bulletins: BulletinItem[]): Promise<void> => {
+  // 서버에 저장
+  const success = await saveDataToServer('bulletins', bulletins)
+  if (!success) {
+    throw new Error('서버 저장 실패')
+  }
   
-  // 서버에도 저장 (모바일 동기화를 위해) - 비동기로 백그라운드 실행
-  fetch('/api/save-metadata', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      type: 'bulletins',
-      data: bulletins
-    })
-  })
-  .then(response => {
-    if (response.ok) {
-      console.log('[saveBulletins] 서버 저장 성공:', bulletins.length, '개 주보')
-    } else {
-      response.text().then(text => {
-        console.warn('[saveBulletins] 서버 저장 실패 (localStorage는 저장됨):', text)
-      })
-    }
-  })
-  .catch(serverError => {
-    console.warn('[saveBulletins] 서버 저장 오류 (localStorage는 저장됨):', serverError)
-    // 서버 저장 실패해도 localStorage는 저장되었으므로 계속 진행
-  })
+  // 캐시 업데이트
+  cachedData.bulletins = bulletins
   
   // 다른 페이지에서 업데이트를 감지할 수 있도록 이벤트 발생
   window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
 }
 
-export const exportBulletins = (): void => {
-  const data = getBulletins()
+export const exportBulletins = async (): Promise<void> => {
+  const data = await getBulletins()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -829,22 +586,20 @@ export const exportBulletins = (): void => {
 }
 
 // 단체 게시글 관리
-export const getOrganizationPosts = (organization?: OrganizationType): OrganizationPost[] => {
+export const getOrganizationPosts = async (organization?: OrganizationType, forceRefresh = false): Promise<OrganizationPost[]> => {
   // 전체 게시글 가져오기
   let allPosts: OrganizationPost[] = []
   
-  if (cachedData.organizationPosts) {
+  if (!forceRefresh && cachedData.organizationPosts) {
     allPosts = cachedData.organizationPosts
   } else {
-    const stored = localStorage.getItem(ORGANIZATION_POSTS_KEY)
-    if (stored) {
-      try {
-        allPosts = JSON.parse(stored)
-        // 캐시 업데이트
-        cachedData.organizationPosts = allPosts
-      } catch (e) {
-        // JSON 파싱 실패 시 무시
-      }
+    const serverData = await loadDataFromServer<OrganizationPost[]>('organizationPosts')
+    if (serverData !== null) {
+      allPosts = serverData
+      cachedData.organizationPosts = allPosts
+    } else {
+      allPosts = []
+      cachedData.organizationPosts = []
     }
   }
   
@@ -868,16 +623,21 @@ export const getOrganizationPosts = (organization?: OrganizationType): Organizat
   return directPosts
 }
 
-export const saveOrganizationPosts = (posts: OrganizationPost[]): void => {
-  localStorage.setItem(ORGANIZATION_POSTS_KEY, JSON.stringify(posts))
+export const saveOrganizationPosts = async (posts: OrganizationPost[]): Promise<void> => {
+  // 서버에 저장
+  const success = await saveDataToServer('organizationPosts', posts)
+  if (!success) {
+    throw new Error('서버 저장 실패')
+  }
+  
   // 캐시 즉시 업데이트
   cachedData.organizationPosts = posts
   // 이벤트 발생하여 모든 컴포넌트에 알림
   window.dispatchEvent(new CustomEvent('organizationPostsUpdated'))
 }
 
-export const exportOrganizationPosts = (): void => {
-  const data = getOrganizationPosts()
+export const exportOrganizationPosts = async (): Promise<void> => {
+  const data = await getOrganizationPosts()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -1139,12 +899,10 @@ export type BackupEntry = {
   data: unknown
 }
 
-const BACKUPS_KEY = 'admin_backups'
-
 const datasetRegistry: Record<StorageDatasetKey, {
   label: string
-  getter: () => unknown
-  saver: (data: any) => void
+  getter: () => Promise<unknown>
+  saver: (data: any) => Promise<void>
 }> = {
   notices: { label: '공지사항', getter: () => getNotices(), saver: saveNotices },
   recruitments: { label: '단체 소식', getter: () => getRecruitments(), saver: saveRecruitments },
@@ -1152,25 +910,38 @@ const datasetRegistry: Record<StorageDatasetKey, {
   albums: { label: '성당 앨범', getter: () => getAlbums(), saver: saveAlbums },
   massSchedule: { label: '미사 시간표', getter: () => getMassSchedule(), saver: saveMassSchedule },
   sacraments: { label: '성사 안내', getter: () => getSacraments(), saver: saveSacraments },
-  catechism: { label: '예비신자 교리', getter: () => getCatechismInfo(), saver: (data) => data && saveCatechismInfo(data) },
+  catechism: { label: '예비신자 교리', getter: () => getCatechismInfo(), saver: (data) => data ? saveCatechismInfo(data) : Promise.resolve() },
   bulletins: { label: '주보 안내', getter: () => getBulletins(), saver: saveBulletins },
   organizationPosts: { label: '단체 게시판', getter: () => getOrganizationPosts(), saver: saveOrganizationPosts }
 }
 
-const readBackups = (): BackupEntry[] => {
-  const stored = localStorage.getItem(BACKUPS_KEY)
-  if (!stored) return []
+// 백업 데이터를 서버에서 로드
+const loadBackupsFromServer = async (): Promise<BackupEntry[]> => {
   try {
-    return JSON.parse(stored) as BackupEntry[]
+    const serverData = await loadDataFromServer<BackupEntry[]>('backups')
+    if (serverData !== null) {
+      return serverData
+    }
   } catch (error) {
-    console.error('백업 데이터 파싱 실패:', error)
-    return []
+    console.warn('[loadBackupsFromServer] 백업 로드 실패:', error)
   }
+  return []
 }
 
-const writeBackups = (entries: BackupEntry[]): void => {
-  localStorage.setItem(BACKUPS_KEY, JSON.stringify(entries))
-  window.dispatchEvent(new CustomEvent('storageBackupUpdated'))
+// 백업 데이터를 서버에 저장 (최대 20개만 유지하여 용량 관리)
+const saveBackupsToServer = async (backups: BackupEntry[]): Promise<boolean> => {
+  try {
+    // 최대 20개만 유지 (용량 관리)
+    const limitedBackups = backups.slice(0, 20)
+    const success = await saveDataToServer('backups', limitedBackups)
+    if (success) {
+      window.dispatchEvent(new CustomEvent('storageBackupUpdated'))
+      return true
+    }
+  } catch (error) {
+    console.warn('[saveBackupsToServer] 백업 저장 실패:', error)
+  }
+  return false
 }
 
 export const getBackups = (): BackupEntry[] => {
@@ -1195,16 +966,16 @@ export const createBackup = (key: StorageDatasetKey): BackupEntry | null => {
   return backup
 }
 
-export const restoreBackup = (backupId: string): boolean => {
-  const backups = readBackups()
+export const restoreBackup = async (backupId: string): Promise<boolean> => {
+  const backups = await loadBackupsFromServer()
   const target = backups.find((entry) => entry.id === backupId)
   if (!target) return false
 
   const registry = datasetRegistry[target.key]
   if (!registry) return false
 
-  registry.saver(target.data)
-  createBackup(target.key) // 복원 전 상태를 백업으로 남기기 위해 새 백업 생성
+  await registry.saver(target.data)
+  await createBackup(target.key) // 복원 전 상태를 백업으로 남기기 위해 새 백업 생성
 
   switch (target.key) {
     case 'notices':
@@ -1239,14 +1010,16 @@ export const restoreBackup = (backupId: string): boolean => {
   }
 
   if (target.key === 'catechism' && !target.data) {
-    localStorage.removeItem(CATECHISM_KEY)
+    // localStorage는 더 이상 사용하지 않음
     cachedData.catechism = null
   }
   return true
 }
 
-export const deleteBackup = (backupId: string): void => {
-  const backups = readBackups().filter((entry) => entry.id !== backupId)
-  writeBackups(backups)
+export const deleteBackup = async (backupId: string): Promise<boolean> => {
+  const backups = await loadBackupsFromServer()
+  const filtered = backups.filter((entry) => entry.id !== backupId)
+  const success = await saveBackupsToServer(filtered)
+  return success && filtered.length < backups.length
 }
 

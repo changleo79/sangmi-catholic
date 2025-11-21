@@ -224,13 +224,13 @@ export default function Mass() {
               <table className="min-w-full text-sm text-left text-gray-700">
                 <thead className="text-xs uppercase tracking-wider bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
                   <tr>
-                    <th scope="col" className="px-4 py-3 text-gray-900">요일</th>
-                    <th scope="col" className="px-4 py-3 text-gray-900">성당 오픈</th>
-                    <th scope="col" className="px-4 py-3 text-gray-900">미사</th>
-                    <th scope="col" className="px-4 py-3 text-gray-900">특별 미사</th>
-                    <th scope="col" className="px-4 py-3 text-gray-900">성물방</th>
-                    <th scope="col" className="px-4 py-3 text-gray-900">사무장 근무</th>
-                    <th scope="col" className="px-4 py-3 text-gray-900">관리장 근무</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">요일</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">성당 오픈</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">미사</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">특별 미사</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap min-w-[80px] md:min-w-0">성물방</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">사무장 근무</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">관리장 근무</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -239,21 +239,21 @@ export default function Mass() {
                       key={schedule.day}
                       className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/70'}
                     >
-                      <th scope="row" className="px-4 py-4 font-semibold text-gray-900 whitespace-nowrap">
+                      <th scope="row" className="px-2 md:px-4 py-4 font-semibold text-gray-900 whitespace-nowrap">
                         {schedule.day}
                       </th>
-                      <td className="px-4 py-4">
+                      <td className="px-2 md:px-4 py-4 whitespace-nowrap">
                         {schedule.chapelOpen.join(' · ')}
                       </td>
-                      <td className="px-4 py-4 space-y-1">
+                      <td className="px-2 md:px-4 py-4 space-y-1">
                         {schedule.mass.map((item, idx) => (
-                          <div key={`${schedule.day}-mass-${idx}`}>{item}</div>
+                          <div key={`${schedule.day}-mass-${idx}`} className="text-xs md:text-sm">{item}</div>
                         ))}
                       </td>
-                      <td className="px-4 py-4 space-y-1">
+                      <td className="px-2 md:px-4 py-4 space-y-1">
                         {schedule.specials && schedule.specials.length > 0 ? (
                           schedule.specials.map((item, idx) => (
-                            <div key={`${schedule.day}-special-${idx}`} className="text-catholic-logo">
+                            <div key={`${schedule.day}-special-${idx}`} className="text-catholic-logo text-xs md:text-sm">
                               {item}
                             </div>
                           ))
@@ -261,17 +261,17 @@ export default function Mass() {
                           <span className="text-gray-400">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-4">
-                        {schedule.giftShop ? schedule.giftShop : <span className="text-gray-400">-</span>}
+                      <td className="px-2 md:px-4 py-4 min-w-[80px] md:min-w-0 whitespace-nowrap">
+                        {schedule.giftShop ? <span className="text-xs md:text-sm">{schedule.giftShop}</span> : <span className="text-gray-400">-</span>}
                       </td>
-                      <td className="px-4 py-4 space-y-1">
+                      <td className="px-2 md:px-4 py-4 space-y-1">
                         {schedule.office.map((item, idx) => (
-                          <div key={`${schedule.day}-office-${idx}`}>{item}</div>
+                          <div key={`${schedule.day}-office-${idx}`} className="text-xs md:text-sm">{item}</div>
                         ))}
                       </td>
-                      <td className="px-4 py-4 space-y-1">
+                      <td className="px-2 md:px-4 py-4 space-y-1">
                         {schedule.manager.map((item, idx) => (
-                          <div key={`${schedule.day}-manager-${idx}`}>{item}</div>
+                          <div key={`${schedule.day}-manager-${idx}`} className="text-xs md:text-sm">{item}</div>
                         ))}
                       </td>
                     </tr>
