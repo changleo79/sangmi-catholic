@@ -17,6 +17,13 @@ export default function News() {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
   const itemsPerPage = 10
 
+  // 모바일 감지 함수
+  const isMobile = () => {
+    return window.innerWidth < 768 || 
+           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
+  }
+
   const loadData = async () => {
     console.log('[News] loadData 시작 - 모바일/PC 모두 서버에서 강제 로드')
     // 캐시 완전히 무효화 (모바일 브라우저 캐시 회피)
@@ -48,18 +55,10 @@ export default function News() {
       ])
     }
     
-    // 모바일 감지 함수
-    const isMobile = () => {
-      return window.innerWidth < 768 || 
-             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-             (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
-    }
-    
     // 서버에서만 데이터 로드 (localStorage 사용 안 함) - 모바일에서도 확실히 반영
     const loadedBulletins = await getBulletins(true) // forceRefresh=true: 서버에서 최신 데이터 로드
     
-    const isMobileDevice = isMobile()
-    console.log('[News]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))
+    console.log('[News] getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))
     
     // 서버에서만 데이터 로드 (localStorage 사용 안 함)
     // 최신순 정렬
