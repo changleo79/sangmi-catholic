@@ -60,11 +60,11 @@ export default function FAQsManage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newFaqs = faqs.filter(f => f.id !== id)
       setFaqs(newFaqs)
-      saveFAQs(newFaqs)
+      await saveFAQs(newFaqs) // 서버에 저장 완료 대기
     }
   }
 

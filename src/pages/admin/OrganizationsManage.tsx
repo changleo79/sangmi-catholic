@@ -37,14 +37,17 @@ export default function OrganizationsManage() {
     loadPosts()
     
     // URL 쿼리 파라미터에서 edit ID 확인
-    const editId = searchParams.get('edit')
-    if (editId) {
-      const allPosts = getOrganizationPosts()
-      const postToEdit = allPosts.find(p => p.id === editId)
-      if (postToEdit) {
-        handleEdit(postToEdit)
+    const checkEditId = async () => {
+      const editId = searchParams.get('edit')
+      if (editId) {
+        const allPosts = await getOrganizationPosts()
+        const postToEdit = allPosts.find(p => p.id === editId)
+        if (postToEdit) {
+          handleEdit(postToEdit)
+        }
       }
     }
+    checkEditId()
   }, [searchParams])
 
   const loadPosts = () => {
@@ -108,11 +111,11 @@ export default function OrganizationsManage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newPosts = posts.filter(p => p.id !== id)
       setPosts(newPosts)
-      saveOrganizationPosts(newPosts)
+      await saveOrganizationPosts(newPosts) // 서버에 저장 완료 대기
       initializeData()
     }
   }
@@ -191,7 +194,7 @@ export default function OrganizationsManage() {
       try {
         const data = await importJSON<OrganizationPost[]>(file)
         setPosts(data)
-        saveOrganizationPosts(data)
+        await saveOrganizationPosts(data) // 서버에 저장 완료 대기
         await initializeData()
         alert('데이터를 성공적으로 가져왔습니다.')
       } catch (error) {

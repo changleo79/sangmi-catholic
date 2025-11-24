@@ -58,12 +58,12 @@ export default function MassManage() {
         { id: '8', day: '일요일', time: '오후 3시', description: '어린이미사' }
       ]
       setMassSchedule(defaultSchedule)
-      saveMassSchedule(defaultSchedule)
+      await saveMassSchedule(defaultSchedule)
     } else {
       setMassSchedule(schedule)
     }
 
-    const sacramentList = getSacraments()
+    const sacramentList = await getSacraments()
     if (sacramentList.length === 0) {
       // 기본 데이터
       const defaultSacraments: SacramentItem[] = [
@@ -74,12 +74,12 @@ export default function MassManage() {
         { id: '5', name: '병자성사', description: '사무실로 연락 바랍니다' }
       ]
       setSacraments(defaultSacraments)
-      saveSacraments(defaultSacraments)
+      await saveSacraments(defaultSacraments)
     } else {
       setSacraments(sacramentList)
     }
 
-    const catechism = getCatechismInfo()
+    const catechism = await getCatechismInfo()
     if (catechism) {
       setCatechismInfo(catechism)
     } else {
@@ -89,7 +89,7 @@ export default function MassManage() {
         contact: '문의 : 성당 사무실 (031-282-9989)'
       }
       setCatechismInfo(defaultCatechism)
-      saveCatechismInfo(defaultCatechism)
+      await saveCatechismInfo(defaultCatechism)
     }
   }
 
@@ -124,7 +124,7 @@ export default function MassManage() {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newSchedule = massSchedule.filter(s => s.id !== id)
       setMassSchedule(newSchedule)
-      saveMassSchedule(newSchedule)
+      await saveMassSchedule(newSchedule) // 서버에 저장 완료 대기
     }
   }
 
@@ -166,7 +166,7 @@ export default function MassManage() {
   // 예비신자 교리학교 정보 저장
   const handleCatechismSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    saveCatechismInfo(catechismInfo)
+    await saveCatechismInfo(catechismInfo) // 서버에 저장 완료 대기
     alert('저장되었습니다.')
   }
 

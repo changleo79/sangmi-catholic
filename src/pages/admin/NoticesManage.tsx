@@ -53,11 +53,11 @@ export default function NoticesManage() {
   }
 
 
-  const handleDelete = (index: number) => {
+  const handleDelete = async (index: number) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newNotices = notices.filter((_, i) => i !== index)
       setNotices(newNotices)
-      saveNotices(newNotices)
+      await saveNotices(newNotices) // 서버에 저장 완료 대기
     }
   }
 

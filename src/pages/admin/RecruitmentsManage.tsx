@@ -60,11 +60,11 @@ export default function RecruitmentsManage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newRecruitments = recruitments.filter(r => r.id !== id)
       setRecruitments(newRecruitments)
-      saveRecruitments(newRecruitments)
+      await saveRecruitments(newRecruitments) // 서버에 저장 완료 대기
     }
   }
 
