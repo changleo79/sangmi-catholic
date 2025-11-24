@@ -157,12 +157,11 @@ export default function AlbumsManage() {
       setAlbums(newAlbums)
       await saveAlbums(newAlbums) // 서버에 저장 완료 대기
       
-      // 기본 앨범 삭제 시 플래그 설정 (다시 생성되지 않도록)
-      if (id === '1762757851120') {
-        localStorage.setItem('default_album_deleted', 'true')
-      }
+      // 저장 후 다시 로드하여 확인
+      await loadAlbums()
       
-      // 이벤트 발생
+      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+      await new Promise(resolve => setTimeout(resolve, 300))
       window.dispatchEvent(new CustomEvent('albumsUpdated'))
     }
   }

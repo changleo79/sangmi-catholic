@@ -20,7 +20,7 @@ const navItems = [
     )
   },
   {
-    to: '/organizations/tree',
+    to: '/organizations',
     label: '성당단체',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

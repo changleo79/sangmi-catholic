@@ -51,7 +51,8 @@ export default function BulletinsManage() {
         newBulletins[index] = { ...formData, id: editingId }
       }
     } else {
-      const newId = Date.now().toString()
+      // 고유 ID 생성 (Date.now() + 랜덤 문자열로 충돌 방지)
+      const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
       newBulletins.unshift({ ...formData, id: newId })
     }
 
