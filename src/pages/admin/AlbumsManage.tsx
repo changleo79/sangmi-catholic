@@ -119,7 +119,8 @@ export default function AlbumsManage() {
           cover: albumData.cover
         }
       })
-      // 이벤트 발생 확인
+      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+      await new Promise(resolve => setTimeout(resolve, 300))
       window.dispatchEvent(new CustomEvent('albumsUpdated'))
       resetForm()
       return
@@ -136,7 +137,8 @@ export default function AlbumsManage() {
         cover: albumData.cover
       }
     })
-    // 이벤트 발생 확인
+    // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+    await new Promise(resolve => setTimeout(resolve, 300))
     window.dispatchEvent(new CustomEvent('albumsUpdated'))
     resetForm()
   }

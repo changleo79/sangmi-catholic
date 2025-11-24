@@ -35,16 +35,18 @@ export default function Albums() {
     }
     
     // 앨범 업데이트 이벤트 리스너 (모바일/PC 모두 동작)
-    const handleAlbumsUpdate = () => {
+    const handleAlbumsUpdate = async () => {
       console.log('[Albums] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
-      // 캐시 무시하고 강제 새로고침
+      // 캐시 완전히 무효화
       if ((window as any).__albumsCache) {
         delete (window as any).__albumsCache
       }
-      // 약간의 지연 후 로드 (저장 완료 대기)
-      setTimeout(async () => {
-        await loadAlbums()
-      }, 100)
+      if ((window as any).cachedData && (window as any).cachedData.albums) {
+        (window as any).cachedData.albums = undefined
+      }
+      // 서버 저장 완료 대기 후 로드 (모바일에서도 확실히 반영되도록)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      await loadAlbums()
     }
     
     // visibilitychange 이벤트 (탭 전환, 모바일에서 앱 전환 등)

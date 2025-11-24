@@ -51,14 +51,18 @@ export default function Bulletins() {
     }
     
     // 주보 업데이트 이벤트 리스너
-    const handleBulletinsUpdate = () => {
+    const handleBulletinsUpdate = async () => {
       console.log('[Bulletins] bulletinsUpdated 이벤트 수신 - 데이터 다시 로드')
+      // 캐시 완전히 무효화
       if ((window as any).__bulletinsCache) {
         delete (window as any).__bulletinsCache
       }
-      setTimeout(() => {
-        loadBulletins()
-      }, 100)
+      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+        (window as any).cachedData.bulletins = undefined
+      }
+      // 서버 저장 완료 대기 후 로드 (모바일에서도 확실히 반영되도록)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      await loadBulletins()
     }
     
     // visibilitychange 이벤트

@@ -60,7 +60,8 @@ export default function BulletinsManage() {
     console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
     // 저장 후 즉시 다시 로드하여 확인
     await loadBulletins()
-    // 주보 업데이트 이벤트 발생 (다른 컴포넌트에서 데이터 새로고침)
+    // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+    await new Promise(resolve => setTimeout(resolve, 300))
     window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
     resetForm()
   }
