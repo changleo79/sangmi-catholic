@@ -76,18 +76,18 @@ export default function News() {
     loadData()
     
     // 주보 업데이트 이벤트 리스너
-    const handleBulletinsUpdate = () => {
-      console.log('[News] bulletinsUpdated 이벤트 수신')
+    const handleBulletinsUpdate = async () => {
+      console.log('[News] bulletinsUpdated 이벤트 수신 - 데이터 다시 로드')
       // 캐시 완전히 무효화
       if ((window as any).__bulletinsCache) {
         delete (window as any).__bulletinsCache
       }
-      // storage.ts의 cachedData도 무효화
       if ((window as any).cachedData && (window as any).cachedData.bulletins) {
         (window as any).cachedData.bulletins = undefined
       }
-      // 모바일 로직 적용
-      loadData()
+      // 서버 저장 완료 대기 후 로드 (모바일에서도 확실히 반영되도록)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      await loadData()
     }
     
     // 포커스 및 visibilitychange 이벤트도 추가
