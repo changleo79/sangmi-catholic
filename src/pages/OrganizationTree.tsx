@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { 
   getOrganizationInfo, 
   getSubOrganizations,
@@ -227,7 +226,7 @@ export default function OrganizationTree() {
               <div className="flex justify-center mb-8">
                 <div className="relative inline-block">
                   <div 
-                    className="px-10 py-6 rounded-2xl shadow-xl text-center transform hover:scale-105 transition-transform duration-300"
+                    className="px-10 py-6 rounded-2xl shadow-xl text-center"
                     style={{ 
                       background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)',
                       color: 'white',
