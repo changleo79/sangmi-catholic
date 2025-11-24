@@ -91,7 +91,8 @@ export default function BulletinsManage() {
       const newBulletins = bulletins.filter(b => b.id !== id)
       setBulletins(newBulletins)
       await saveBulletins(newBulletins) // 서버에 저장 완료 대기
-      // 주보 업데이트 이벤트 발생
+      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+      await new Promise(resolve => setTimeout(resolve, 300))
       window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
     }
   }
