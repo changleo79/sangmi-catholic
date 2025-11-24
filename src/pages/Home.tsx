@@ -745,14 +745,13 @@ export default function Home() {
                   <div className="space-y-4">
                     <h4 className="text-2xl font-semibold">성당단체 한 눈에</h4>
                     <p className="text-sm text-white/80 leading-relaxed">
-                      6개 위원회와 24개 단체가 신앙으로 함께합니다. 단체 소개와 활동 사진을 보고 게시판에서 바로 소통해보세요.
+                      6개 위원회와 24개 단체가 신앙으로 함께합니다. 단체 소개와 활동 사진을 확인하세요.
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     {[
                       { label: '상임 위원회', value: '6개' },
                       { label: '산하 단체', value: '24개' },
-                      { label: '게시글', value: `${notices.length + recruitments.length + bulletins.length}건` },
                       { label: '최근 업데이트', value: formatDate(notices[0]?.date || bulletins[0]?.date) }
                     ].map(item => (
                       <div key={item.label} className="rounded-2xl bg-white/10 backdrop-blur p-3">
