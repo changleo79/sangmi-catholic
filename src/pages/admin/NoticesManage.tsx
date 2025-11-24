@@ -25,7 +25,11 @@ export default function NoticesManage() {
 
   const loadNotices = async () => {
     console.log('[NoticesManage] 서버에서 공지사항 로드 시작')
-    const stored = await getNotices()
+    // 캐시 무효화하고 서버에서 강제 로드
+    if ((window as any).cachedData && (window as any).cachedData.notices) {
+      (window as any).cachedData.notices = undefined
+    }
+    const stored = await getNotices(true) // 서버에서 강제 로드
     if (stored.length > 0) {
       console.log('[NoticesManage] 서버에서 공지사항 로드 완료:', stored.length, '개')
       setNotices(stored)

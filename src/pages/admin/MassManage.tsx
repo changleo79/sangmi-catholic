@@ -44,7 +44,13 @@ export default function MassManage() {
 
   const loadData = async () => {
     console.log('[MassManage] 서버에서 데이터 로드 시작')
-    const schedule = await getMassSchedule()
+    // 캐시 무효화하고 서버에서 강제 로드
+    if ((window as any).cachedData) {
+      (window as any).cachedData.massSchedule = undefined
+      (window as any).cachedData.sacraments = undefined
+      (window as any).cachedData.catechism = undefined
+    }
+    const schedule = await getMassSchedule(true) // 서버에서 강제 로드
     if (schedule.length === 0) {
       // 기본 데이터
       const defaultSchedule: MassScheduleItem[] = [
@@ -63,7 +69,7 @@ export default function MassManage() {
       setMassSchedule(schedule)
     }
 
-    const sacramentList = await getSacraments()
+    const sacramentList = await getSacraments(true) // 서버에서 강제 로드
     if (sacramentList.length === 0) {
       // 기본 데이터
       const defaultSacraments: SacramentItem[] = [
@@ -79,7 +85,7 @@ export default function MassManage() {
       setSacraments(sacramentList)
     }
 
-    const catechism = await getCatechismInfo()
+    const catechism = await getCatechismInfo(true) // 서버에서 강제 로드
     if (catechism) {
       setCatechismInfo(catechism)
     } else {

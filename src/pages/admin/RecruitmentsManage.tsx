@@ -19,7 +19,11 @@ export default function RecruitmentsManage() {
 
   const loadRecruitments = async () => {
     console.log('[RecruitmentsManage] 서버에서 단체 소식 로드 시작')
-    const stored = await getRecruitments()
+    // 캐시 무효화하고 서버에서 강제 로드
+    if ((window as any).cachedData && (window as any).cachedData.recruitments) {
+      (window as any).cachedData.recruitments = undefined
+    }
+    const stored = await getRecruitments(true) // 서버에서 강제 로드
     if (stored.length > 0) {
       console.log('[RecruitmentsManage] 서버에서 단체 소식 로드 완료:', stored.length, '개')
       setRecruitments(stored)

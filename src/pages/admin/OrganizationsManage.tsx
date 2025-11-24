@@ -50,8 +50,14 @@ export default function OrganizationsManage() {
     checkEditId()
   }, [searchParams])
 
-  const loadPosts = () => {
-    const stored = getOrganizationPosts()
+  const loadPosts = async () => {
+    console.log('[OrganizationsManage] 서버에서 단체 게시판 로드 시작')
+    // 캐시 무효화하고 서버에서 강제 로드
+    if ((window as any).cachedData && (window as any).cachedData.organizationPosts) {
+      (window as any).cachedData.organizationPosts = undefined
+    }
+    const stored = await getOrganizationPosts(true) // 서버에서 강제 로드
+    console.log('[OrganizationsManage] 서버에서 단체 게시판 로드 완료:', stored.length, '개')
     setPosts(stored.sort((a, b) => {
       if (a.isImportant && !b.isImportant) return -1
       if (!a.isImportant && b.isImportant) return 1

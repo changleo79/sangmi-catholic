@@ -462,16 +462,43 @@ export const ensureDefaultAlbumExists = async (): Promise<void> => {
 }
 
 // 미사 시간 관리
-export const getMassSchedule = (): MassScheduleItem[] => {
-  if (cachedData.massSchedule) return cachedData.massSchedule
+export const getMassSchedule = async (forceRefresh = false): Promise<MassScheduleItem[]> => {
+  console.log(`[getMassSchedule] 호출 - forceRefresh: ${forceRefresh}, 캐시 있음: ${!!cachedData.massSchedule}`)
   
-  // 서버에서 로드
+  // forceRefresh가 true이면 무조건 서버에서 가져오기
+  if (forceRefresh) {
+    console.log('[getMassSchedule] forceRefresh=true, 서버에서 강제 로드')
+    // 캐시 무효화
+    cachedData.massSchedule = undefined
+    
+    const serverData = await loadDataFromServer<MassScheduleItem[]>('massSchedule')
+    if (serverData !== null) {
+      cachedData.massSchedule = serverData
+      console.log(`[getMassSchedule] 서버에서 로드 완료: ${serverData.length}개`)
+      return serverData
+    }
+    
+    console.warn('[getMassSchedule] 서버 데이터 없음, 빈 배열 반환')
+    cachedData.massSchedule = []
+    return []
+  }
+  
+  // 캐시된 데이터 우선 (forceRefresh가 false일 때만)
+  if (cachedData.massSchedule) {
+    console.log(`[getMassSchedule] 캐시에서 반환: ${cachedData.massSchedule.length}개`)
+    return cachedData.massSchedule
+  }
+  
+  // 캐시가 없으면 서버에서 로드
+  console.log('[getMassSchedule] 캐시 없음, 서버에서 로드')
   const serverData = await loadDataFromServer<MassScheduleItem[]>('massSchedule')
   if (serverData !== null) {
     cachedData.massSchedule = serverData
+    console.log(`[getMassSchedule] 서버에서 로드 완료: ${serverData.length}개`)
     return serverData
   }
   
+  console.warn('[getMassSchedule] 서버 데이터 없음, 빈 배열 반환')
   cachedData.massSchedule = []
   return []
 }

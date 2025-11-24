@@ -18,7 +18,11 @@ export default function FAQsManage() {
 
   const loadFAQs = async () => {
     console.log('[FAQsManage] 서버에서 FAQ 로드 시작')
-    const stored = await getFAQs()
+    // 캐시 무효화하고 서버에서 강제 로드
+    if ((window as any).cachedData && (window as any).cachedData.faqs) {
+      (window as any).cachedData.faqs = undefined
+    }
+    const stored = await getFAQs(true) // 서버에서 강제 로드
     if (stored.length > 0) {
       console.log('[FAQsManage] 서버에서 FAQ 로드 완료:', stored.length, '개')
       setFaqs(stored)
