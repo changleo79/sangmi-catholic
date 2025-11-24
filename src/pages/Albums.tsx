@@ -8,6 +8,13 @@ export default function Albums() {
   const [tagQuery, setTagQuery] = useState<string>('')
   const categories = getAlbumCategories()
 
+  // 모바일 감지 함수
+  const isMobile = () => {
+    return window.innerWidth < 768 || 
+           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
+  }
+
   useEffect(() => {
     // 초기 데이터 로드 - 모든 기기에서 서버에서 로드
     const loadData = async () => {

@@ -31,10 +31,11 @@ export default function News() {
       delete (window as any).__bulletinsCache
     }
     // storage.ts의 cachedData도 무효화
-    if ((window as any).cachedData) {
-      (window as any).cachedData.bulletins = undefined
-      (window as any).cachedData.notices = undefined
-      (window as any).cachedData.recruitments = undefined
+    const cachedData = (window as any).cachedData
+    if (cachedData) {
+      cachedData.bulletins = undefined
+      cachedData.notices = undefined
+      cachedData.recruitments = undefined
     }
     
     const storedNotices = await getNotices(true) // 서버에서 강제 로드
@@ -127,10 +128,11 @@ export default function News() {
           if ((window as any).__bulletinsCache) {
             delete (window as any).__bulletinsCache
           }
-          if ((window as any).cachedData) {
-            (window as any).cachedData.bulletins = undefined
-            (window as any).cachedData.notices = undefined
-            (window as any).cachedData.recruitments = undefined
+          const cachedData = (window as any).cachedData
+          if (cachedData) {
+            cachedData.bulletins = undefined
+            cachedData.notices = undefined
+            cachedData.recruitments = undefined
           }
           // 서버에서 강제로 최신 데이터 로드
           await loadData()
@@ -145,10 +147,11 @@ export default function News() {
           if ((window as any).__bulletinsCache) {
             delete (window as any).__bulletinsCache
           }
-          if ((window as any).cachedData) {
-            (window as any).cachedData.bulletins = undefined
-            (window as any).cachedData.notices = undefined
-            (window as any).cachedData.recruitments = undefined
+          const cachedData = (window as any).cachedData
+          if (cachedData) {
+            cachedData.bulletins = undefined
+            cachedData.notices = undefined
+            cachedData.recruitments = undefined
           }
           // 서버에서 강제로 최신 데이터 로드
           await loadData()

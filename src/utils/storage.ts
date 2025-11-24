@@ -190,7 +190,7 @@ export const initializeData = async (): Promise<void> => {
     console.log('[initializeData] 실행 시작 - 네이버 클라우드에서 모든 데이터 로드')
     
     // 모든 데이터를 서버에서 로드
-    const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins, organizationPosts] = await Promise.all([
+    const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins] = await Promise.all([
       loadDataFromServer<NoticeItem[]>('notices'),
       loadDataFromServer<RecruitmentItem[]>('recruitments'),
       loadDataFromServer<FAQItem[]>('faqs'),
@@ -664,67 +664,7 @@ export const exportBulletins = async (): Promise<void> => {
   URL.revokeObjectURL(url)
 }
 
-// 단체 게시글 관리
-export const getOrganizationPosts = async (organization?: OrganizationType, forceRefresh = false): Promise<OrganizationPost[]> => {
-  // 전체 게시글 가져오기
-  let allPosts: OrganizationPost[] = []
-  
-  if (!forceRefresh && cachedData.organizationPosts) {
-    allPosts = cachedData.organizationPosts
-  } else {
-    const serverData = await loadDataFromServer<OrganizationPost[]>('organizationPosts')
-    if (serverData !== null) {
-      allPosts = serverData
-      cachedData.organizationPosts = allPosts
-    } else {
-      allPosts = []
-      cachedData.organizationPosts = []
-    }
-  }
-  
-  // organization이 지정되지 않으면 전체 반환
-  if (!organization) {
-    return allPosts
-  }
-  
-  // 특정 단체의 게시글 필터링
-  const directPosts = allPosts.filter(post => post.organization === organization)
-  
-  // 상위 위원회인 경우 하위 단체 게시글도 포함
-  const subOrgs = getSubOrganizations(organization as ParentOrganizationType)
-  if (subOrgs.length > 0) {
-    const subOrgPosts = subOrgs.flatMap(subOrg => 
-      allPosts.filter(post => post.organization === subOrg)
-    )
-    return [...directPosts, ...subOrgPosts]
-  }
-  
-  return directPosts
-}
-
-export const saveOrganizationPosts = async (posts: OrganizationPost[]): Promise<void> => {
-  // 서버에 저장
-  const success = await saveDataToServer('organizationPosts', posts)
-  if (!success) {
-    throw new Error('서버 저장 실패')
-  }
-  
-  // 캐시 즉시 업데이트
-  cachedData.organizationPosts = posts
-  // 이벤트 발생하여 모든 컴포넌트에 알림
-  window.dispatchEvent(new CustomEvent('organizationPostsUpdated'))
-}
-
-export const exportOrganizationPosts = async (): Promise<void> => {
-  const data = await getOrganizationPosts()
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'organization-posts.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
+// 단체 게시글 관리 함수들은 제거됨 (게시판 기능 삭제)
 
 // 상위 위원회 타입
 export type ParentOrganizationType = 
@@ -1021,15 +961,16 @@ const saveBackupsToServer = async (backups: BackupEntry[]): Promise<boolean> => 
   return false
 }
 
-export const getBackups = (): BackupEntry[] => {
-  return readBackups().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+export const getBackups = async (): Promise<BackupEntry[]> => {
+  const backups = await loadBackupsFromServer()
+  return backups.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
 }
 
-export const createBackup = (key: StorageDatasetKey): BackupEntry | null => {
+export const createBackup = async (key: StorageDatasetKey): Promise<BackupEntry | null> => {
   const registry = datasetRegistry[key]
   if (!registry) return null
 
-  const data = registry.getter()
+  const data = await registry.getter()
   const backup: BackupEntry = {
     id: `${key}-${Date.now()}`,
     key,
@@ -1038,8 +979,9 @@ export const createBackup = (key: StorageDatasetKey): BackupEntry | null => {
     data
   }
 
-  const backups = [backup, ...readBackups()].slice(0, 20)
-  writeBackups(backups)
+  const existingBackups = await loadBackupsFromServer()
+  const backups = [backup, ...existingBackups].slice(0, 20)
+  await saveBackupsToServer(backups)
   return backup
 }
 

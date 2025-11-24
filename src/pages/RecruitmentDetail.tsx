@@ -8,13 +8,16 @@ export default function RecruitmentDetail() {
   const [recruitment, setRecruitment] = useState<RecruitmentItem | null>(null)
 
   useEffect(() => {
-    if (id) {
-      const recruitments = getRecruitments()
-      const found = recruitments.find(r => r.id === id)
-      if (found) {
-        setRecruitment(found)
+    const loadRecruitment = async () => {
+      if (id) {
+        const recruitments = await getRecruitments()
+        const found = recruitments.find(r => r.id === id)
+        if (found) {
+          setRecruitment(found)
+        }
       }
     }
+    loadRecruitment()
   }, [id])
 
   if (!recruitment) {

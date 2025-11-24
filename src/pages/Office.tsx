@@ -9,7 +9,7 @@ export default function Office() {
     const loadData = async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
       
-      const storedFAQs = getFAQs()
+      const storedFAQs = await getFAQs()
       if (storedFAQs.length > 0) {
         setFaqs(storedFAQs)
       } else {

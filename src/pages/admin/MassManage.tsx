@@ -45,10 +45,11 @@ export default function MassManage() {
   const loadData = async () => {
     console.log('[MassManage] 서버에서 데이터 로드 시작')
     // 캐시 무효화하고 서버에서 강제 로드
-    if ((window as any).cachedData) {
-      (window as any).cachedData.massSchedule = undefined
-      (window as any).cachedData.sacraments = undefined
-      (window as any).cachedData.catechism = undefined
+    const cachedData = (window as any).cachedData
+    if (cachedData) {
+      cachedData.massSchedule = undefined
+      cachedData.sacraments = undefined
+      cachedData.catechism = undefined
     }
     const schedule = await getMassSchedule(true) // 서버에서 강제 로드
     if (schedule.length === 0) {

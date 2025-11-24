@@ -14,7 +14,7 @@ export default function Mass() {
     const loadData = async () => {
       await new Promise(resolve => setTimeout(resolve, 100))
       
-      const schedule = getMassSchedule()
+      const schedule = await getMassSchedule()
       if (schedule.length > 0) {
         setMassSchedule(schedule)
       } else {
@@ -32,7 +32,7 @@ export default function Mass() {
         setMassSchedule(defaultSchedule)
       }
 
-      const sacramentList = getSacraments()
+      const sacramentList = await getSacraments()
       if (sacramentList.length > 0) {
         setSacraments(sacramentList)
       } else {
@@ -47,7 +47,7 @@ export default function Mass() {
         setSacraments(defaultSacraments)
       }
 
-      const catechism = getCatechismInfo()
+      const catechism = await getCatechismInfo()
       if (catechism) {
         setCatechismInfo(catechism)
       } else {

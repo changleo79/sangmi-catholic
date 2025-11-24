@@ -42,100 +42,103 @@ export default function SearchBar() {
   }, [isOpen])
 
   useEffect(() => {
-    if (query.trim().length > 0) {
-      setIsSearching(true)
-      const searchResults: SearchResult[] = []
-      const queryLower = query.toLowerCase()
+    const performSearch = async () => {
+      if (query.trim().length > 0) {
+        setIsSearching(true)
+        const searchResults: SearchResult[] = []
+        const queryLower = query.toLowerCase()
 
-      // 공지사항 검색
-      const notices = getNotices()
-      notices.forEach((notice: NoticeItem) => {
-        if (
-          notice.title.toLowerCase().includes(queryLower) ||
-          notice.summary?.toLowerCase().includes(queryLower) ||
-          notice.content?.toLowerCase().includes(queryLower)
-        ) {
-          searchResults.push({
-            type: 'notice',
-            id: notice.date + notice.title,
-            title: notice.title,
-            subtitle: `공지사항 · ${notice.date}`,
-            url: `/news/${encodeURIComponent(notice.date + '-' + notice.title)}`
-          })
-        }
-      })
+        // 공지사항 검색
+        const notices = await getNotices()
+        notices.forEach((notice: NoticeItem) => {
+          if (
+            notice.title.toLowerCase().includes(queryLower) ||
+            notice.summary?.toLowerCase().includes(queryLower) ||
+            notice.content?.toLowerCase().includes(queryLower)
+          ) {
+            searchResults.push({
+              type: 'notice',
+              id: notice.date + notice.title,
+              title: notice.title,
+              subtitle: `공지사항 · ${notice.date}`,
+              url: `/news/${encodeURIComponent(notice.date + '-' + notice.title)}`
+            })
+          }
+        })
 
-      // 앨범 검색
-      const albums = getAlbums()
-      albums.forEach((album) => {
-        if (album.title.toLowerCase().includes(queryLower)) {
-          searchResults.push({
-            type: 'album',
-            id: album.id,
-            title: album.title,
-            subtitle: `앨범 · ${album.date}`,
-            url: `/albums/${album.id}`
-          })
-        }
-      })
+        // 앨범 검색
+        const albums = await getAlbums()
+        albums.forEach((album) => {
+          if (album.title.toLowerCase().includes(queryLower)) {
+            searchResults.push({
+              type: 'album',
+              id: album.id,
+              title: album.title,
+              subtitle: `앨범 · ${album.date}`,
+              url: `/albums/${album.id}`
+            })
+          }
+        })
 
-      // 단체 소식 검색
-      const recruitments = getRecruitments()
-      recruitments.forEach((recruitment) => {
-        if (
-          recruitment.title.toLowerCase().includes(queryLower) ||
-          recruitment.summary?.toLowerCase().includes(queryLower) ||
-          recruitment.content?.toLowerCase().includes(queryLower)
-        ) {
-          searchResults.push({
-            type: 'recruitment',
-            id: recruitment.id,
-            title: recruitment.title,
-            subtitle: `단체 소식`,
-            url: `/recruitments/${recruitment.id}`
-          })
-        }
-      })
+        // 단체 소식 검색
+        const recruitments = await getRecruitments()
+        recruitments.forEach((recruitment) => {
+          if (
+            recruitment.title.toLowerCase().includes(queryLower) ||
+            recruitment.summary?.toLowerCase().includes(queryLower) ||
+            recruitment.content?.toLowerCase().includes(queryLower)
+          ) {
+            searchResults.push({
+              type: 'recruitment',
+              id: recruitment.id,
+              title: recruitment.title,
+              subtitle: `단체 소식`,
+              url: `/recruitments/${recruitment.id}`
+            })
+          }
+        })
 
-      // FAQ 검색
-      const faqs = getFAQs()
-      faqs.forEach((faq) => {
-        if (
-          faq.question.toLowerCase().includes(queryLower) ||
-          faq.answer.toLowerCase().includes(queryLower)
-        ) {
-          searchResults.push({
-            type: 'faq',
-            id: faq.id,
-            title: faq.question,
-            subtitle: `자주 묻는 질문`,
-            url: '/office'
-          })
-        }
-      })
+        // FAQ 검색
+        const faqs = await getFAQs()
+        faqs.forEach((faq) => {
+          if (
+            faq.question.toLowerCase().includes(queryLower) ||
+            faq.answer.toLowerCase().includes(queryLower)
+          ) {
+            searchResults.push({
+              type: 'faq',
+              id: faq.id,
+              title: faq.question,
+              subtitle: `자주 묻는 질문`,
+              url: '/office'
+            })
+          }
+        })
 
-      // 주보 안내 검색
-      const bulletins = getBulletins()
-      bulletins.forEach((bulletin) => {
-        if (
-          bulletin.title.toLowerCase().includes(queryLower) ||
-          bulletin.description?.toLowerCase().includes(queryLower)
-        ) {
-          searchResults.push({
-            type: 'bulletin',
-            id: bulletin.id,
-            title: bulletin.title,
-            subtitle: `주보 안내 · ${bulletin.date}`,
-            url: '/news'
-          })
-        }
-      })
+        // 주보 안내 검색
+        const bulletins = await getBulletins()
+        bulletins.forEach((bulletin) => {
+          if (
+            bulletin.title.toLowerCase().includes(queryLower) ||
+            bulletin.description?.toLowerCase().includes(queryLower)
+          ) {
+            searchResults.push({
+              type: 'bulletin',
+              id: bulletin.id,
+              title: bulletin.title,
+              subtitle: `주보 안내 · ${bulletin.date}`,
+              url: '/news'
+            })
+          }
+        })
 
-      setResults(searchResults.slice(0, 10)) // 최대 10개 결과
-      setIsSearching(false)
-    } else {
-      setResults([])
+        setResults(searchResults.slice(0, 10)) // 최대 10개 결과
+        setIsSearching(false)
+      } else {
+        setResults([])
+      }
     }
+    performSearch()
   }, [query])
 
   const handleResultClick = (url: string) => {
