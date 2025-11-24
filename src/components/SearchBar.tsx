@@ -5,14 +5,12 @@ import {
   getAlbums, 
   getRecruitments, 
   getFAQs, 
-  getOrganizationPosts,
-  getBulletins,
-  getOrganizationInfo
+  getBulletins
 } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
 
 interface SearchResult {
-  type: 'notice' | 'album' | 'recruitment' | 'faq' | 'organization' | 'bulletin'
+  type: 'notice' | 'album' | 'recruitment' | 'faq' | 'bulletin'
   id: string
   title: string
   subtitle?: string
@@ -116,25 +114,6 @@ export default function SearchBar() {
         }
       })
 
-      // 단체 게시판 검색
-      const orgPosts = getOrganizationPosts()
-      orgPosts.forEach((post) => {
-        if (
-          post.title.toLowerCase().includes(queryLower) ||
-          post.content.toLowerCase().includes(queryLower) ||
-          post.author?.toLowerCase().includes(queryLower)
-        ) {
-          const orgInfo = getOrganizationInfo(post.organization)
-          searchResults.push({
-            type: 'organization',
-            id: post.id,
-            title: post.title,
-            subtitle: `${orgInfo.name} · ${post.date}`,
-            url: `/organizations/${encodeURIComponent(post.organization)}/posts/${post.id}`
-          })
-        }
-      })
-
       // 주보 안내 검색
       const bulletins = getBulletins()
       bulletins.forEach((bulletin) => {
@@ -222,8 +201,6 @@ export default function SearchBar() {
                           ? 'bg-green-100 text-green-600'
                           : result.type === 'faq'
                           ? 'bg-yellow-100 text-yellow-600'
-                          : result.type === 'organization'
-                          ? 'bg-pink-100 text-pink-600'
                           : 'bg-orange-100 text-orange-600'
                       }`}>
                         {result.type === 'notice' ? (
@@ -241,10 +218,6 @@ export default function SearchBar() {
                         ) : result.type === 'faq' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        ) : result.type === 'organization' ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
                         ) : (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,8 +288,6 @@ export default function SearchBar() {
                           ? 'bg-green-100 text-green-600'
                           : result.type === 'faq'
                           ? 'bg-yellow-100 text-yellow-600'
-                          : result.type === 'organization'
-                          ? 'bg-pink-100 text-pink-600'
                           : 'bg-orange-100 text-orange-600'
                       }`}>
                         {result.type === 'notice' ? (
@@ -334,10 +305,6 @@ export default function SearchBar() {
                         ) : result.type === 'faq' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        ) : result.type === 'organization' ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
                         ) : (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,8 +354,6 @@ export default function SearchBar() {
                           ? 'bg-green-100 text-green-600'
                           : result.type === 'faq'
                           ? 'bg-yellow-100 text-yellow-600'
-                          : result.type === 'organization'
-                          ? 'bg-pink-100 text-pink-600'
                           : 'bg-orange-100 text-orange-600'
                       }`}>
                         {result.type === 'notice' ? (
@@ -406,10 +371,6 @@ export default function SearchBar() {
                         ) : result.type === 'faq' ? (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        ) : result.type === 'organization' ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
                         ) : (
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

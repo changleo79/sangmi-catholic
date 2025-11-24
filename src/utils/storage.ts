@@ -181,7 +181,6 @@ let cachedData: {
   sacraments?: SacramentItem[]
   catechism?: CatechismInfo | null
   bulletins?: BulletinItem[]
-  organizationPosts?: OrganizationPost[]
 } = {}
 
 // 데이터 초기화 (페이지 로드 시 한 번만 실행)
@@ -199,8 +198,7 @@ export const initializeData = async (): Promise<void> => {
       loadDataFromServer<MassScheduleItem[]>('massSchedule'),
       loadDataFromServer<SacramentItem[]>('sacraments'),
       loadDataFromServer<CatechismInfo | null>('catechism'),
-      loadDataFromServer<BulletinItem[]>('bulletins'),
-      loadDataFromServer<OrganizationPost[]>('organizationPosts')
+      loadDataFromServer<BulletinItem[]>('bulletins')
     ])
     
     // 서버에서 로드한 데이터를 캐시에 저장 (메모리 캐시만 사용)
@@ -212,8 +210,7 @@ export const initializeData = async (): Promise<void> => {
       massSchedule: massSchedule || [],
       sacraments: sacraments || [],
       catechism: catechism || null,
-      bulletins: bulletins || [],
-      organizationPosts: organizationPosts || []
+      bulletins: bulletins || []
     }
     
     console.log('[initializeData] 서버에서 데이터 로드 완료:', {
@@ -224,8 +221,7 @@ export const initializeData = async (): Promise<void> => {
       massSchedule: cachedData.massSchedule?.length || 0,
       sacraments: cachedData.sacraments?.length || 0,
       catechism: cachedData.catechism ? 1 : 0,
-      bulletins: cachedData.bulletins?.length || 0,
-      organizationPosts: cachedData.organizationPosts?.length || 0
+      bulletins: cachedData.bulletins?.length || 0
     })
   } catch (e) {
     console.error('데이터 초기화 실패:', e)
@@ -972,7 +968,6 @@ export type StorageDatasetKey =
   | 'sacraments'
   | 'catechism'
   | 'bulletins'
-  | 'organizationPosts'
 
 export type BackupEntry = {
   id: string
@@ -994,8 +989,7 @@ const datasetRegistry: Record<StorageDatasetKey, {
   massSchedule: { label: '미사 시간표', getter: () => getMassSchedule(), saver: saveMassSchedule },
   sacraments: { label: '성사 안내', getter: () => getSacraments(), saver: saveSacraments },
   catechism: { label: '예비신자 교리', getter: () => getCatechismInfo(), saver: (data) => data ? saveCatechismInfo(data) : Promise.resolve() },
-  bulletins: { label: '주보 안내', getter: () => getBulletins(), saver: saveBulletins },
-  organizationPosts: { label: '단체 게시판', getter: () => getOrganizationPosts(), saver: saveOrganizationPosts }
+  bulletins: { label: '주보 안내', getter: () => getBulletins(), saver: saveBulletins }
 }
 
 // 백업 데이터를 서버에서 로드
@@ -1084,9 +1078,6 @@ export const restoreBackup = async (backupId: string): Promise<boolean> => {
       break
     case 'bulletins':
       cachedData.bulletins = target.data as BulletinItem[]
-      break
-    case 'organizationPosts':
-      cachedData.organizationPosts = target.data as OrganizationPost[]
       break
     default:
       break

@@ -227,14 +227,14 @@ export default function Home() {
       )
     },
     {
-      title: '성당단체 둘러보기',
-      description: '위원회 · 단체 게시판',
-      to: '/organizations',
+      title: '주보 보기',
+      description: '주일 주보 확인',
+      to: '/bulletins',
       accent: '#8B4A6B',
       background: 'linear-gradient(135deg, rgba(139, 74, 107, 0.14) 0%, rgba(139, 74, 107, 0.04) 100%)',
       icon: (
         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a4 4 0 018 0v2m-3-10a4 4 0 11-8 0 4 4 0 018 0zM5 21h14" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       )
     },

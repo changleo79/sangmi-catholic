@@ -17,8 +17,7 @@ const datasets: Array<{ key: StorageDatasetKey; description: string }> = [
   { key: 'massSchedule', description: '미사 시간표 데이터' },
   { key: 'sacraments', description: '성사 안내' },
   { key: 'catechism', description: '예비신자 교리 안내' },
-  { key: 'bulletins', description: '주보 안내(PDF)' },
-  { key: 'organizationPosts', description: '단체 게시판 글 전체' }
+  { key: 'bulletins', description: '주보 안내(PDF)' }
 ]
 
 export default function BackupManage() {
