@@ -23,6 +23,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  
+  // 모바일 브라우저 캐시 완전 회피를 위한 강력한 헤더
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, private')
+  res.setHeader('Pragma', 'no-cache')
+  res.setHeader('Expires', '0')
+  res.setHeader('X-Content-Type-Options', 'nosniff')
 
   if (req.method === 'OPTIONS') {
     res.status(200).end()

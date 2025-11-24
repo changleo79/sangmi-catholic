@@ -15,7 +15,8 @@ export default function Bulletins() {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
 
   const loadBulletins = async () => {
-    // 캐시 완전히 무효화
+    console.log('[Bulletins] loadBulletins 시작 - 모바일/PC 모두 서버에서 강제 로드')
+    // 캐시 완전히 무효화 (모바일 브라우저 캐시 회피)
     if ((window as any).__bulletinsCache) {
       delete (window as any).__bulletinsCache
     }
@@ -23,7 +24,7 @@ export default function Bulletins() {
       (window as any).cachedData.bulletins = undefined
     }
     
-    // 서버에서만 데이터 로드 (localStorage 사용 안 함)
+    // 서버에서만 데이터 로드 (localStorage 사용 안 함) - 모바일에서도 확실히 반영
     const loadedBulletins = await getBulletins(true) // forceRefresh=true: 서버에서 최신 데이터 로드
     
     const isMobileDevice = isMobile()

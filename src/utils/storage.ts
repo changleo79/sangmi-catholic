@@ -235,17 +235,22 @@ export const initializeData = async (): Promise<void> => {
 // 서버에서 데이터 로드 (공통 함수)
 const loadDataFromServer = async <T>(type: string): Promise<T | null> => {
   try {
-    // 캐시 방지를 위해 타임스탬프 추가
+    // 캐시 방지를 위해 타임스탬프와 랜덤 값 추가 (모바일 브라우저 캐시 완전 회피)
     const timestamp = Date.now()
-    const url = `/api/load-metadata?type=${type}&_t=${timestamp}`
+    const random = Math.random().toString(36).substring(7)
+    const url = `/api/load-metadata?type=${type}&_t=${timestamp}&_r=${random}`
     console.log(`[loadDataFromServer] ${type} 서버에서 로드 시도:`, url)
     
+    // 모바일 브라우저 캐시 완전 회피를 위한 강력한 헤더
     const response = await fetch(url, {
       method: 'GET',
+      cache: 'no-store', // fetch API의 캐시 옵션
       headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
-        'Expires': '0'
+        'Expires': '0',
+        'If-Modified-Since': '0', // 조건부 요청 방지
+        'If-None-Match': '*', // ETag 캐시 방지
       }
     })
     
@@ -259,9 +264,20 @@ const loadDataFromServer = async <T>(type: string): Promise<T | null> => {
       }
     } else {
       console.warn(`[loadDataFromServer] ${type} 서버 응답 오류:`, response.status, response.statusText)
+      // 에러 응답도 로그에 기록
+      try {
+        const errorText = await response.text()
+        console.warn(`[loadDataFromServer] ${type} 에러 응답 내용:`, errorText)
+      } catch (e) {
+        // 무시
+      }
     }
   } catch (error) {
     console.error(`[loadDataFromServer] ${type} 서버 로드 실패:`, error)
+    // 네트워크 오류 상세 정보
+    if (error instanceof Error) {
+      console.error(`[loadDataFromServer] ${type} 오류 상세:`, error.message, error.stack)
+    }
   }
   return null
 }

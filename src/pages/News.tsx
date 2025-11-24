@@ -18,19 +18,26 @@ export default function News() {
   const itemsPerPage = 10
 
   const loadData = async () => {
-    // 캐시 무효화
+    console.log('[News] loadData 시작 - 모바일/PC 모두 서버에서 강제 로드')
+    // 캐시 완전히 무효화 (모바일 브라우저 캐시 회피)
     if ((window as any).__bulletinsCache) {
       delete (window as any).__bulletinsCache
     }
+    // storage.ts의 cachedData도 무효화
+    if ((window as any).cachedData) {
+      (window as any).cachedData.bulletins = undefined
+      (window as any).cachedData.notices = undefined
+      (window as any).cachedData.recruitments = undefined
+    }
     
-    const storedNotices = await getNotices()
+    const storedNotices = await getNotices(true) // 서버에서 강제 로드
     if (storedNotices.length > 0) {
       setNotices(storedNotices)
     } else {
       setNotices(defaultNotices)
     }
 
-    const storedRecruitments = await getRecruitments()
+    const storedRecruitments = await getRecruitments(true) // 서버에서 강제 로드
     if (storedRecruitments.length > 0) {
       setRecruit(storedRecruitments)
     } else {
@@ -40,15 +47,6 @@ export default function News() {
         { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
       ])
     }
-
-    // 주보 데이터 강제 새로고침 (캐시 완전히 무효화)
-    if ((window as any).__bulletinsCache) {
-      delete (window as any).__bulletinsCache
-    }
-    // storage.ts의 cachedData도 무효화
-    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-      (window as any).cachedData.bulletins = undefined
-    }
     
     // 모바일 감지 함수
     const isMobile = () => {
@@ -57,7 +55,7 @@ export default function News() {
              (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
     }
     
-    // 서버에서만 데이터 로드 (localStorage 사용 안 함)
+    // 서버에서만 데이터 로드 (localStorage 사용 안 함) - 모바일에서도 확실히 반영
     const loadedBulletins = await getBulletins(true) // forceRefresh=true: 서버에서 최신 데이터 로드
     
     const isMobileDevice = isMobile()

@@ -11,14 +11,24 @@ export default function Albums() {
   useEffect(() => {
     // 초기 데이터 로드 - 모든 기기에서 서버에서 로드
     const loadData = async () => {
+      console.log('[Albums] 초기 데이터 로드 시작 - 모바일/PC 모두 서버에서 강제 로드')
+      // 캐시 완전히 무효화 (모바일 브라우저 캐시 회피)
+      if ((window as any).__albumsCache) {
+        delete (window as any).__albumsCache
+      }
+      if ((window as any).cachedData && (window as any).cachedData.albums) {
+        (window as any).cachedData.albums = undefined
+      }
+      
       // 모든 기기에서 서버 데이터 초기화
       await initializeData()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, 200))
       await loadAlbums()
       // 기본 앨범이 없으면 초기 데이터 생성
-      const stored = await getAlbums(true) // await 추가 - 서버에서 강제 새로고침
+      const stored = await getAlbums(true) // 서버에서 강제 새로고침
       if (stored.length === 0) {
         initializeDefaultAlbum()
+        await new Promise(resolve => setTimeout(resolve, 200))
         await loadAlbums() // 다시 로드
       }
     }
