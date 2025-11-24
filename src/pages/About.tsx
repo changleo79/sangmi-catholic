@@ -152,6 +152,29 @@ export default function About() {
             </div>
           </div>
 
+          {/* Organization Tree Link */}
+          <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+              <h2 className="text-3xl font-bold text-gray-900">성당단체 안내</h2>
+            </div>
+            <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+              상미성당의 위원회와 단체 조직도를 확인하실 수 있습니다. 6개 위원회와 24개 단체의 정보를 한눈에 보실 수 있습니다.
+            </p>
+            <Link
+              to="/organizations/tree"
+              className="inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-lg hover:scale-105 transition-all duration-300 active:scale-95 shadow-md"
+              style={{ backgroundColor: '#7B1F4B', color: '#ffffff' }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+            >
+              조직도 보기
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
           {/* Jurisdiction Link */}
           <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
             <div className="flex items-center gap-3 mb-6">
