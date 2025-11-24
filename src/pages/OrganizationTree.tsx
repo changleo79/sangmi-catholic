@@ -249,9 +249,8 @@ export default function OrganizationTree() {
                {/* Level 2: 총회장 */}
               <div className="flex justify-center mb-6">
                 <div className="relative inline-block">
-                  <Link
-                    to={`/organizations/${encodeURIComponent('총회장')}`}
-                    className="block px-8 py-5 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-center transform hover:scale-105"
+                  <div
+                    className="block px-8 py-5 rounded-xl shadow-lg text-center"
                     style={{ 
                       background: 'linear-gradient(135deg, #9B5A7B 0%, #8B4A6B 100%)',
                       color: 'white',
@@ -260,7 +259,7 @@ export default function OrganizationTree() {
                     }}
                   >
                     <h3 className="text-xl font-bold mb-1">총회장</h3>
-                  </Link>
+                  </div>
                  </div>
                </div>
  

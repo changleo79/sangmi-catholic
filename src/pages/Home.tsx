@@ -704,15 +704,6 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
-                <Link
-                  to="/organizations"
-                  className="inline-flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/15 border border-white/20 hover:bg-white/20 transition-all"
-                >
-                  성당단체 게시판
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
               </div>
             </div>
           </div>
