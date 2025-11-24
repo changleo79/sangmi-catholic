@@ -16,9 +16,11 @@ export default function FAQsManage() {
     loadFAQs()
   }, [])
 
-  const loadFAQs = () => {
-    const stored = getFAQs()
+  const loadFAQs = async () => {
+    console.log('[FAQsManage] 서버에서 FAQ 로드 시작')
+    const stored = await getFAQs()
     if (stored.length > 0) {
+      console.log('[FAQsManage] 서버에서 FAQ 로드 완료:', stored.length, '개')
       setFaqs(stored)
     } else {
       // 기본 데이터
@@ -28,11 +30,11 @@ export default function FAQsManage() {
         { id: '3', question: '주보는 어디서 볼 수 있나요?', answer: '공지/소식 페이지에 주보 PDF가 업로드될 예정입니다.' }
       ]
       setFaqs(defaultData)
-      saveFAQs(defaultData)
+      await saveFAQs(defaultData)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newFaqs = [...faqs]
     
@@ -47,7 +49,7 @@ export default function FAQsManage() {
     }
     
     setFaqs(newFaqs)
-    saveFAQs(newFaqs)
+    await saveFAQs(newFaqs) // 서버에 저장 완료 대기
     resetForm()
   }
 

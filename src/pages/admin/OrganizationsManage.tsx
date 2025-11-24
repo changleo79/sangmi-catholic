@@ -56,7 +56,7 @@ export default function OrganizationsManage() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newPosts = [...posts]
     
@@ -74,7 +74,7 @@ export default function OrganizationsManage() {
     }
     
     setPosts(newPosts)
-    saveOrganizationPosts(newPosts)
+    await saveOrganizationPosts(newPosts) // 서버에 저장 완료 대기
     initializeData()
     
     // 수정 완료 후 원래 페이지로 돌아가기 (URL에 returnTo가 있는 경우)

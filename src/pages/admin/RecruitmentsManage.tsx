@@ -17,9 +17,11 @@ export default function RecruitmentsManage() {
     loadRecruitments()
   }, [])
 
-  const loadRecruitments = () => {
-    const stored = getRecruitments()
+  const loadRecruitments = async () => {
+    console.log('[RecruitmentsManage] 서버에서 단체 소식 로드 시작')
+    const stored = await getRecruitments()
     if (stored.length > 0) {
+      console.log('[RecruitmentsManage] 서버에서 단체 소식 로드 완료:', stored.length, '개')
       setRecruitments(stored)
     } else {
       // 기본 데이터
@@ -28,11 +30,11 @@ export default function RecruitmentsManage() {
         { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
       ]
       setRecruitments(defaultData)
-      saveRecruitments(defaultData)
+      await saveRecruitments(defaultData)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newRecruitments = [...recruitments]
     
@@ -47,7 +49,7 @@ export default function RecruitmentsManage() {
     }
     
     setRecruitments(newRecruitments)
-    saveRecruitments(newRecruitments)
+    await saveRecruitments(newRecruitments) // 서버에 저장 완료 대기
     resetForm()
   }
 

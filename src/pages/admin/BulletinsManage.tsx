@@ -20,20 +20,21 @@ export default function BulletinsManage() {
     loadBulletins()
   }, [])
 
-  const loadBulletins = () => {
-    // 캐시 무효화하고 강제 새로고침
+  const loadBulletins = async () => {
+    console.log('[BulletinsManage] 서버에서 주보 로드 시작')
+    // 캐시 무효화하고 서버에서 강제 로드
     if ((window as any).__bulletinsCache) {
       delete (window as any).__bulletinsCache
     }
     if ((window as any).cachedData && (window as any).cachedData.bulletins) {
       (window as any).cachedData.bulletins = undefined
     }
-    const stored = getBulletins(true) // 강제 새로고침
-    console.log('[BulletinsManage] 주보 로드:', stored.length, '개', stored)
+    const stored = await getBulletins(true) // 서버에서 강제 로드
+    console.log('[BulletinsManage] 서버에서 주보 로드 완료:', stored.length, '개', stored.map(b => ({ id: b.id, title: b.title })))
     setBulletins(stored)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // 파일 URL이 필수인지 확인
@@ -55,14 +56,12 @@ export default function BulletinsManage() {
     }
 
     setBulletins(newBulletins)
-    saveBulletins(newBulletins)
-    console.log('[BulletinsManage] 주보 저장 완료:', newBulletins.length, '개', newBulletins)
+    await saveBulletins(newBulletins) // 서버에 저장 완료 대기
+    console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
     // 저장 후 즉시 다시 로드하여 확인
-    setTimeout(() => {
-      loadBulletins()
-      // 주보 업데이트 이벤트 발생 (다른 컴포넌트에서 데이터 새로고침)
-      window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
-    }, 100)
+    await loadBulletins()
+    // 주보 업데이트 이벤트 발생 (다른 컴포넌트에서 데이터 새로고침)
+    window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
     resetForm()
   }
 
@@ -86,11 +85,11 @@ export default function BulletinsManage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newBulletins = bulletins.filter(b => b.id !== id)
       setBulletins(newBulletins)
-      saveBulletins(newBulletins)
+      await saveBulletins(newBulletins) // 서버에 저장 완료 대기
       // 주보 업데이트 이벤트 발생
       window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
     }

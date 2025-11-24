@@ -29,12 +29,24 @@ export default function AlbumsManage() {
   }
 
   useEffect(() => {
-    ensureDefaultAlbumExists()
-    loadAlbums()
+    const init = async () => {
+      await ensureDefaultAlbumExists()
+      await loadAlbums()
+    }
+    init()
   }, [])
 
-  const loadAlbums = () => {
-    const stored = getAlbums()
+  const loadAlbums = async () => {
+    console.log('[AlbumsManage] 서버에서 앨범 로드 시작')
+    // 캐시 무효화하고 서버에서 강제 로드
+    if ((window as any).__albumsCache) {
+      delete (window as any).__albumsCache
+    }
+    if ((window as any).cachedData && (window as any).cachedData.albums) {
+      (window as any).cachedData.albums = undefined
+    }
+    const stored = await getAlbums(true) // 서버에서 강제 로드
+    console.log('[AlbumsManage] 서버에서 앨범 로드 완료:', stored.length, '개', stored.map(a => ({ id: a.id, title: a.title })))
     setAlbums(stored)
   }
 
@@ -42,7 +54,7 @@ export default function AlbumsManage() {
     ensureDefaultAlbumExists()
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     console.log('[AlbumsManage] handleSubmit 시작:', {
@@ -97,8 +109,8 @@ export default function AlbumsManage() {
       const filteredAlbums = newAlbums.filter(a => !a.id.startsWith('draft-'))
       filteredAlbums.unshift(albumData)
       setAlbums(filteredAlbums)
-      saveAlbums(filteredAlbums) // await 제거됨
-      console.log('[AlbumsManage] 새 앨범 저장 완료:', {
+      await saveAlbums(filteredAlbums) // 서버에 저장 완료 대기
+      console.log('[AlbumsManage] 새 앨범 저장 완료 (서버 동기화):', {
         총앨범수: filteredAlbums.length,
         저장된앨범: {
           id: albumData.id,
@@ -114,8 +126,8 @@ export default function AlbumsManage() {
     }
     
     setAlbums(newAlbums)
-    saveAlbums(newAlbums)
-    console.log('[AlbumsManage] 앨범 수정 저장 완료:', {
+    await saveAlbums(newAlbums) // 서버에 저장 완료 대기
+    console.log('[AlbumsManage] 앨범 수정 저장 완료 (서버 동기화):', {
       총앨범수: newAlbums.length,
       수정된앨범: {
         id: albumData.id,
@@ -137,16 +149,19 @@ export default function AlbumsManage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newAlbums = albums.filter(a => a.id !== id)
       setAlbums(newAlbums)
-      saveAlbums(newAlbums)
+      await saveAlbums(newAlbums) // 서버에 저장 완료 대기
       
       // 기본 앨범 삭제 시 플래그 설정 (다시 생성되지 않도록)
       if (id === '1762757851120') {
         localStorage.setItem('default_album_deleted', 'true')
       }
+      
+      // 이벤트 발생
+      window.dispatchEvent(new CustomEvent('albumsUpdated'))
     }
   }
 

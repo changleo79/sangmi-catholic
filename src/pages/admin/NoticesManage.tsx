@@ -23,18 +23,21 @@ export default function NoticesManage() {
     loadNotices()
   }, [])
 
-  const loadNotices = () => {
-    const stored = getNotices()
+  const loadNotices = async () => {
+    console.log('[NoticesManage] 서버에서 공지사항 로드 시작')
+    const stored = await getNotices()
     if (stored.length > 0) {
+      console.log('[NoticesManage] 서버에서 공지사항 로드 완료:', stored.length, '개')
       setNotices(stored)
     } else {
       // 기본 데이터 로드
+      console.log('[NoticesManage] 기본 데이터 사용')
       setNotices(defaultNotices)
-      saveNotices(defaultNotices)
+      await saveNotices(defaultNotices)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newNotices = [...notices]
     
@@ -45,7 +48,7 @@ export default function NoticesManage() {
     }
     
     setNotices(newNotices)
-    saveNotices(newNotices)
+    await saveNotices(newNotices) // 서버에 저장 완료 대기
     resetForm()
   }
 
