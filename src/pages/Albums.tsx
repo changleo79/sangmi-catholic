@@ -76,49 +76,53 @@ export default function Albums() {
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
-    // localStorage는 더 이상 사용하지 않음 - 서버에서만 데이터 로드
-    // 이벤트 리스너만으로 충분
-      const intervalId = setInterval(() => {
+    // 모바일에서 주기적으로 서버에서 최신 데이터 확인 (모바일 어드민과의 동기화 보장)
+    const isMobileDevice = isMobile()
+    let intervalId: NodeJS.Timeout | null = null
+    
+    if (isMobileDevice) {
+      // 모바일: 2초마다 서버에서 강제로 최신 데이터 확인
+      intervalId = setInterval(async () => {
         if (!document.hidden) {
-          checkAlbumsChange()
+          console.log('[Albums] 모바일 주기적 서버 동기화 체크')
+          // 캐시 완전히 무효화
+          if ((window as any).__albumsCache) {
+            delete (window as any).__albumsCache
+          }
+          if ((window as any).cachedData && (window as any).cachedData.albums) {
+            (window as any).cachedData.albums = undefined
+          }
+          // 서버에서 강제로 최신 데이터 로드
+          await loadAlbums()
         }
-      }, 1000) // 1초마다 체크
-      
-      return () => {
-        window.removeEventListener('focus', handleFocus)
-        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
+      }, 2000) // 2초마다 체크
     } else {
-      // PC에서는 덜 자주 체크
-      const intervalId = setInterval(() => {
+      // PC: 5초마다 서버에서 강제로 최신 데이터 확인
+      intervalId = setInterval(async () => {
         if (!document.hidden) {
-          checkAlbumsChange()
+          console.log('[Albums] PC 주기적 서버 동기화 체크')
+          // 캐시 완전히 무효화
+          if ((window as any).__albumsCache) {
+            delete (window as any).__albumsCache
+          }
+          if ((window as any).cachedData && (window as any).cachedData.albums) {
+            (window as any).cachedData.albums = undefined
+          }
+          // 서버에서 강제로 최신 데이터 로드
+          await loadAlbums()
         }
-      }, 3000) // 3초마다 체크
-      
-      return () => {
-        window.removeEventListener('focus', handleFocus)
-        window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-        clearInterval(intervalId)
-      }
+      }, 5000) // 5초마다 체크
     }
-
+    
     return () => {
       window.removeEventListener('focus', handleFocus)
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
     }
   }, [])
-
-  // 모바일 감지 함수 (더 정확한 감지)
-  const isMobile = () => {
-    return window.innerWidth < 768 || 
-           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-           (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
-  }
 
   const loadAlbums = async () => {
     try {

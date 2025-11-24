@@ -77,12 +77,56 @@ export default function Bulletins() {
       }
     }
 
+    // 모바일에서 주기적으로 서버에서 최신 데이터 확인 (모바일 어드민과의 동기화 보장)
+    const isMobileDevice = isMobile()
+    let intervalId: NodeJS.Timeout | null = null
+    
+    if (isMobileDevice) {
+      // 모바일: 2초마다 서버에서 강제로 최신 데이터 확인
+      intervalId = setInterval(async () => {
+        if (!document.hidden) {
+          console.log('[Bulletins] 모바일 주기적 서버 동기화 체크')
+          // 캐시 완전히 무효화
+          if ((window as any).__bulletinsCache) {
+            delete (window as any).__bulletinsCache
+          }
+          if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+            (window as any).cachedData.bulletins = undefined
+          }
+          // 서버에서 강제로 최신 데이터 로드
+          await loadBulletins()
+        }
+      }, 2000) // 2초마다 체크
+    } else {
+      // PC: 5초마다 서버에서 강제로 최신 데이터 확인
+      intervalId = setInterval(async () => {
+        if (!document.hidden) {
+          console.log('[Bulletins] PC 주기적 서버 동기화 체크')
+          // 캐시 완전히 무효화
+          if ((window as any).__bulletinsCache) {
+            delete (window as any).__bulletinsCache
+          }
+          if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+            (window as any).cachedData.bulletins = undefined
+          }
+          // 서버에서 강제로 최신 데이터 로드
+          await loadBulletins()
+        }
+      }, 5000) // 5초마다 체크
+    }
+    
     window.addEventListener('focus', handleFocus)
     window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
     document.addEventListener('visibilitychange', handleVisibilityChange)
     
-    // localStorage는 더 이상 사용하지 않음 - 서버에서만 데이터 로드
-    // 이벤트 리스너만으로 충분
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (intervalId) {
+        clearInterval(intervalId)
+      }
+    }
   }, [])
 
   const handleBulletinClick = (bulletin: BulletinItem) => {
