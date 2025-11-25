@@ -6,9 +6,11 @@ import {
   getAlbums,
   getRecruitments,
   getBulletins,
+  getCatechismInfo,
   type RecruitmentItem,
   type BulletinItem,
   type AlbumWithCategory,
+  type CatechismInfo,
   ensureDefaultAlbumExists
 } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
@@ -31,6 +33,7 @@ export default function Home() {
   const [recruitments, setRecruitments] = useState<RecruitmentItem[]>([])
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
   const [displayAlbums, setDisplayAlbums] = useState<Array<{ id: string; cover: string; title: string }>>([])
+  const [catechismInfo, setCatechismInfo] = useState<CatechismInfo | null>(null)
   const [activeNoticeTab, setActiveNoticeTab] = useState<NoticeTabKey>('notice')
   const [currentSlide, setCurrentSlide] = useState(0)
   const [selectedBulletin, setSelectedBulletin] = useState<BulletinItem | null>(null)
@@ -63,6 +66,17 @@ export default function Home() {
     const storedBulletins = await getBulletins(true) // 강제 새로고침 - await 추가
     console.log('[Home] 주보 로드:', storedBulletins.length, '개', storedBulletins)
     setBulletins(storedBulletins.slice(0, 6))
+
+    const catechism = await getCatechismInfo()
+    if (catechism) {
+      setCatechismInfo(catechism)
+    } else {
+      setCatechismInfo({
+        title: '예비신자 교리학교',
+        description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
+        contact: '문의 : 성당 사무실 (031-282-9989)'
+      })
+    }
   }
 
   useEffect(() => {
@@ -670,6 +684,29 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            {/* 예비신자 교리학교 배너 */}
+            {catechismInfo && (
+              <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 md:p-8 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold">{catechismInfo.title}</h2>
+                </div>
+                <p className="text-blue-100 mb-4 text-base md:text-lg leading-relaxed">
+                  {catechismInfo.description}
+                </p>
+                <div className="flex items-center gap-2 text-blue-100">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <p className="font-semibold">{catechismInfo.contact}</p>
+                </div>
+              </div>
+            )}
 
             <div className="bg-gradient-to-br from-catholic-logo to-catholic-logo-dark text-white rounded-3xl shadow-xl p-6 md:p-8 flex flex-col justify-between">
               <div className="space-y-4">
