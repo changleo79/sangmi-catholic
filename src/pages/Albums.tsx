@@ -271,30 +271,54 @@ export default function Albums() {
                 className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
-                  {album.cover ? (
-                    <img
-                      src={album.cover}
-                      alt={album.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                      decoding="async"
-                      style={{ backgroundColor: '#f3f4f6' }}
-                      onLoad={(e) => {
-                        (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
-                      }}
-                      onError={(e) => {
-                        // 원본 로드 실패 시 썸네일 시도 (첫 번째 사진의 썸네일)
-                        const firstPhoto = album.photos?.[0]
-                        if (firstPhoto?.thumbnailUrl && e.currentTarget.src !== firstPhoto.thumbnailUrl) {
-                          e.currentTarget.src = firstPhoto.thumbnailUrl
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      이미지 없음
-                    </div>
-                  )}
+                  {(() => {
+                    // 썸네일 우선 사용 (빠른 로딩)
+                    const firstPhoto = album.photos?.[0]
+                    const thumbnailUrl = firstPhoto?.thumbnailUrl
+                    const coverUrl = album.cover || firstPhoto?.src
+                    
+                    if (!coverUrl && !thumbnailUrl) {
+                      return (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          이미지 없음
+                        </div>
+                      )
+                    }
+                    
+                    // 썸네일이 있으면 썸네일을 먼저 표시하고, 로드 완료 후 원본으로 교체
+                    return (
+                      <img
+                        src={thumbnailUrl || coverUrl}
+                        alt={album.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        decoding="async"
+                        style={{ backgroundColor: '#f3f4f6' }}
+                        onLoad={(e) => {
+                          const img = e.currentTarget
+                          img.style.backgroundColor = 'transparent'
+                          
+                          // 썸네일이 로드되었고 원본이 있으면 백그라운드에서 원본 로드 후 교체
+                          if (thumbnailUrl && coverUrl && img.src === thumbnailUrl) {
+                            const originalImg = new Image()
+                            originalImg.onload = () => {
+                              img.src = coverUrl
+                            }
+                            originalImg.src = coverUrl
+                          }
+                        }}
+                        onError={(e) => {
+                          // 썸네일 로드 실패 시 원본 시도
+                          if (coverUrl && e.currentTarget.src !== coverUrl) {
+                            e.currentTarget.src = coverUrl
+                          } else {
+                            // 둘 다 실패 시 대체 이미지
+                            e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect fill="%23ddd" width="128" height="128"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3E이미지 없음%3C/text%3E%3C/svg%3E'
+                          }
+                        }}
+                      />
+                    )
+                  })()}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="flex items-center gap-2 text-white">

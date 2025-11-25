@@ -307,24 +307,35 @@ export default function AlbumDetail() {
                 key={`main-${album.id}-${currentPhotoIndex}-${photos[currentPhotoIndex]?.src?.substring(0, 20)}`}
                 src={photos[currentPhotoIndex]?.thumbnailUrl || photos[currentPhotoIndex]?.src}
                 alt={photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
-                className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-contain transition-opacity duration-300"
                 style={{ objectPosition: 'center', backgroundColor: '#f3f4f6' }}
                 loading="eager"
                 onLoad={(e) => {
                   const img = e.currentTarget
-                  // 썸네일이 로드되면 원본으로 교체
                   const currentPhoto = photos[currentPhotoIndex]
-                  if (currentPhoto?.src && img.src !== currentPhoto.src && img.src === currentPhoto.thumbnailUrl) {
+                  
+                  // 썸네일이 로드되었고 원본이 있으면 백그라운드에서 원본 로드 후 교체
+                  if (currentPhoto?.thumbnailUrl && currentPhoto?.src && img.src === currentPhoto.thumbnailUrl) {
+                    // 썸네일 배경색 제거
+                    img.style.backgroundColor = 'transparent'
+                    
+                    // 원본 이미지를 백그라운드에서 미리 로드
                     const originalImg = new Image()
                     originalImg.onload = () => {
-                      img.src = currentPhoto.src
-                      img.style.backgroundColor = 'transparent'
+                      // 원본 로드 완료 시 부드럽게 교체
+                      img.style.opacity = '0'
+                      setTimeout(() => {
+                        img.src = currentPhoto.src
+                        img.style.opacity = '1'
+                      }, 150)
                     }
                     originalImg.onerror = () => {
+                      // 원본 로드 실패해도 썸네일 유지
                       img.style.backgroundColor = 'transparent'
                     }
                     originalImg.src = currentPhoto.src
                   } else {
+                    // 원본이거나 썸네일이 없는 경우
                     img.style.backgroundColor = 'transparent'
                   }
                 }}
@@ -332,11 +343,14 @@ export default function AlbumDetail() {
                   console.error('[AlbumDetail] 이미지 로드 실패:', photos[currentPhotoIndex]?.src)
                   const target = e.currentTarget
                   const currentPhoto = photos[currentPhotoIndex]
+                  
                   // 썸네일 로드 실패 시 원본 시도
-                  if (currentPhoto?.src && target.src !== currentPhoto.src) {
+                  if (currentPhoto?.src && target.src !== currentPhoto.src && target.src === currentPhoto.thumbnailUrl) {
                     target.src = currentPhoto.src
                     return
                   }
+                  
+                  // 둘 다 실패 시 에러 표시
                   target.style.display = 'none'
                   const parent = target.parentElement
                   if (parent) {
