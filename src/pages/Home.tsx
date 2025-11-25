@@ -32,7 +32,7 @@ export default function Home() {
   const [notices, setNotices] = useState<NoticeItem[]>([])
   const [recruitments, setRecruitments] = useState<RecruitmentItem[]>([])
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
-  const [displayAlbums, setDisplayAlbums] = useState<Array<{ id: string; cover: string; title: string }>>([])
+  const [displayAlbums, setDisplayAlbums] = useState<Array<{ id: string; cover: string; originalCover?: string; title: string }>>([])
   const [catechismInfo, setCatechismInfo] = useState<CatechismInfo | null>(null)
   const [activeNoticeTab, setActiveNoticeTab] = useState<NoticeTabKey>('notice')
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -128,23 +128,35 @@ export default function Home() {
         return true
       })
       
-      // cover가 없으면 첫 번째 사진 사용, 그것도 없으면 빈 문자열 (galleryPhotos 사용 안 함)
-      const recentAlbums = savedAlbums.slice(0, 4).map(album => ({
-        id: album.id,
-        cover: album.cover || (album.photos && album.photos.length > 0 ? album.photos[0].src : ''),
-        title: album.title
-      }))
+      // 썸네일 우선 사용 (빠른 로딩), 없으면 원본 사용
+      const recentAlbums = savedAlbums.slice(0, 4).map(album => {
+        const firstPhoto = album.photos && album.photos.length > 0 ? album.photos[0] : null
+        const thumbnailUrl = firstPhoto?.thumbnailUrl
+        const originalUrl = album.cover || firstPhoto?.src || ''
+        return {
+          id: album.id,
+          cover: thumbnailUrl || originalUrl, // 썸네일 우선
+          originalCover: originalUrl, // 원본 URL 저장 (나중에 교체용)
+          title: album.title
+        }
+      })
       console.log('[Home] 표시할 앨범:', recentAlbums)
       setDisplayAlbums(recentAlbums)
     } catch (error) {
       console.error('[Home] 앨범 로드 오류:', error)
       await ensureDefaultAlbumExists()
       const fallback = await getAlbums(true) // await 추가
-      const recentAlbums = fallback.slice(0, 4).map(album => ({
-        id: album.id,
-        cover: album.cover || (album.photos && album.photos.length > 0 ? album.photos[0].src : ''),
-        title: album.title
-      }))
+      const recentAlbums = fallback.slice(0, 4).map(album => {
+        const firstPhoto = album.photos && album.photos.length > 0 ? album.photos[0] : null
+        const thumbnailUrl = firstPhoto?.thumbnailUrl
+        const originalUrl = album.cover || firstPhoto?.src || ''
+        return {
+          id: album.id,
+          cover: thumbnailUrl || originalUrl, // 썸네일 우선
+          originalCover: originalUrl, // 원본 URL 저장 (나중에 교체용)
+          title: album.title
+        }
+      })
       setDisplayAlbums(recentAlbums)
     }
   }
@@ -848,10 +860,33 @@ export default function Home() {
                 to={album.id ? `/albums/${album.id}` : '/albums'}
                 className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
               >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <div
-                    className="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${album.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
+                  <img
+                    src={album.cover}
+                    alt={album.title}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    style={{ backgroundColor: '#f3f4f6' }}
+                    loading="lazy"
+                    decoding="async"
+                    onLoad={(e) => {
+                      const img = e.currentTarget
+                      img.style.backgroundColor = 'transparent'
+                      
+                      // 썸네일 로드 완료 후 원본으로 교체 (있는 경우)
+                      if (album.originalCover && album.cover !== album.originalCover) {
+                        const originalImg = new Image()
+                        originalImg.onload = () => {
+                          img.src = album.originalCover!
+                        }
+                        originalImg.src = album.originalCover
+                      }
+                    }}
+                    onError={(e) => {
+                      // 썸네일 로드 실패 시 원본 시도
+                      if (album.originalCover && e.currentTarget.src !== album.originalCover) {
+                        e.currentTarget.src = album.originalCover
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
                   <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-400">
