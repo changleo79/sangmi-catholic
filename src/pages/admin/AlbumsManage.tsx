@@ -156,9 +156,13 @@ export default function AlbumsManage() {
         // 먼저 서버에서 최신 데이터 로드하여 동기화
         const latestAlbums = await getAlbums(true) // 네이버 클라우드에서 최신 데이터 가져오기
         const newAlbums = latestAlbums.filter(a => a.id !== id)
-        setAlbums(newAlbums) // 즉시 UI 업데이트
-        await saveAlbums(newAlbums) // 네이버 클라우드에 저장
-        console.log('[AlbumsManage] 앨범 삭제 완료:', id, '남은 앨범 수:', newAlbums.length)
+        
+        // 네이버 클라우드에 저장
+        await saveAlbums(newAlbums)
+        console.log('[AlbumsManage] 앨범 삭제 저장 완료:', id, '남은 앨범 수:', newAlbums.length)
+        
+        // 저장 완료 후 서버에서 다시 로드하여 UI 업데이트
+        await loadAlbums()
         
         // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
         await new Promise(resolve => setTimeout(resolve, 300))
