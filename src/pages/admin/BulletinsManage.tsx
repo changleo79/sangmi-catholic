@@ -17,7 +17,20 @@ export default function BulletinsManage() {
   })
 
   useEffect(() => {
-    loadBulletins(true) // 초기 로드 시에만 서버에서 강제 로드
+    // 어드민 진입 시 항상 네이버 클라우드에서 최신 데이터 로드
+    console.log('[BulletinsManage] 어드민 페이지 진입 - 네이버 클라우드에서 최신 데이터 로드')
+    loadBulletins(true) // 항상 서버에서 강제 로드
+    
+    // 페이지 포커스 시에도 최신 데이터 로드 (다른 탭에서 네이버 클라우드 수정 시 반영)
+    const handleFocus = () => {
+      console.log('[BulletinsManage] 페이지 포커스 - 네이버 클라우드에서 최신 데이터 로드')
+      loadBulletins(true)
+    }
+    
+    window.addEventListener('focus', handleFocus)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [])
 
   const loadBulletins = async (forceRefresh = false) => {
@@ -45,12 +58,17 @@ export default function BulletinsManage() {
       return
     }
     
-    const newBulletins = [...bulletins]
+    // 먼저 서버에서 최신 데이터 로드하여 동기화
+    const latestBulletins = await getBulletins(true) // 네이버 클라우드에서 최신 데이터 가져오기
+    const newBulletins = [...latestBulletins]
 
     if (editingId) {
       const index = newBulletins.findIndex(b => b.id === editingId)
       if (index !== -1) {
         newBulletins[index] = { ...formData, id: editingId }
+      } else {
+        // 수정 중인 주보가 서버에 없으면 추가
+        newBulletins.unshift({ ...formData, id: editingId })
       }
     } else {
       // 고유 ID 생성 (Date.now() + 랜덤 문자열로 충돌 방지)
@@ -60,7 +78,7 @@ export default function BulletinsManage() {
 
     try {
       setBulletins(newBulletins) // 즉시 UI 업데이트
-      await saveBulletins(newBulletins) // 서버에 저장 완료 대기 (이미 캐시 업데이트됨)
+      await saveBulletins(newBulletins) // 네이버 클라우드에 저장
       console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
       // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
       await new Promise(resolve => setTimeout(resolve, 300))
@@ -96,14 +114,22 @@ export default function BulletinsManage() {
 
   const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
-      const newBulletins = bulletins.filter(b => b.id !== id)
-      setBulletins(newBulletins) // 즉시 UI 업데이트
-      await saveBulletins(newBulletins) // 서버에 저장 완료 대기 (이미 캐시 업데이트됨)
-      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
-      await new Promise(resolve => setTimeout(resolve, 300))
-      window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
-      // 저장 후 캐시에서 빠르게 로드 (forceRefresh=false)
-      await loadBulletins(false)
+      try {
+        // 먼저 서버에서 최신 데이터 로드하여 동기화
+        const latestBulletins = await getBulletins(true) // 네이버 클라우드에서 최신 데이터 가져오기
+        const newBulletins = latestBulletins.filter(b => b.id !== id)
+        setBulletins(newBulletins) // 즉시 UI 업데이트
+        await saveBulletins(newBulletins) // 네이버 클라우드에 저장
+        console.log('[BulletinsManage] 주보 삭제 완료:', id, '남은 주보 수:', newBulletins.length)
+        // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+        await new Promise(resolve => setTimeout(resolve, 300))
+        window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
+      } catch (error) {
+        console.error('[BulletinsManage] 주보 삭제 실패:', error)
+        alert('주보 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.')
+        // 실패 시 원래 상태로 복구
+        await loadBulletins(true)
+      }
     }
   }
 

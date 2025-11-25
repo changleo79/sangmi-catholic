@@ -97,21 +97,36 @@ export default function AlbumsManage() {
       cover: albumData.cover
     })
     
-    const newAlbums = [...albums]
+    // 먼저 서버에서 최신 데이터 로드하여 동기화 (네이버 클라우드 직접 수정 반영)
+    const latestAlbums = await getAlbums(true) // 네이버 클라우드에서 최신 데이터 가져오기
     
     if (editingId) {
-      const index = newAlbums.findIndex(a => a.id === editingId)
+      // 앨범 수정
+      const index = latestAlbums.findIndex(a => a.id === editingId)
       if (index !== -1) {
-        newAlbums[index] = albumData
+        latestAlbums[index] = albumData
+      } else {
+        // 수정 중인 앨범이 서버에 없으면 추가
+        latestAlbums.unshift(albumData)
       }
+      setAlbums(latestAlbums)
+      await saveAlbums(latestAlbums) // 네이버 클라우드에 저장
+      console.log('[AlbumsManage] 앨범 수정 저장 완료 (네이버 클라우드 동기화):', {
+        총앨범수: latestAlbums.length,
+        수정된앨범: {
+          id: albumData.id,
+          title: albumData.title,
+          photosCount: albumData.photos.length,
+          cover: albumData.cover
+        }
+      })
     } else {
-      // 새 앨범 추가 - draft- 앨범은 필터링하지 않고 그대로 추가
-      // (draft- 앨범은 이미 저장된 앨범이므로 유지)
-      newAlbums.unshift(albumData)
-      setAlbums(newAlbums)
-      await saveAlbums(newAlbums) // 서버에 저장 완료 대기
-      console.log('[AlbumsManage] 새 앨범 저장 완료 (서버 동기화):', {
-        총앨범수: newAlbums.length,
+      // 새 앨범 추가
+      latestAlbums.unshift(albumData)
+      setAlbums(latestAlbums)
+      await saveAlbums(latestAlbums) // 네이버 클라우드에 저장
+      console.log('[AlbumsManage] 새 앨범 저장 완료 (네이버 클라우드 동기화):', {
+        총앨범수: latestAlbums.length,
         저장된앨범: {
           id: albumData.id,
           title: albumData.title,
@@ -119,24 +134,8 @@ export default function AlbumsManage() {
           cover: albumData.cover
         }
       })
-      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
-      await new Promise(resolve => setTimeout(resolve, 300))
-      window.dispatchEvent(new CustomEvent('albumsUpdated'))
-      resetForm()
-      return
     }
     
-    setAlbums(newAlbums)
-    await saveAlbums(newAlbums) // 서버에 저장 완료 대기
-    console.log('[AlbumsManage] 앨범 수정 저장 완료 (서버 동기화):', {
-      총앨범수: newAlbums.length,
-      수정된앨범: {
-        id: albumData.id,
-        title: albumData.title,
-        photosCount: albumData.photos.length,
-        cover: albumData.cover
-      }
-    })
     // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
     await new Promise(resolve => setTimeout(resolve, 300))
     window.dispatchEvent(new CustomEvent('albumsUpdated'))
@@ -154,9 +153,11 @@ export default function AlbumsManage() {
   const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       try {
-        const newAlbums = albums.filter(a => a.id !== id)
+        // 먼저 서버에서 최신 데이터 로드하여 동기화
+        const latestAlbums = await getAlbums(true) // 네이버 클라우드에서 최신 데이터 가져오기
+        const newAlbums = latestAlbums.filter(a => a.id !== id)
         setAlbums(newAlbums) // 즉시 UI 업데이트
-        await saveAlbums(newAlbums) // 서버에 저장 완료 대기
+        await saveAlbums(newAlbums) // 네이버 클라우드에 저장
         console.log('[AlbumsManage] 앨범 삭제 완료:', id, '남은 앨범 수:', newAlbums.length)
         
         // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)

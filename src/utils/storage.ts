@@ -655,12 +655,6 @@ export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]
     return serverData
   }
   
-  // 서버 데이터가 없으면 기존 캐시 유지 (데이터 손실 방지)
-  if (cachedData.bulletins) {
-    console.log('[getBulletins] 서버 데이터 없음, 기존 캐시 유지:', cachedData.bulletins.length, '개')
-    return cachedData.bulletins
-  }
-  
   console.warn('[getBulletins] 서버 데이터 없고 캐시도 없음, 빈 배열 반환')
   cachedData.bulletins = []
   return []
