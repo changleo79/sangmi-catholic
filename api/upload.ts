@@ -186,17 +186,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const cdnDomain = requiredEnv.cdnDomain.replace(/\/$/, '')
           const cdnUrl = `https://${cdnDomain}/${cdnPath}`
 
-          // 이미지인 경우 썸네일 생성
+          // 이미지인 경우 썸네일 생성 (작은 용량으로 최적화)
           let thumbnailUrl: string | undefined = undefined
           if (isImage) {
             try {
-              // 썸네일 생성 (400x400, cover-fit, WebP 포맷으로 압축)
+              // 썸네일 생성 (200x200, cover-fit, WebP 포맷으로 압축, 품질 70%로 용량 최소화)
               const thumbnailBuffer = await sharp(file.buffer)
-                .resize(400, 400, {
+                .resize(200, 200, {
                   fit: 'cover',
                   position: 'center'
                 })
-                .webp({ quality: 85 }) // WebP 포맷으로 압축
+                .webp({ quality: 70 }) // WebP 포맷으로 압축 (품질 70%로 용량 최소화)
                 .toBuffer()
 
               const thumbnailKey = `albums/${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
