@@ -305,14 +305,38 @@ export default function AlbumDetail() {
             >
               <img
                 key={`main-${album.id}-${currentPhotoIndex}-${photos[currentPhotoIndex]?.src?.substring(0, 20)}`}
-                src={photos[currentPhotoIndex]?.src}
+                src={photos[currentPhotoIndex]?.thumbnailUrl || photos[currentPhotoIndex]?.src}
                 alt={photos[currentPhotoIndex]?.alt || `${album.title} - ${currentPhotoIndex + 1}`}
                 className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                style={{ objectPosition: 'center' }}
+                style={{ objectPosition: 'center', backgroundColor: '#f3f4f6' }}
                 loading="eager"
+                onLoad={(e) => {
+                  const img = e.currentTarget
+                  // 썸네일이 로드되면 원본으로 교체
+                  const currentPhoto = photos[currentPhotoIndex]
+                  if (currentPhoto?.src && img.src !== currentPhoto.src && img.src === currentPhoto.thumbnailUrl) {
+                    const originalImg = new Image()
+                    originalImg.onload = () => {
+                      img.src = currentPhoto.src
+                      img.style.backgroundColor = 'transparent'
+                    }
+                    originalImg.onerror = () => {
+                      img.style.backgroundColor = 'transparent'
+                    }
+                    originalImg.src = currentPhoto.src
+                  } else {
+                    img.style.backgroundColor = 'transparent'
+                  }
+                }}
                 onError={(e) => {
                   console.error('[AlbumDetail] 이미지 로드 실패:', photos[currentPhotoIndex]?.src)
                   const target = e.currentTarget
+                  const currentPhoto = photos[currentPhotoIndex]
+                  // 썸네일 로드 실패 시 원본 시도
+                  if (currentPhoto?.src && target.src !== currentPhoto.src) {
+                    target.src = currentPhoto.src
+                    return
+                  }
                   target.style.display = 'none'
                   const parent = target.parentElement
                   if (parent) {

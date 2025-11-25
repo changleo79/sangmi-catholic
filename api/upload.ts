@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Busboy from 'busboy'
 import { randomUUID } from 'crypto'
+import sharp from 'sharp'
 
 type UploadedFile = {
   buffer: Buffer
@@ -156,8 +157,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       files.map(async (file) => {
         const safeFileName = normaliseFileName(file.originalName || 'image')
         const objectKey = `albums/${folder}/${safeFileName}`
+        const isImage = file.mimeType?.startsWith('image/') || false
 
         try {
+          // 원본 이미지 업로드
           await s3Client.send(
             new PutObjectCommand({
               Bucket: requiredEnv.bucket!,
@@ -169,10 +172,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             })
           )
 
-          // CDN URL 생성
-          // objectKey 예: "albums/draft-123/image.jpg"
-          // CDN 원본 경로가 "/"인 경우: cdnPath = "albums/draft-123/image.jpg"
-          // CDN 원본 경로가 "/albums"인 경우: cdnPath = "draft-123/image.jpg" (albums 제거)
+          // CDN URL 생성 (원본)
           let cdnPath = objectKey
           if (cdnPathPrefix) {
             const prefix = cdnPathPrefix.replace(/^\/|\/$/g, '') // 앞뒤 슬래시 제거
@@ -183,12 +183,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
           }
           
-          // CDN 도메인에 슬래시가 없도록 처리
           const cdnDomain = requiredEnv.cdnDomain.replace(/\/$/, '')
           const cdnUrl = `https://${cdnDomain}/${cdnPath}`
 
+          // 이미지인 경우 썸네일 생성
+          let thumbnailUrl: string | undefined = undefined
+          if (isImage) {
+            try {
+              // 썸네일 생성 (400x400, cover-fit, WebP 포맷으로 압축)
+              const thumbnailBuffer = await sharp(file.buffer)
+                .resize(400, 400, {
+                  fit: 'cover',
+                  position: 'center'
+                })
+                .webp({ quality: 85 }) // WebP 포맷으로 압축
+                .toBuffer()
+
+              const thumbnailKey = `albums/${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
+              
+              await s3Client.send(
+                new PutObjectCommand({
+                  Bucket: requiredEnv.bucket!,
+                  Key: thumbnailKey,
+                  Body: thumbnailBuffer,
+                  ContentType: 'image/webp',
+                  ACL: 'public-read',
+                  CacheControl: 'public, max-age=31536000, immutable'
+                })
+              )
+
+              // 썸네일 CDN URL 생성
+              let thumbnailCdnPath = thumbnailKey
+              if (cdnPathPrefix) {
+                const prefix = cdnPathPrefix.replace(/^\/|\/$/g, '')
+                if (prefix && thumbnailKey.startsWith(prefix + '/')) {
+                  thumbnailCdnPath = thumbnailKey.substring(prefix.length + 1)
+                } else if (prefix && thumbnailKey.startsWith(prefix)) {
+                  thumbnailCdnPath = thumbnailKey.substring(prefix.length)
+                }
+              }
+              
+              thumbnailUrl = `https://${cdnDomain}/${thumbnailCdnPath}`
+              console.log(`[upload] 썸네일 생성 완료: ${thumbnailUrl}`)
+            } catch (thumbnailError) {
+              console.error(`[upload] 썸네일 생성 실패 (${file.originalName}):`, thumbnailError)
+              // 썸네일 생성 실패해도 원본은 업로드 성공이므로 계속 진행
+            }
+          }
+
           return {
             url: cdnUrl,
+            thumbnailUrl: thumbnailUrl,
             originalName: file.originalName,
             key: objectKey
           }

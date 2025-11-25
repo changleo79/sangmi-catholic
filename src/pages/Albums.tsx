@@ -280,6 +280,13 @@ export default function Albums() {
                       onLoad={(e) => {
                         (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
                       }}
+                      onError={(e) => {
+                        // 원본 로드 실패 시 썸네일 시도 (첫 번째 사진의 썸네일)
+                        const firstPhoto = album.photos?.[0]
+                        if (firstPhoto?.thumbnailUrl && e.currentTarget.src !== firstPhoto.thumbnailUrl) {
+                          e.currentTarget.src = firstPhoto.thumbnailUrl
+                        }
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">

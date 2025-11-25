@@ -295,7 +295,7 @@ export default function AlbumsManage() {
             throw new Error(errorMessage)
           }
 
-          const result = await response.json() as { uploads: { url: string; originalName: string }[] }
+          const result = await response.json() as { uploads: { url: string; thumbnailUrl?: string; originalName: string }[] }
           
           if (!result.uploads || result.uploads.length === 0) {
             throw new Error('업로드된 파일이 없습니다.')
@@ -304,6 +304,7 @@ export default function AlbumsManage() {
           const uploaded = result.uploads[0]
           uploadedPhotos.push({
             src: uploaded.url,
+            thumbnailUrl: uploaded.thumbnailUrl, // 썸네일 URL 저장
             alt: file.name || uploaded.originalName || undefined
           })
           

@@ -1,5 +1,6 @@
 export type AlbumPhoto = {
   src: string // path under /albums
+  thumbnailUrl?: string // 썸네일 이미지 URL (선택)
   alt?: string
   tags?: string[]
 }
