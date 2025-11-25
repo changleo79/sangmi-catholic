@@ -697,62 +697,65 @@ export default function Home() {
               )}
             </div>
 
-            {/* 예비신자 교리학교 배너 */}
-            {catechismInfo && (
-              <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 md:p-8 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+            <div className="space-y-6">
+              {/* 예비신자 교리학교 배너 */}
+              {catechismInfo && (
+                <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 md:p-8 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold">{catechismInfo.title}</h2>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold">{catechismInfo.title}</h2>
+                  <p className="text-blue-100 mb-4 text-base md:text-lg leading-relaxed">
+                    {catechismInfo.description}
+                  </p>
+                  <div className="flex items-center gap-2 text-blue-100">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <p className="font-semibold">{catechismInfo.contact}</p>
+                  </div>
                 </div>
-                <p className="text-blue-100 mb-4 text-base md:text-lg leading-relaxed">
-                  {catechismInfo.description}
-                </p>
-                <div className="flex items-center gap-2 text-blue-100">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                  <p className="font-semibold">{catechismInfo.contact}</p>
-                </div>
-              </div>
-            )}
+              )}
 
-            <div className="bg-gradient-to-br from-catholic-logo to-catholic-logo-dark text-white rounded-3xl shadow-xl p-6 md:p-8 flex flex-col justify-between">
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
-                  </svg>
-                  빠르게 이동하기
-                </h3>
-                <ul className="space-y-3 text-sm text-white/90">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-white/70"></span>
-                    최신 공지와 단체 소식을 확인하세요.
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-white/70"></span>
-                    주보 PDF를 내려받아 신앙 생활에 활용하세요.
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-white/70"></span>
-                    성당단체 조직도를 확인하세요.
-                  </li>
-                </ul>
-              </div>
-              <div className="mt-6 space-y-3">
-                <Link
-                  to="/news"
-                  className="inline-flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/15 border border-white/20 hover:bg-white/20 transition-all"
-                >
-                  공지/소식 페이지로 이동
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
+              {/* 빠르게 이동하기 */}
+              <div className="bg-gradient-to-br from-catholic-logo to-catholic-logo-dark text-white rounded-3xl shadow-xl p-6 md:p-8 flex flex-col justify-between min-h-[200px]">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                    빠르게 이동하기
+                  </h3>
+                  <ul className="space-y-3 text-sm text-white/90">
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-white/70"></span>
+                      최신 공지와 단체 소식을 확인하세요.
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-white/70"></span>
+                      주보 PDF를 내려받아 신앙 생활에 활용하세요.
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-white/70"></span>
+                      성당단체 조직도를 확인하세요.
+                    </li>
+                  </ul>
+                </div>
+                <div className="mt-6 space-y-3">
+                  <Link
+                    to="/news"
+                    className="inline-flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/15 border border-white/20 hover:bg-white/20 transition-all"
+                  >
+                    공지/소식 페이지로 이동
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
