@@ -149,11 +149,8 @@ export default function Albums() {
       const isMobileDevice = isMobile()
       console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- 서버에서 로드:', loadedAlbums.length, '개 앨범', loadedAlbums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
       
-      // setAlbums로 상태 업데이트
-      setAlbums(loadedAlbums)
-      
-      // 유효성 검사 및 필터링
-      const validAlbums = albums.map((album: any) => ({
+      // 유효성 검사 및 필터링 (loadedAlbums를 직접 사용)
+      const validAlbums = loadedAlbums.map((album: any) => ({
         ...album,
         photos: Array.isArray(album.photos) ? album.photos : []
       })).filter((album: any) => {
@@ -164,6 +161,7 @@ export default function Albums() {
         return true
       })
       
+      // setAlbums로 상태 업데이트
       setAlbums(validAlbums)
     } catch (error) {
       console.error('[Albums] 로드 오류:', error)

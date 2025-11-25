@@ -17,20 +17,22 @@ export default function BulletinsManage() {
   })
 
   useEffect(() => {
-    loadBulletins()
+    loadBulletins(true) // 초기 로드 시에만 서버에서 강제 로드
   }, [])
 
-  const loadBulletins = async () => {
-    console.log('[BulletinsManage] 서버에서 주보 로드 시작')
-    // 캐시 무효화하고 서버에서 강제 로드
-    if ((window as any).__bulletinsCache) {
-      delete (window as any).__bulletinsCache
+  const loadBulletins = async (forceRefresh = false) => {
+    console.log('[BulletinsManage] 주보 로드 시작 - forceRefresh:', forceRefresh)
+    if (forceRefresh) {
+      // 캐시 무효화하고 서버에서 강제 로드
+      if ((window as any).__bulletinsCache) {
+        delete (window as any).__bulletinsCache
+      }
+      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
+        (window as any).cachedData.bulletins = undefined
+      }
     }
-    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-      (window as any).cachedData.bulletins = undefined
-    }
-    const stored = await getBulletins(true) // 서버에서 강제 로드
-    console.log('[BulletinsManage] 서버에서 주보 로드 완료:', stored.length, '개', stored.map(b => ({ id: b.id, title: b.title })))
+    const stored = await getBulletins(forceRefresh) // forceRefresh에 따라 캐시 사용 또는 서버 로드
+    console.log('[BulletinsManage] 주보 로드 완료:', stored.length, '개', stored.map(b => ({ id: b.id, title: b.title })))
     setBulletins(stored)
   }
 
@@ -56,14 +58,14 @@ export default function BulletinsManage() {
       newBulletins.unshift({ ...formData, id: newId })
     }
 
-    setBulletins(newBulletins)
-    await saveBulletins(newBulletins) // 서버에 저장 완료 대기
+    setBulletins(newBulletins) // 즉시 UI 업데이트
+    await saveBulletins(newBulletins) // 서버에 저장 완료 대기 (이미 캐시 업데이트됨)
     console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
-    // 저장 후 즉시 다시 로드하여 확인
-    await loadBulletins()
     // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
     await new Promise(resolve => setTimeout(resolve, 300))
     window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
+    // 저장 후 캐시에서 빠르게 로드 (forceRefresh=false)
+    await loadBulletins(false)
     resetForm()
   }
 
@@ -90,11 +92,13 @@ export default function BulletinsManage() {
   const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newBulletins = bulletins.filter(b => b.id !== id)
-      setBulletins(newBulletins)
-      await saveBulletins(newBulletins) // 서버에 저장 완료 대기
+      setBulletins(newBulletins) // 즉시 UI 업데이트
+      await saveBulletins(newBulletins) // 서버에 저장 완료 대기 (이미 캐시 업데이트됨)
       // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
       await new Promise(resolve => setTimeout(resolve, 300))
       window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
+      // 저장 후 캐시에서 빠르게 로드 (forceRefresh=false)
+      await loadBulletins(false)
     }
   }
 

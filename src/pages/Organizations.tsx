@@ -44,7 +44,7 @@ export default function Organizations() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-16">
         {/* Page Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
             성당단체 안내
           </h1>
@@ -52,6 +52,22 @@ export default function Organizations() {
           <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
             상미성당의 위원회와 단체를 소개합니다. 각 단체의 역할과 활동을 확인하실 수 있습니다.
           </p>
+        </div>
+
+        {/* Link to Organization Tree */}
+        <div className="mb-12 text-center">
+          <Link
+            to="/organizations/tree"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 shadow-lg"
+            style={{ backgroundColor: '#7B1F4B' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
+            </svg>
+            조직도 보기
+          </Link>
         </div>
 
         {/* Category Filter */}
@@ -91,7 +107,7 @@ export default function Organizations() {
           {selectedCategory === '전체' ? (
             <div className="space-y-8">
               {parentOrganizations.map((parentOrg) => {
-                const subOrgs = getSubOrganizations(parentOrg)
+                const subOrgs = getSubOrganizations(parentOrg).filter(org => org !== parentOrg) // 자기 자신 제외
                 const colors = categoryColors[parentOrg]
                 
                 return (
@@ -103,20 +119,24 @@ export default function Organizations() {
                       </p>
                     </div>
                     <div className="p-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {subOrgs.map((org) => {
-                          const info = getOrganizationInfo(org)
-                          return (
-                            <div
-                              key={org}
-                              className="p-4 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:shadow-md transition-all duration-300"
-                            >
-                              <h3 className="text-lg font-semibold text-gray-900 mb-2">{info.name}</h3>
-                              <p className="text-sm text-gray-600 leading-relaxed">{info.description}</p>
-                            </div>
-                          )
-                        })}
-                      </div>
+                      {subOrgs.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {subOrgs.map((org) => {
+                            const info = getOrganizationInfo(org)
+                            return (
+                              <div
+                                key={org}
+                                className="p-4 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:shadow-md transition-all duration-300"
+                              >
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">{info.name}</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">{info.description}</p>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-center py-8">하위 단체가 없습니다.</p>
+                      )}
                     </div>
                   </div>
                 )
@@ -145,21 +165,6 @@ export default function Organizations() {
           )}
         </div>
 
-        {/* Link to Organization Tree */}
-        <div className="mt-16 text-center">
-          <Link
-            to="/organizations/tree"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 shadow-lg"
-            style={{ backgroundColor: '#7B1F4B' }}
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
-            </svg>
-            조직도 보기
-          </Link>
-        </div>
       </div>
     </div>
   )

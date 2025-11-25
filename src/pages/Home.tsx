@@ -724,20 +724,36 @@ export default function Home() {
                 <p className="text-gray-600 leading-relaxed">
                   위원회·단체 소개와 조직도를 한눈에 확인하세요.
                 </p>
-                <Link
-                  to="/organizations/tree"
-                  className="group inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
-                >
-                  <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
-                    </svg>
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 group-hover:text-catholic-logo">조직도 보기</p>
-                    <p className="text-xs text-gray-500">주임신부님부터 위원회, 단체 정보</p>
-                  </div>
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link
+                    to="/organizations"
+                    className="group inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-catholic-logo">성당단체 안내</p>
+                      <p className="text-xs text-gray-500">위원회와 단체 소개</p>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/organizations/tree"
+                    className="group inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 group-hover:text-catholic-logo">조직도 보기</p>
+                      <p className="text-xs text-gray-500">주임신부님부터 위원회, 단체 정보</p>
+                    </div>
+                  </Link>
+                </div>
               </div>
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-catholic-logo/90 to-catholic-logo-dark"></div>

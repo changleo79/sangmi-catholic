@@ -154,15 +154,15 @@ export default function AlbumsManage() {
   const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       const newAlbums = albums.filter(a => a.id !== id)
-      setAlbums(newAlbums)
+      setAlbums(newAlbums) // 즉시 UI 업데이트
       await saveAlbums(newAlbums) // 서버에 저장 완료 대기
-      
-      // 저장 후 다시 로드하여 확인
-      await loadAlbums()
       
       // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
       await new Promise(resolve => setTimeout(resolve, 300))
       window.dispatchEvent(new CustomEvent('albumsUpdated'))
+      
+      // 저장 후 다시 로드하여 확인 (이벤트 발생 후)
+      await loadAlbums()
     }
   }
 
