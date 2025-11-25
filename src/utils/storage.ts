@@ -202,16 +202,25 @@ export const initializeData = async (): Promise<void> => {
     ])
     
     // 서버에서 로드한 데이터를 캐시에 저장 (메모리 캐시만 사용)
-    cachedData = {
-      notices: notices || [],
-      recruitments: recruitments || [],
-      faqs: faqs || [],
-      albums: albums || [],
-      massSchedule: massSchedule || [],
-      sacraments: sacraments || [],
-      catechism: catechism || null,
-      bulletins: bulletins || []
-    }
+    // null이 아닌 경우에만 업데이트 (기존 데이터 보존)
+    if (notices !== null) cachedData.notices = notices
+    if (recruitments !== null) cachedData.recruitments = recruitments
+    if (faqs !== null) cachedData.faqs = faqs
+    if (albums !== null) cachedData.albums = albums
+    if (massSchedule !== null) cachedData.massSchedule = massSchedule
+    if (sacraments !== null) cachedData.sacraments = sacraments
+    if (catechism !== null) cachedData.catechism = catechism
+    if (bulletins !== null) cachedData.bulletins = bulletins
+    
+    // 초기값 설정 (서버 데이터가 없고 캐시도 없을 때만)
+    if (!cachedData.notices) cachedData.notices = []
+    if (!cachedData.recruitments) cachedData.recruitments = []
+    if (!cachedData.faqs) cachedData.faqs = []
+    if (!cachedData.albums) cachedData.albums = []
+    if (!cachedData.massSchedule) cachedData.massSchedule = []
+    if (!cachedData.sacraments) cachedData.sacraments = []
+    if (cachedData.catechism === undefined) cachedData.catechism = null
+    if (!cachedData.bulletins) cachedData.bulletins = []
     
     console.log('[initializeData] 서버에서 데이터 로드 완료:', {
       notices: cachedData.notices?.length || 0,
@@ -640,12 +649,19 @@ export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]
   console.log('[getBulletins] 캐시 없음, 서버에서 로드 (캐시 활용)')
   const serverData = await loadDataFromServer<BulletinItem[]>('bulletins', false)
   if (serverData !== null) {
+    // 서버에서 가져온 데이터로 업데이트 (네이버 클라우드 직접 수정 반영)
     cachedData.bulletins = serverData
     console.log(`[getBulletins] 서버에서 로드 완료: ${serverData.length}개 주보`)
     return serverData
   }
   
-  console.warn('[getBulletins] 서버 데이터 없음, 빈 배열 반환')
+  // 서버 데이터가 없으면 기존 캐시 유지 (데이터 손실 방지)
+  if (cachedData.bulletins) {
+    console.log('[getBulletins] 서버 데이터 없음, 기존 캐시 유지:', cachedData.bulletins.length, '개')
+    return cachedData.bulletins
+  }
+  
+  console.warn('[getBulletins] 서버 데이터 없고 캐시도 없음, 빈 배열 반환')
   cachedData.bulletins = []
   return []
 }

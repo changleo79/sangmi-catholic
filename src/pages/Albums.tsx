@@ -31,10 +31,12 @@ export default function Albums() {
       await initializeData()
       await new Promise(resolve => setTimeout(resolve, 200))
       await loadAlbums()
-      // 기본 앨범이 없으면 초기 데이터 생성
+      // 기본 앨범이 없으면 초기 데이터 생성 (서버에 데이터가 전혀 없을 때만)
       const stored = await getAlbums(true) // 서버에서 강제 새로고침
+      // 서버에 데이터가 전혀 없고, 기본 앨범도 없을 때만 생성
       if (stored.length === 0) {
-        initializeDefaultAlbum()
+        console.log('[Albums] 서버에 앨범 데이터가 없음 - 기본 앨범 생성 확인')
+        await ensureDefaultAlbumExists()
         await new Promise(resolve => setTimeout(resolve, 200))
         await loadAlbums() // 다시 로드
       }
