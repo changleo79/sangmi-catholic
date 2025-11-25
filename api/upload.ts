@@ -164,7 +164,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               Key: objectKey,
               Body: file.buffer,
               ContentType: file.mimeType || 'image/jpeg',
-              ACL: 'public-read'
+              ACL: 'public-read',
+              CacheControl: 'public, max-age=31536000, immutable' // CDN 캐싱 최적화 (1년)
             })
           )
 

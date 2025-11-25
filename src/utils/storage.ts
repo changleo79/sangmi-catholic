@@ -229,26 +229,37 @@ export const initializeData = async (): Promise<void> => {
 }
 
 // 서버에서 데이터 로드 (공통 함수)
-const loadDataFromServer = async <T>(type: string): Promise<T | null> => {
+const loadDataFromServer = async <T>(type: string, forceRefresh = false): Promise<T | null> => {
   try {
-    // 캐시 방지를 위해 타임스탬프와 랜덤 값 추가 (모바일 브라우저 캐시 완전 회피)
-    const timestamp = Date.now()
-    const random = Math.random().toString(36).substring(7)
-    const url = `/api/load-metadata?type=${type}&_t=${timestamp}&_r=${random}`
-    console.log(`[loadDataFromServer] ${type} 서버에서 로드 시도:`, url)
+    // forceRefresh가 false이면 캐시 활용, true이면 강제 새로고침
+    let url = `/api/load-metadata?type=${type}`
+    if (forceRefresh) {
+      // 강제 새로고침 시에만 타임스탬프 추가
+      const timestamp = Date.now()
+      const random = Math.random().toString(36).substring(7)
+      url = `${url}&_t=${timestamp}&_r=${random}`
+    }
+    console.log(`[loadDataFromServer] ${type} 서버에서 로드 시도 (forceRefresh: ${forceRefresh}):`, url)
     
-    // 모바일 브라우저 캐시 완전 회피를 위한 강력한 헤더
-    const response = await fetch(url, {
+    // fetch 옵션 설정
+    const fetchOptions: RequestInit = {
       method: 'GET',
-      cache: 'no-store', // fetch API의 캐시 옵션
-      headers: {
+      headers: {}
+    }
+    
+    if (forceRefresh) {
+      // 강제 새로고침 시에만 캐시 무효화 헤더 추가
+      fetchOptions.cache = 'no-store'
+      fetchOptions.headers = {
         'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
         'Expires': '0',
-        'If-Modified-Since': '0', // 조건부 요청 방지
-        'If-None-Match': '*', // ETag 캐시 방지
+        'If-Modified-Since': '0',
+        'If-None-Match': '*'
       }
-    })
+    }
+    
+    const response = await fetch(url, fetchOptions)
     
     if (response.ok) {
       const result = await response.json()
@@ -405,8 +416,8 @@ export const getAlbums = async (forceRefresh = false): Promise<AlbumWithCategory
     return cachedData.albums
   }
   
-  // 서버에서 로드
-  const serverData = await loadDataFromServer<AlbumWithCategory[]>('albums')
+  // 서버에서 로드 (캐시 활용)
+  const serverData = await loadDataFromServer<AlbumWithCategory[]>('albums', false)
   if (serverData !== null) {
     // photos 배열이 없는 앨범도 유효성 검사
     const validAlbums = serverData.map(album => ({
@@ -607,7 +618,7 @@ export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]
     // 캐시 무효화
     cachedData.bulletins = undefined
     
-    const serverData = await loadDataFromServer<BulletinItem[]>('bulletins')
+    const serverData = await loadDataFromServer<BulletinItem[]>('bulletins', true)
     if (serverData !== null) {
       cachedData.bulletins = serverData
       console.log(`[getBulletins] 서버에서 로드 완료: ${serverData.length}개 주보`)
@@ -625,9 +636,9 @@ export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]
     return cachedData.bulletins
   }
   
-  // 캐시가 없으면 서버에서 로드
-  console.log('[getBulletins] 캐시 없음, 서버에서 로드')
-  const serverData = await loadDataFromServer<BulletinItem[]>('bulletins')
+  // 캐시가 없으면 서버에서 로드 (캐시 활용)
+  console.log('[getBulletins] 캐시 없음, 서버에서 로드 (캐시 활용)')
+  const serverData = await loadDataFromServer<BulletinItem[]>('bulletins', false)
   if (serverData !== null) {
     cachedData.bulletins = serverData
     console.log(`[getBulletins] 서버에서 로드 완료: ${serverData.length}개 주보`)

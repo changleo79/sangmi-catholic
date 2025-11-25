@@ -105,13 +105,13 @@ export default function AlbumsManage() {
         newAlbums[index] = albumData
       }
     } else {
-      // 기존 draft- 앨범이 있으면 제거하고 새로 추가
-      const filteredAlbums = newAlbums.filter(a => !a.id.startsWith('draft-'))
-      filteredAlbums.unshift(albumData)
-      setAlbums(filteredAlbums)
-      await saveAlbums(filteredAlbums) // 서버에 저장 완료 대기
+      // 새 앨범 추가 - draft- 앨범은 필터링하지 않고 그대로 추가
+      // (draft- 앨범은 이미 저장된 앨범이므로 유지)
+      newAlbums.unshift(albumData)
+      setAlbums(newAlbums)
+      await saveAlbums(newAlbums) // 서버에 저장 완료 대기
       console.log('[AlbumsManage] 새 앨범 저장 완료 (서버 동기화):', {
-        총앨범수: filteredAlbums.length,
+        총앨범수: newAlbums.length,
         저장된앨범: {
           id: albumData.id,
           title: albumData.title,
@@ -153,16 +153,21 @@ export default function AlbumsManage() {
 
   const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
-      const newAlbums = albums.filter(a => a.id !== id)
-      setAlbums(newAlbums) // 즉시 UI 업데이트
-      await saveAlbums(newAlbums) // 서버에 저장 완료 대기
-      
-      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
-      await new Promise(resolve => setTimeout(resolve, 300))
-      window.dispatchEvent(new CustomEvent('albumsUpdated'))
-      
-      // 저장 후 다시 로드하여 확인 (이벤트 발생 후)
-      await loadAlbums()
+      try {
+        const newAlbums = albums.filter(a => a.id !== id)
+        setAlbums(newAlbums) // 즉시 UI 업데이트
+        await saveAlbums(newAlbums) // 서버에 저장 완료 대기
+        console.log('[AlbumsManage] 앨범 삭제 완료:', id, '남은 앨범 수:', newAlbums.length)
+        
+        // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+        await new Promise(resolve => setTimeout(resolve, 300))
+        window.dispatchEvent(new CustomEvent('albumsUpdated'))
+      } catch (error) {
+        console.error('[AlbumsManage] 앨범 삭제 실패:', error)
+        alert('앨범 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.')
+        // 실패 시 원래 상태로 복구
+        await loadAlbums()
+      }
     }
   }
 
@@ -634,7 +639,14 @@ export default function AlbumsManage() {
                     <div className="flex items-start gap-4">
                       <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                         {album.cover ? (
-                          <img src={album.cover} alt={album.title} className="w-full h-full object-cover" />
+                          <img 
+                            src={album.cover} 
+                            alt={album.title} 
+                            className="w-full h-full object-cover" 
+                            loading="lazy"
+                            decoding="async"
+                            style={{ backgroundColor: '#f3f4f6' }}
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">이미지 없음</div>
                         )}

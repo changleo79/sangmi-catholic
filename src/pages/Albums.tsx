@@ -274,6 +274,12 @@ export default function Albums() {
                       src={album.cover}
                       alt={album.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                      decoding="async"
+                      style={{ backgroundColor: '#f3f4f6' }}
+                      onLoad={(e) => {
+                        (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">

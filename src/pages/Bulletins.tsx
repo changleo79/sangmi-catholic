@@ -216,6 +216,8 @@ export default function Bulletins() {
                         alt={bulletin.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         crossOrigin="anonymous"
+                        loading="lazy"
+                        decoding="async"
                         style={{ backgroundColor: '#f3f4f6', pointerEvents: 'none' }}
                         onLoad={(e) => {
                           (e.target as HTMLImageElement).style.backgroundColor = 'transparent'

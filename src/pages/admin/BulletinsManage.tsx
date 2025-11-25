@@ -58,15 +58,20 @@ export default function BulletinsManage() {
       newBulletins.unshift({ ...formData, id: newId })
     }
 
-    setBulletins(newBulletins) // 즉시 UI 업데이트
-    await saveBulletins(newBulletins) // 서버에 저장 완료 대기 (이미 캐시 업데이트됨)
-    console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
-    // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
-    await new Promise(resolve => setTimeout(resolve, 300))
-    window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
-    // 저장 후 캐시에서 빠르게 로드 (forceRefresh=false)
-    await loadBulletins(false)
-    resetForm()
+    try {
+      setBulletins(newBulletins) // 즉시 UI 업데이트
+      await saveBulletins(newBulletins) // 서버에 저장 완료 대기 (이미 캐시 업데이트됨)
+      console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
+      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
+      resetForm()
+    } catch (error) {
+      console.error('[BulletinsManage] 주보 저장 실패:', error)
+      alert('주보 저장 중 오류가 발생했습니다. 다시 시도해 주세요.')
+      // 실패 시 원래 상태로 복구
+      await loadBulletins(true)
+    }
   }
 
   const handleEdit = (bulletin: BulletinItem) => {
