@@ -489,7 +489,6 @@ export const ensureDefaultAlbumExists = async (): Promise<void> => {
   // 기본 앨범 자동 생성 기능 비활성화
   // 사용자가 삭제한 경우 재생성하지 않도록 함
   // 더 이상 기본 앨범을 자동으로 생성하지 않음
-  console.log('[ensureDefaultAlbumExists] 기본 앨범 자동 생성 비활성화됨')
   return
 }
 
