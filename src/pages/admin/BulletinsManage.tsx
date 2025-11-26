@@ -119,12 +119,19 @@ export default function BulletinsManage() {
         const latestBulletins = await getBulletins(true) // 네이버 클라우드에서 최신 데이터 가져오기
         const newBulletins = latestBulletins.filter(b => b.id !== id)
         
+        console.log('[BulletinsManage] 삭제 전 주보 수:', latestBulletins.length, '삭제 후 주보 수:', newBulletins.length)
+        
         // 네이버 클라우드에 저장
         await saveBulletins(newBulletins)
         console.log('[BulletinsManage] 주보 삭제 저장 완료:', id, '남은 주보 수:', newBulletins.length)
         
-        // 저장 완료 후 서버에서 다시 로드하여 UI 업데이트
-        await loadBulletins(true)
+        // 저장 완료 후 약간의 지연을 두고 서버에서 다시 로드하여 저장 확인
+        await new Promise(resolve => setTimeout(resolve, 500))
+        const verifyBulletins = await getBulletins(true) // 서버에서 다시 로드하여 저장 확인
+        console.log('[BulletinsManage] 삭제 후 서버 확인 - 주보 수:', verifyBulletins.length, verifyBulletins.map(b => ({ id: b.id, title: b.title })))
+        
+        // UI 업데이트
+        setBulletins(verifyBulletins)
         
         // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
         await new Promise(resolve => setTimeout(resolve, 300))

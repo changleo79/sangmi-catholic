@@ -116,7 +116,7 @@ export default function Home() {
         (window as any).cachedData.albums = undefined
       }
       
-      await ensureDefaultAlbumExists()
+      // ensureDefaultAlbumExists는 초기 로드 시에만 호출 (삭제 후 재생성 방지)
       const storedAlbums = await getAlbums(true) // 강제 새로고침 - await 추가
       console.log('[Home] 앨범 로드:', storedAlbums.length, '개', storedAlbums)
       

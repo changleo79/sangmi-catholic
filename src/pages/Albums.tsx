@@ -145,7 +145,7 @@ export default function Albums() {
       }
       
       // 서버에서만 데이터 로드 (localStorage 사용 안 함)
-      await ensureDefaultAlbumExists()
+      // ensureDefaultAlbumExists는 초기 로드 시에만 호출 (삭제 후 재생성 방지)
       const loadedAlbums = await getAlbums(true) // forceRefresh=true: 서버에서 최신 데이터 로드
       
       const isMobileDevice = isMobile()
