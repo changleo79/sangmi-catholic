@@ -151,12 +151,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return
     }
 
-    const folder = (albumId || `draft-${Date.now()}`).replace(/[^a-zA-Z0-9-_]/g, '')
+    // albumId가 'bulletins'인 경우 bulletins 폴더에 저장
+    const folder = albumId === 'bulletins' 
+      ? 'bulletins' 
+      : (albumId || `draft-${Date.now()}`).replace(/[^a-zA-Z0-9-_]/g, '')
 
     const uploads = await Promise.all(
       files.map(async (file) => {
         const safeFileName = normaliseFileName(file.originalName || 'image')
-        const objectKey = `albums/${folder}/${safeFileName}`
+        // bulletins 폴더인 경우 bulletins 경로 사용, 그 외는 albums 경로 사용
+        const objectKey = folder === 'bulletins' 
+          ? `bulletins/${safeFileName}`
+          : `albums/${folder}/${safeFileName}`
         const isImage = file.mimeType?.startsWith('image/') || false
 
         try {

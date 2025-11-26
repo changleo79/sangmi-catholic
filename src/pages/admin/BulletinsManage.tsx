@@ -179,45 +179,94 @@ export default function BulletinsManage() {
     setEditingId(null)
   }
 
-  const handlePdfFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePdfFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      // PDF 또는 이미지 파일 허용
-      const isPdf = file.type === 'application/pdf'
-      const isImage = file.type.startsWith('image/')
-      
-      if (!isPdf && !isImage) {
-        alert('PDF 또는 이미지 파일(JPG, PNG 등)만 업로드 가능합니다.')
-        return
+    if (!file) return
+
+    // PDF 또는 이미지 파일 허용
+    const isPdf = file.type === 'application/pdf'
+    const isImage = file.type.startsWith('image/')
+    
+    if (!isPdf && !isImage) {
+      alert('PDF 또는 이미지 파일(JPG, PNG 등)만 업로드 가능합니다.')
+      return
+    }
+
+    try {
+      // 파일을 서버에 업로드 (Base64 대신 서버에 저장)
+      const uploadFormData = new FormData()
+      uploadFormData.append('files', file)
+      uploadFormData.append('albumId', 'bulletins') // 주보는 bulletins 폴더에 저장
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('[BulletinsManage] 파일 업로드 실패:', response.status, errorText)
+        throw new Error('파일 업로드 실패')
       }
-      
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64 = reader.result as string
+
+      const result = await response.json()
+      if (result.uploads && result.uploads.length > 0) {
+        const uploadedFile = result.uploads[0]
+        const fileUrl = uploadedFile.url
+        const thumbnailUrl = uploadedFile.thumbnailUrl || (isImage ? uploadedFile.url : undefined)
+
         // 이미지 파일인 경우 자동으로 썸네일로도 사용
         if (isImage && !formData.thumbnailUrl) {
-          setFormData({ ...formData, fileUrl: base64, thumbnailUrl: base64 })
+          setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl }))
         } else {
-          setFormData({ ...formData, fileUrl: base64 })
+          setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl: thumbnailUrl || prev.thumbnailUrl }))
         }
+      } else {
+        throw new Error('업로드 응답에 파일이 없습니다.')
       }
-      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('[BulletinsManage] 파일 업로드 실패:', error)
+      alert('파일 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.')
     }
   }
 
-  const handleThumbnailFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('이미지 파일만 업로드 가능합니다.')
-        return
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.')
+      return
+    }
+
+    try {
+      // 파일을 서버에 업로드 (Base64 대신 서버에 저장)
+      const uploadFormData = new FormData()
+      uploadFormData.append('files', file)
+      uploadFormData.append('albumId', 'bulletins') // 주보는 bulletins 폴더에 저장
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('[BulletinsManage] 썸네일 업로드 실패:', response.status, errorText)
+        throw new Error('파일 업로드 실패')
       }
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64 = reader.result as string
-        setFormData({ ...formData, thumbnailUrl: base64 })
+
+      const result = await response.json()
+      if (result.uploads && result.uploads.length > 0) {
+        const uploadedFile = result.uploads[0]
+        const thumbnailUrl = uploadedFile.thumbnailUrl || uploadedFile.url
+        setFormData(prev => ({ ...prev, thumbnailUrl }))
+      } else {
+        throw new Error('업로드 응답에 파일이 없습니다.')
       }
-      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('[BulletinsManage] 썸네일 업로드 실패:', error)
+      alert('썸네일 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.')
     }
   }
 
