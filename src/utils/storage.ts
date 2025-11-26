@@ -495,18 +495,11 @@ export const getAlbumCategories = (): string[] => {
 }
 
 export const ensureDefaultAlbumExists = async (): Promise<void> => {
-  // 기본 앨범이 삭제된 경우 다시 생성하지 않음
-  // localStorage는 더 이상 사용하지 않으므로 서버에서 확인
-  try {
-    const albums = await getAlbums(true)
-    if (!albums.some(album => album.id === DEFAULT_ALBUM_ID)) {
-      const nextAlbums = [...albums, createDefaultAlbum()]
-      // 기본 앨범 생성 시 이벤트 발생하지 않음 (무한 루프 방지)
-      await saveAlbums(nextAlbums, true)
-    }
-  } catch (error) {
-    console.warn('[ensureDefaultAlbumExists] 기본 앨범 확인 실패:', error)
-  }
+  // 기본 앨범 자동 생성 기능 비활성화
+  // 사용자가 삭제한 경우 재생성하지 않도록 함
+  // 더 이상 기본 앨범을 자동으로 생성하지 않음
+  console.log('[ensureDefaultAlbumExists] 기본 앨범 자동 생성 비활성화됨')
+  return
 }
 
 // 미사 시간 관리

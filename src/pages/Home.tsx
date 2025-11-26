@@ -144,7 +144,7 @@ export default function Home() {
       setDisplayAlbums(recentAlbums)
     } catch (error) {
       console.error('[Home] 앨범 로드 오류:', error)
-      await ensureDefaultAlbumExists()
+      // 기본 앨범 자동 생성 비활성화
       const fallback = await getAlbums(true) // await 추가
       const recentAlbums = fallback.slice(0, 4).map(album => {
         const firstPhoto = album.photos && album.photos.length > 0 ? album.photos[0] : null

@@ -39,8 +39,7 @@ export default function AlbumDetail() {
         (window as any).cachedData.albums = undefined
       }
 
-      // 기본 앨범 확인
-      await ensureDefaultAlbumExists()
+      // 기본 앨범 자동 생성 비활성화
 
       // 서버에서만 데이터 로드 (모바일/PC 모두 동일)
       const albums = await getAlbums(true)
