@@ -115,11 +115,25 @@ export default function Home() {
           title: album.title
         }
       })
-      setDisplayAlbums(recentAlbums)
+      
+      // 데이터가 실제로 변경되었을 때만 상태 업데이트 (깜빡임 방지)
+      setDisplayAlbums(prev => {
+        // ID와 cover가 모두 같으면 업데이트하지 않음
+        if (prev.length === recentAlbums.length) {
+          const isSame = prev.every((prevAlbum, index) => {
+            const newAlbum = recentAlbums[index]
+            return prevAlbum.id === newAlbum.id && prevAlbum.cover === newAlbum.cover
+          })
+          if (isSame) {
+            return prev // 변경사항 없으면 이전 상태 유지
+          }
+        }
+        return recentAlbums // 변경사항 있으면 업데이트
+      })
     } catch (error) {
       console.error('[Home] 앨범 로드 오류:', error)
-      // 에러 발생 시 빈 배열로 설정
-      setDisplayAlbums([])
+      // 에러 발생 시에만 빈 배열로 설정 (이미 데이터가 있으면 유지)
+      setDisplayAlbums(prev => prev.length > 0 ? prev : [])
     }
   }
 
