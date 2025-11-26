@@ -235,7 +235,10 @@ export const initializeData = async (): Promise<void> => {
     // 초기화 완료 플래그 설정
     isInitialized = true
   } catch (e) {
-    console.error('데이터 초기화 실패:', e)
+    // 중요한 에러만 로그 (프로덕션에서도 유지)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('데이터 초기화 실패:', e)
+    }
   } finally {
     // 초기화 완료 (성공/실패 관계없이)
     isInitializing = false
@@ -297,10 +300,7 @@ const loadDataFromServer = async <T>(type: string, forceRefresh = false): Promis
 // 서버에 데이터 저장 (공통 함수)
 const saveDataToServer = async (type: string, data: any): Promise<boolean> => {
   try {
-    console.log(`[saveDataToServer] ${type} 저장 시작:`, Array.isArray(data) ? `${data.length}개` : '데이터 있음')
-    
     const requestBody = JSON.stringify({ type, data })
-    console.log(`[saveDataToServer] ${type} 요청 본문 크기:`, requestBody.length, 'bytes')
     
     const response = await fetch('/api/save-metadata', {
       method: 'POST',
@@ -311,24 +311,18 @@ const saveDataToServer = async (type: string, data: any): Promise<boolean> => {
     })
     
     if (response.ok) {
-      const result = await response.json()
-      console.log(`[saveDataToServer] ${type} 서버 저장 성공:`, result)
       return true
     } else {
-      const text = await response.text()
-      console.error(`[saveDataToServer] ${type} 서버 저장 실패:`, response.status, response.statusText, text)
-      // 에러 응답도 JSON일 수 있으므로 파싱 시도
-      try {
-        const errorJson = JSON.parse(text)
-        console.error(`[saveDataToServer] ${type} 에러 상세:`, errorJson)
-      } catch (e) {
-        // JSON 파싱 실패 시 무시
+      // 에러는 개발 환경에서만 로그
+      if (process.env.NODE_ENV === 'development') {
+        const text = await response.text()
+        console.error(`[saveDataToServer] ${type} 서버 저장 실패:`, response.status, response.statusText, text)
       }
     }
   } catch (error) {
-    console.error(`[saveDataToServer] ${type} 서버 저장 오류:`, error)
-    if (error instanceof Error) {
-      console.error(`[saveDataToServer] ${type} 에러 상세:`, error.message, error.stack)
+    // 에러는 개발 환경에서만 로그
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`[saveDataToServer] ${type} 서버 저장 오류:`, error)
     }
   }
   return false
@@ -501,42 +495,30 @@ export const ensureDefaultAlbumExists = async (): Promise<void> => {
 
 // 미사 시간 관리
 export const getMassSchedule = async (forceRefresh = false): Promise<MassScheduleItem[]> => {
-  console.log(`[getMassSchedule] 호출 - forceRefresh: ${forceRefresh}, 캐시 있음: ${!!cachedData.massSchedule}`)
-  
   // forceRefresh가 true이면 무조건 서버에서 가져오기
   if (forceRefresh) {
-    console.log('[getMassSchedule] forceRefresh=true, 서버에서 강제 로드')
-    // 캐시 무효화
     cachedData.massSchedule = undefined
-    
     const serverData = await loadDataFromServer<MassScheduleItem[]>('massSchedule')
     if (serverData !== null) {
       cachedData.massSchedule = serverData
-      console.log(`[getMassSchedule] 서버에서 로드 완료: ${serverData.length}개`)
       return serverData
     }
-    
-    console.warn('[getMassSchedule] 서버 데이터 없음, 빈 배열 반환')
     cachedData.massSchedule = []
     return []
   }
   
-  // 캐시된 데이터 우선 (forceRefresh가 false일 때만)
+  // 캐시된 데이터 우선 사용
   if (cachedData.massSchedule) {
-    console.log(`[getMassSchedule] 캐시에서 반환: ${cachedData.massSchedule.length}개`)
     return cachedData.massSchedule
   }
   
   // 캐시가 없으면 서버에서 로드
-  console.log('[getMassSchedule] 캐시 없음, 서버에서 로드')
   const serverData = await loadDataFromServer<MassScheduleItem[]>('massSchedule')
   if (serverData !== null) {
     cachedData.massSchedule = serverData
-    console.log(`[getMassSchedule] 서버에서 로드 완료: ${serverData.length}개`)
     return serverData
   }
   
-  console.warn('[getMassSchedule] 서버 데이터 없음, 빈 배열 반환')
   cachedData.massSchedule = []
   return []
 }
@@ -661,16 +643,14 @@ export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]
 
 export const saveBulletins = async (bulletins: BulletinItem[]): Promise<void> => {
   try {
-    console.log('[saveBulletins] 저장 시작:', bulletins.length, '개 주보')
-    
     // 서버에 저장
     const success = await saveDataToServer('bulletins', bulletins)
     if (!success) {
-      console.error('[saveBulletins] 서버 저장 실패 - saveDataToServer가 false 반환')
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[saveBulletins] 서버 저장 실패')
+      }
       throw new Error('서버 저장 실패')
     }
-    
-    console.log('[saveBulletins] 서버 저장 성공')
     
     // 캐시 업데이트
     cachedData.bulletins = bulletins
@@ -678,9 +658,9 @@ export const saveBulletins = async (bulletins: BulletinItem[]): Promise<void> =>
     // 다른 페이지에서 업데이트를 감지할 수 있도록 이벤트 발생
     window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
   } catch (error) {
-    console.error('[saveBulletins] 저장 실패:', error)
-    if (error instanceof Error) {
-      console.error('[saveBulletins] 에러 상세:', error.message, error.stack)
+    // 에러는 개발 환경에서만 로그
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[saveBulletins] 저장 실패:', error)
     }
     throw error
   }
