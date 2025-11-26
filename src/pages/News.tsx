@@ -253,9 +253,6 @@ export default function News() {
                         if (!isScrolling) {
                           e.preventDefault()
                           e.stopPropagation()
-                            thumbnailUrl: bulletin.thumbnailUrl,
-                            bulletin: bulletin
-                          })
                           if (bulletin && bulletin.fileUrl) {
                             setSelectedBulletin(bulletin)
                             setIsPdfModalOpen(true)
@@ -283,12 +280,6 @@ export default function News() {
                           (bulletin.fileUrl.startsWith('http') && bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
                         )
                         const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
-                        
-                          thumbnailUrl: bulletin.thumbnailUrl,
-                          fileUrl: bulletin.fileUrl,
-                          isImageFile,
-                          finalThumbnailUrl: thumbnailUrl
-                        })
                         
                         return thumbnailUrl ? (
                           <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gray-100" style={{ minHeight: '200px', maxHeight: '400px' }}>
