@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { getAlbums, getAlbumCategories, initializeData, ensureDefaultAlbumExists, type AlbumWithCategory } from '../utils/storage'
+import { getAlbums, getAlbumCategories, type AlbumWithCategory } from '../utils/storage'
 
 export default function Albums() {
   const [albums, setAlbums] = useState<AlbumWithCategory[]>([])
@@ -16,135 +16,29 @@ export default function Albums() {
   }
 
   useEffect(() => {
-    // 초기 데이터 로드 - 모든 기기에서 서버에서 로드
-    const loadData = async () => {
-      console.log('[Albums] 초기 데이터 로드 시작 - 모바일/PC 모두 서버에서 강제 로드')
-      // 캐시 완전히 무효화 (모바일 브라우저 캐시 회피)
-      if ((window as any).__albumsCache) {
-        delete (window as any).__albumsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.albums) {
-        (window as any).cachedData.albums = undefined
-      }
-      
-      // 모든 기기에서 서버 데이터 초기화
-      await initializeData()
-      await new Promise(resolve => setTimeout(resolve, 200))
-      await loadAlbums()
-      // 기본 앨범 자동 생성 비활성화
-      // 사용자가 삭제한 경우 재생성하지 않도록 함
-    }
-    loadData()
+    // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
+    loadAlbums(false)
 
-    // 페이지 포커스 시 데이터 다시 로드
-    const handleFocus = async () => {
-      console.log('[Albums] focus 이벤트 - 데이터 다시 로드')
-      // 캐시 무시하고 강제 새로고침
-      if ((window as any).__albumsCache) {
-        delete (window as any).__albumsCache
-      }
-      await loadAlbums()
-    }
-    
-    // 앨범 업데이트 이벤트 리스너 (모바일/PC 모두 동작)
+    // 앨범 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleAlbumsUpdate = async () => {
-      console.log('[Albums] albumsUpdated 이벤트 수신 - 데이터 다시 로드')
-      // 캐시 완전히 무효화
-      if ((window as any).__albumsCache) {
-        delete (window as any).__albumsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.albums) {
-        (window as any).cachedData.albums = undefined
-      }
-      // 서버 저장 완료 대기 후 로드 (모바일에서도 확실히 반영되도록)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      await loadAlbums()
+      // 서버 저장 완료 대기 후 로드
+      await new Promise(resolve => setTimeout(resolve, 300))
+      await loadAlbums(true) // 업데이트 이벤트 시에만 강제 새로고침
     }
     
-    // visibilitychange 이벤트 (탭 전환, 모바일에서 앱 전환 등)
-    const handleVisibilityChange = async () => {
-      if (!document.hidden) {
-        console.log('[Albums] visibilitychange 이벤트 - 데이터 다시 로드')
-        // 캐시 무시하고 강제 새로고침
-        if ((window as any).__albumsCache) {
-          delete (window as any).__albumsCache
-        }
-        await loadAlbums()
-      }
-    }
-
-    // 이벤트 리스너 등록
-    window.addEventListener('focus', handleFocus)
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    
-    // 모바일에서 주기적으로 서버에서 최신 데이터 확인 (모바일 어드민과의 동기화 보장)
-    const isMobileDevice = isMobile()
-    let intervalId: NodeJS.Timeout | null = null
-    
-    if (isMobileDevice) {
-      // 모바일: 2초마다 서버에서 강제로 최신 데이터 확인
-      intervalId = setInterval(async () => {
-        if (!document.hidden) {
-          console.log('[Albums] 모바일 주기적 서버 동기화 체크')
-          // 캐시 완전히 무효화
-          if ((window as any).__albumsCache) {
-            delete (window as any).__albumsCache
-          }
-          if ((window as any).cachedData && (window as any).cachedData.albums) {
-            (window as any).cachedData.albums = undefined
-          }
-          // 서버에서 강제로 최신 데이터 로드
-          await loadAlbums()
-        }
-      }, 2000) // 2초마다 체크
-    } else {
-      // PC: 5초마다 서버에서 강제로 최신 데이터 확인
-      intervalId = setInterval(async () => {
-        if (!document.hidden) {
-          console.log('[Albums] PC 주기적 서버 동기화 체크')
-          // 캐시 완전히 무효화
-          if ((window as any).__albumsCache) {
-            delete (window as any).__albumsCache
-          }
-          if ((window as any).cachedData && (window as any).cachedData.albums) {
-            (window as any).cachedData.albums = undefined
-          }
-          // 서버에서 강제로 최신 데이터 로드
-          await loadAlbums()
-        }
-      }, 5000) // 5초마다 체크
-    }
     
     return () => {
-      window.removeEventListener('focus', handleFocus)
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
     }
   }, [])
 
-  const loadAlbums = async () => {
+  const loadAlbums = async (forceRefresh = false) => {
     try {
-      // 캐시 완전히 무효화
-      if ((window as any).__albumsCache) {
-        delete (window as any).__albumsCache
-      }
-      // storage.ts의 cachedData도 무효화
-      if ((window as any).cachedData && (window as any).cachedData.albums) {
-        (window as any).cachedData.albums = undefined
-      }
+      // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
+      const loadedAlbums = await getAlbums(forceRefresh)
       
-      // 서버에서만 데이터 로드 (localStorage 사용 안 함)
-      // ensureDefaultAlbumExists는 초기 로드 시에만 호출 (삭제 후 재생성 방지)
-      const loadedAlbums = await getAlbums(true) // forceRefresh=true: 서버에서 최신 데이터 로드
-      
-      const isMobileDevice = isMobile()
-      console.log('[Albums]', isMobileDevice ? '모바일' : 'PC', '- 서버에서 로드:', loadedAlbums.length, '개 앨범', loadedAlbums.map(a => ({ id: a.id, title: a.title, photosCount: a.photos?.length || 0 })))
-      
-      // 유효성 검사 및 필터링 (loadedAlbums를 직접 사용)
+      // 유효성 검사 및 필터링
       const validAlbums = loadedAlbums.map((album: any) => ({
         ...album,
         photos: Array.isArray(album.photos) ? album.photos : []
@@ -156,11 +50,9 @@ export default function Albums() {
         return true
       })
       
-      // setAlbums로 상태 업데이트
       setAlbums(validAlbums)
     } catch (error) {
       console.error('[Albums] 로드 오류:', error)
-      // 에러 발생 시 빈 배열로 설정
       setAlbums([])
     }
   }

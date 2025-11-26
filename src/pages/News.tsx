@@ -57,8 +57,8 @@ export default function News() {
   }
 
   useEffect(() => {
-    // 초기 로드 시에만 서버에서 강제 로드
-    loadData(true)
+    // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
+    loadData(false)
     
     // 주보 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleBulletinsUpdate = async () => {
@@ -210,7 +210,6 @@ export default function News() {
                       if (window.innerWidth >= 768) {
                         e.preventDefault()
                         e.stopPropagation()
-                        console.log('[News] 주보 클릭 (PC):', bulletin.title, 'fileUrl:', bulletin.fileUrl)
                         if (bulletin && bulletin.fileUrl) {
                           setSelectedBulletin(bulletin)
                           setIsPdfModalOpen(true)
@@ -254,9 +253,6 @@ export default function News() {
                         if (!isScrolling) {
                           e.preventDefault()
                           e.stopPropagation()
-                          console.log('[News] 주보 클릭 (모바일):', {
-                            title: bulletin.title,
-                            fileUrl: bulletin.fileUrl,
                             thumbnailUrl: bulletin.thumbnailUrl,
                             bulletin: bulletin
                           })
@@ -288,9 +284,6 @@ export default function News() {
                         )
                         const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
                         
-                        console.log('[News] 주보 썸네일 확인:', {
-                          id: bulletin.id,
-                          title: bulletin.title,
                           thumbnailUrl: bulletin.thumbnailUrl,
                           fileUrl: bulletin.fileUrl,
                           isImageFile,
@@ -337,7 +330,6 @@ export default function News() {
                                 }
                               }}
                               onLoad={(e) => {
-                                console.log('[News] 썸네일 이미지 로드 성공:', thumbnailUrl)
                                 // 로드 성공 시 배경색 제거
                                 e.currentTarget.style.backgroundColor = ''
                                 // 로드 성공 시 배경색 제거
@@ -345,7 +337,6 @@ export default function News() {
                                 target.style.backgroundColor = 'transparent'
                               }}
                               onLoadStart={() => {
-                                console.log('[News] 썸네일 이미지 로드 시작:', thumbnailUrl)
                               }}
                             />
                           </div>

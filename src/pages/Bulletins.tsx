@@ -27,8 +27,8 @@ export default function Bulletins() {
   }
 
   useEffect(() => {
-    // 초기 로드 시에만 서버에서 강제 로드
-    loadBulletins(true)
+    // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
+    loadBulletins(false)
 
     // 주보 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleBulletinsUpdate = async () => {
@@ -45,7 +45,6 @@ export default function Bulletins() {
   }, [])
 
   const handleBulletinClick = (bulletin: BulletinItem) => {
-    console.log('[Bulletins] 주보 클릭:', bulletin.title, 'fileUrl:', bulletin.fileUrl)
     if (bulletin && bulletin.fileUrl) {
       setSelectedBulletin(bulletin)
       setIsPdfModalOpen(true)

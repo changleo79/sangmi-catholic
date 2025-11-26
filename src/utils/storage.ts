@@ -184,11 +184,17 @@ let cachedData: {
 
 // 데이터 초기화 (페이지 로드 시 한 번만 실행)
 // 모든 데이터는 네이버 클라우드에서 로드 (localStorage 사용 안 함)
+// 초기화 플래그 (한 번만 실행)
+let isInitialized = false
+
 export const initializeData = async (): Promise<void> => {
+  // 이미 초기화되었으면 스킵
+  if (isInitialized) {
+    return
+  }
+  
   try {
-    console.log('[initializeData] 실행 시작 - 네이버 클라우드에서 모든 데이터 로드')
-    
-    // 모든 데이터를 서버에서 로드
+    // 모든 데이터를 서버에서 로드 (초기 로드만)
     const [notices, recruitments, faqs, albums, massSchedule, sacraments, catechism, bulletins] = await Promise.all([
       loadDataFromServer<NoticeItem[]>('notices'),
       loadDataFromServer<RecruitmentItem[]>('recruitments'),
@@ -200,8 +206,7 @@ export const initializeData = async (): Promise<void> => {
       loadDataFromServer<BulletinItem[]>('bulletins')
     ])
     
-    // 서버에서 로드한 데이터를 캐시에 저장 (메모리 캐시만 사용)
-    // null이 아닌 경우에만 업데이트 (기존 데이터 보존)
+    // 서버에서 로드한 데이터를 캐시에 저장
     if (notices !== null) cachedData.notices = notices
     if (recruitments !== null) cachedData.recruitments = recruitments
     if (faqs !== null) cachedData.faqs = faqs
@@ -211,7 +216,7 @@ export const initializeData = async (): Promise<void> => {
     if (catechism !== null) cachedData.catechism = catechism
     if (bulletins !== null) cachedData.bulletins = bulletins
     
-    // 초기값 설정 (서버 데이터가 없고 캐시도 없을 때만)
+    // 초기값 설정 (서버 데이터가 없을 때만)
     if (!cachedData.notices) cachedData.notices = []
     if (!cachedData.recruitments) cachedData.recruitments = []
     if (!cachedData.faqs) cachedData.faqs = []
@@ -221,16 +226,7 @@ export const initializeData = async (): Promise<void> => {
     if (cachedData.catechism === undefined) cachedData.catechism = null
     if (!cachedData.bulletins) cachedData.bulletins = []
     
-    console.log('[initializeData] 서버에서 데이터 로드 완료:', {
-      notices: cachedData.notices?.length || 0,
-      recruitments: cachedData.recruitments?.length || 0,
-      faqs: cachedData.faqs?.length || 0,
-      albums: cachedData.albums?.length || 0,
-      massSchedule: cachedData.massSchedule?.length || 0,
-      sacraments: cachedData.sacraments?.length || 0,
-      catechism: cachedData.catechism ? 1 : 0,
-      bulletins: cachedData.bulletins?.length || 0
-    })
+    isInitialized = true
   } catch (e) {
     console.error('데이터 초기화 실패:', e)
   }
@@ -247,7 +243,6 @@ const loadDataFromServer = async <T>(type: string, forceRefresh = false): Promis
       const random = Math.random().toString(36).substring(7)
       url = `${url}&_t=${timestamp}&_r=${random}`
     }
-    console.log(`[loadDataFromServer] ${type} 서버에서 로드 시도 (forceRefresh: ${forceRefresh}):`, url)
     
     // fetch 옵션 설정
     const fetchOptions: RequestInit = {
@@ -272,26 +267,18 @@ const loadDataFromServer = async <T>(type: string, forceRefresh = false): Promis
     if (response.ok) {
       const result = await response.json()
       if (result.data !== undefined) {
-        console.log(`[loadDataFromServer] ${type} 서버에서 로드 성공:`, Array.isArray(result.data) ? `${result.data.length}개` : '데이터 있음')
         return result.data as T
-      } else {
-        console.warn(`[loadDataFromServer] ${type} 서버 응답에 data 없음`)
       }
     } else {
-      console.warn(`[loadDataFromServer] ${type} 서버 응답 오류:`, response.status, response.statusText)
-      // 에러 응답도 로그에 기록
-      try {
-        const errorText = await response.text()
-        console.warn(`[loadDataFromServer] ${type} 에러 응답 내용:`, errorText)
-      } catch (e) {
-        // 무시
+      // 에러는 개발 환경에서만 로그
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[loadDataFromServer] ${type} 서버 응답 오류:`, response.status)
       }
     }
   } catch (error) {
-    console.error(`[loadDataFromServer] ${type} 서버 로드 실패:`, error)
-    // 네트워크 오류 상세 정보
-    if (error instanceof Error) {
-      console.error(`[loadDataFromServer] ${type} 오류 상세:`, error.message, error.stack)
+    // 에러는 개발 환경에서만 로그
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`[loadDataFromServer] ${type} 서버 로드 실패:`, error)
     }
   }
   return null
@@ -628,43 +615,36 @@ export const exportCatechismInfo = async (): Promise<void> => {
 // 주보 안내 관리
 // 주보 관리
 export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]> => {
-  console.log(`[getBulletins] 호출 - forceRefresh: ${forceRefresh}, 캐시 있음: ${!!cachedData.bulletins}`)
-  
   // forceRefresh가 true이면 무조건 서버에서 가져오기
   if (forceRefresh) {
-    console.log('[getBulletins] forceRefresh=true, 서버에서 강제 로드')
-    // 캐시 무효화
     cachedData.bulletins = undefined
-    
     const serverData = await loadDataFromServer<BulletinItem[]>('bulletins', true)
     if (serverData !== null) {
       cachedData.bulletins = serverData
-      console.log(`[getBulletins] 서버에서 로드 완료: ${serverData.length}개 주보`)
       return serverData
     }
-    
-    console.warn('[getBulletins] 서버 데이터 없음, 빈 배열 반환')
     cachedData.bulletins = []
     return []
   }
   
-  // 캐시된 데이터 우선 (forceRefresh가 false일 때만)
-  if (cachedData.bulletins) {
-    console.log(`[getBulletins] 캐시에서 반환: ${cachedData.bulletins.length}개 주보`)
-    return cachedData.bulletins
+  // 캐시된 데이터 우선 사용
+  const cachedBulletins: BulletinItem[] | undefined = cachedData.bulletins
+  if (cachedBulletins && Array.isArray(cachedBulletins) && cachedBulletins.length > 0) {
+    return cachedBulletins
   }
   
-  // 캐시가 없으면 서버에서 로드 (캐시 활용)
-  console.log('[getBulletins] 캐시 없음, 서버에서 로드 (캐시 활용)')
+  // 캐시가 없으면 서버에서 로드
   const serverData = await loadDataFromServer<BulletinItem[]>('bulletins', false)
   if (serverData !== null) {
-    // 서버에서 가져온 데이터로 업데이트 (네이버 클라우드 직접 수정 반영)
     cachedData.bulletins = serverData
-    console.log(`[getBulletins] 서버에서 로드 완료: ${serverData.length}개 주보`)
     return serverData
   }
   
-  console.warn('[getBulletins] 서버 데이터 없고 캐시도 없음, 빈 배열 반환')
+  // 서버 데이터가 없으면 기존 캐시 유지
+  if (cachedBulletins && Array.isArray(cachedBulletins) && cachedBulletins.length > 0) {
+    return cachedBulletins
+  }
+  
   cachedData.bulletins = []
   return []
 }
