@@ -56,15 +56,8 @@ export default function Home() {
       ])
     }
 
-    // 캐시 무효화하고 강제 새로고침
-    if ((window as any).__bulletinsCache) {
-      delete (window as any).__bulletinsCache
-    }
-    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-      (window as any).cachedData.bulletins = undefined
-    }
-    const storedBulletins = await getBulletins(true) // 강제 새로고침 - await 추가
-    console.log('[Home] 주보 로드:', storedBulletins.length, '개', storedBulletins)
+    // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
+    const storedBulletins = await getBulletins(false)
     setBulletins(storedBulletins.slice(0, 6))
 
     const catechism = await getCatechismInfo()
@@ -106,19 +99,10 @@ export default function Home() {
     }
   }, [])
 
-  const loadAlbums = async () => {
+  const loadAlbums = async (forceRefresh = false) => {
     try {
-      // 캐시 완전히 무효화
-      if ((window as any).__albumsCache) {
-        delete (window as any).__albumsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.albums) {
-        (window as any).cachedData.albums = undefined
-      }
-      
-      // ensureDefaultAlbumExists는 초기 로드 시에만 호출 (삭제 후 재생성 방지)
-      const storedAlbums = await getAlbums(true) // 강제 새로고침 - await 추가
-      console.log('[Home] 앨범 로드:', storedAlbums.length, '개', storedAlbums)
+      // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
+      const storedAlbums = await getAlbums(forceRefresh)
       
       // draft-로 시작하지만 실제로 저장된 앨범은 표시 (photos와 title이 있으면 저장된 것으로 간주)
       const savedAlbums = storedAlbums.filter(album => {
@@ -140,55 +124,29 @@ export default function Home() {
           title: album.title
         }
       })
-      console.log('[Home] 표시할 앨범:', recentAlbums)
       setDisplayAlbums(recentAlbums)
     } catch (error) {
       console.error('[Home] 앨범 로드 오류:', error)
-      // 기본 앨범 자동 생성 비활성화
-      const fallback = await getAlbums(true) // await 추가
-      const recentAlbums = fallback.slice(0, 4).map(album => {
-        const firstPhoto = album.photos && album.photos.length > 0 ? album.photos[0] : null
-        const thumbnailUrl = firstPhoto?.thumbnailUrl
-        const originalUrl = album.cover || firstPhoto?.src || ''
-        return {
-          id: album.id,
-          cover: thumbnailUrl || originalUrl, // 썸네일 우선
-          originalCover: originalUrl, // 원본 URL 저장 (나중에 교체용)
-          title: album.title
-        }
-      })
-      setDisplayAlbums(recentAlbums)
+      // 에러 발생 시 빈 배열로 설정
+      setDisplayAlbums([])
     }
   }
 
   useEffect(() => {
-    loadAlbums()
+    // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
+    loadAlbums(false)
     
+    // 앨범 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleAlbumsUpdate = async () => {
-      console.log('[Home] albumsUpdated 이벤트 - 앨범 다시 로드')
-      await loadAlbums()
-    }
-    
-    const handleFocus = async () => {
-      console.log('[Home] focus 이벤트 - 앨범 다시 로드')
-      await loadAlbums()
-    }
-    
-    const handleVisibilityChange = async () => {
-      if (!document.hidden) {
-        console.log('[Home] visibilitychange 이벤트 - 앨범 다시 로드')
-        await loadAlbums()
-      }
+      // 서버 저장 완료 대기 후 로드
+      await new Promise(resolve => setTimeout(resolve, 300))
+      await loadAlbums(true) // 업데이트 이벤트 시에만 강제 새로고침
     }
     
     window.addEventListener('albumsUpdated', handleAlbumsUpdate)
-    window.addEventListener('focus', handleFocus)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
       window.removeEventListener('albumsUpdated', handleAlbumsUpdate)
-      window.removeEventListener('focus', handleFocus)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 

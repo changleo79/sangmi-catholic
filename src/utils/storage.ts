@@ -225,10 +225,9 @@ export const initializeData = async (): Promise<void> => {
     if (!cachedData.sacraments) cachedData.sacraments = []
     if (cachedData.catechism === undefined) cachedData.catechism = null
     if (!cachedData.bulletins) cachedData.bulletins = []
-    
-    isInitialized = true
   } catch (e) {
     console.error('데이터 초기화 실패:', e)
+    // 에러 발생 시에도 플래그는 유지 (무한 루프 방지)
   }
 }
 
