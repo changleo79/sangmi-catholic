@@ -24,28 +24,20 @@ export default function News() {
            (window.matchMedia && window.matchMedia('(max-width: 767px)').matches)
   }
 
-  const loadData = async () => {
-    console.log('[News] loadData 시작 - 모바일/PC 모두 서버에서 강제 로드')
-    // 캐시 완전히 무효화 (모바일 브라우저 캐시 회피)
-    if ((window as any).__bulletinsCache) {
-      delete (window as any).__bulletinsCache
-    }
-    // storage.ts의 cachedData도 무효화
-    const cachedData = (window as any).cachedData
-    if (cachedData) {
-      cachedData.bulletins = undefined
-      cachedData.notices = undefined
-      cachedData.recruitments = undefined
-    }
+  const loadData = async (forceRefresh = false) => {
+    // 초기 로드 시에만 서버에서 강제 로드, 이후에는 캐시 활용
+    const [storedNotices, storedRecruitments, loadedBulletins] = await Promise.all([
+      getNotices(forceRefresh),
+      getRecruitments(forceRefresh),
+      getBulletins(forceRefresh)
+    ])
     
-    const storedNotices = await getNotices(true) // 서버에서 강제 로드
     if (storedNotices.length > 0) {
       setNotices(storedNotices)
     } else {
       setNotices(defaultNotices)
     }
 
-    const storedRecruitments = await getRecruitments(true) // 서버에서 강제 로드
     if (storedRecruitments.length > 0) {
       setRecruit(storedRecruitments)
     } else {
@@ -56,12 +48,6 @@ export default function News() {
       ])
     }
     
-    // 서버에서만 데이터 로드 (localStorage 사용 안 함) - 모바일에서도 확실히 반영
-    const loadedBulletins = await getBulletins(true) // forceRefresh=true: 서버에서 최신 데이터 로드
-    
-    console.log('[News] getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))
-    
-    // 서버에서만 데이터 로드 (localStorage 사용 안 함)
     // 최신순 정렬
     const sortedBulletins = loadedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -71,105 +57,20 @@ export default function News() {
   }
 
   useEffect(() => {
-    loadData()
+    // 초기 로드 시에만 서버에서 강제 로드
+    loadData(true)
     
-    // 주보 업데이트 이벤트 리스너
+    // 주보 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleBulletinsUpdate = async () => {
-      console.log('[News] bulletinsUpdated 이벤트 수신 - 데이터 다시 로드')
-      // 캐시 완전히 무효화
-      if ((window as any).__bulletinsCache) {
-        delete (window as any).__bulletinsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-        (window as any).cachedData.bulletins = undefined
-      }
-      // 서버 저장 완료 대기 후 로드 (모바일에서도 확실히 반영되도록)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      await loadData()
-    }
-    
-    // 포커스 및 visibilitychange 이벤트도 추가
-    const handleFocus = () => {
-      console.log('[News] focus 이벤트 - 주보 다시 로드')
-      // 캐시 완전히 무효화
-      if ((window as any).__bulletinsCache) {
-        delete (window as any).__bulletinsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-        (window as any).cachedData.bulletins = undefined
-      }
-      loadData()
-    }
-    
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('[News] visibilitychange 이벤트 - 주보 다시 로드')
-        // 캐시 완전히 무효화
-        if ((window as any).__bulletinsCache) {
-          delete (window as any).__bulletinsCache
-        }
-        if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-          (window as any).cachedData.bulletins = undefined
-        }
-        loadData()
-      }
-    }
-    
-    // 모바일에서 주기적으로 서버에서 최신 데이터 확인 (모바일 어드민과의 동기화 보장)
-    const isMobileDevice = isMobile()
-    let intervalId: NodeJS.Timeout | null = null
-    
-    if (isMobileDevice) {
-      // 모바일: 2초마다 서버에서 강제로 최신 데이터 확인
-      intervalId = setInterval(async () => {
-        if (!document.hidden) {
-          console.log('[News] 모바일 주기적 서버 동기화 체크')
-          // 캐시 완전히 무효화
-          if ((window as any).__bulletinsCache) {
-            delete (window as any).__bulletinsCache
-          }
-          const cachedData = (window as any).cachedData
-          if (cachedData) {
-            cachedData.bulletins = undefined
-            cachedData.notices = undefined
-            cachedData.recruitments = undefined
-          }
-          // 서버에서 강제로 최신 데이터 로드
-          await loadData()
-        }
-      }, 2000) // 2초마다 체크
-    } else {
-      // PC: 5초마다 서버에서 강제로 최신 데이터 확인
-      intervalId = setInterval(async () => {
-        if (!document.hidden) {
-          console.log('[News] PC 주기적 서버 동기화 체크')
-          // 캐시 완전히 무효화
-          if ((window as any).__bulletinsCache) {
-            delete (window as any).__bulletinsCache
-          }
-          const cachedData = (window as any).cachedData
-          if (cachedData) {
-            cachedData.bulletins = undefined
-            cachedData.notices = undefined
-            cachedData.recruitments = undefined
-          }
-          // 서버에서 강제로 최신 데이터 로드
-          await loadData()
-        }
-      }, 5000) // 5초마다 체크
+      // 서버 저장 완료 대기 후 로드
+      await new Promise(resolve => setTimeout(resolve, 300))
+      await loadData(true) // 업데이트 이벤트 시에만 강제 새로고침
     }
     
     window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
-    window.addEventListener('focus', handleFocus)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
       window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
-      window.removeEventListener('focus', handleFocus)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
     }
   }, [])
 

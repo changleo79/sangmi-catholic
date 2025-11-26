@@ -14,23 +14,10 @@ export default function Bulletins() {
   const [selectedBulletin, setSelectedBulletin] = useState<BulletinItem | null>(null)
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
 
-  const loadBulletins = async () => {
-    console.log('[Bulletins] loadBulletins 시작 - 모바일/PC 모두 서버에서 강제 로드')
-    // 캐시 완전히 무효화 (모바일 브라우저 캐시 회피)
-    if ((window as any).__bulletinsCache) {
-      delete (window as any).__bulletinsCache
-    }
-    if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-      (window as any).cachedData.bulletins = undefined
-    }
+  const loadBulletins = async (forceRefresh = false) => {
+    // 초기 로드 시에만 서버에서 강제 로드, 이후에는 캐시 활용
+    const loadedBulletins = await getBulletins(forceRefresh)
     
-    // 서버에서만 데이터 로드 (localStorage 사용 안 함) - 모바일에서도 확실히 반영
-    const loadedBulletins = await getBulletins(true) // forceRefresh=true: 서버에서 최신 데이터 로드
-    
-    const isMobileDevice = isMobile()
-    console.log('[Bulletins]', isMobileDevice ? '모바일' : 'PC', '- getBulletins로 로드:', loadedBulletins.length, '개 주보', loadedBulletins.map((b: BulletinItem) => ({ id: b.id, title: b.title })))
-    
-    // 서버에서만 데이터 로드 (localStorage 사용 안 함)
     // 최신순 정렬
     const sortedBulletins = loadedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
       return new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -40,92 +27,20 @@ export default function Bulletins() {
   }
 
   useEffect(() => {
-    loadBulletins()
+    // 초기 로드 시에만 서버에서 강제 로드
+    loadBulletins(true)
 
-    // 페이지 포커스 시 데이터 다시 로드
-    const handleFocus = () => {
-      console.log('[Bulletins] focus 이벤트 - 데이터 다시 로드')
-      if ((window as any).__bulletinsCache) {
-        delete (window as any).__bulletinsCache
-      }
-      loadBulletins()
-    }
-    
-    // 주보 업데이트 이벤트 리스너
+    // 주보 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleBulletinsUpdate = async () => {
-      console.log('[Bulletins] bulletinsUpdated 이벤트 수신 - 데이터 다시 로드')
-      // 캐시 완전히 무효화
-      if ((window as any).__bulletinsCache) {
-        delete (window as any).__bulletinsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-        (window as any).cachedData.bulletins = undefined
-      }
-      // 서버 저장 완료 대기 후 로드 (모바일에서도 확실히 반영되도록)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      await loadBulletins()
+      // 서버 저장 완료 대기 후 로드
+      await new Promise(resolve => setTimeout(resolve, 300))
+      await loadBulletins(true) // 업데이트 이벤트 시에만 강제 새로고침
     }
     
-    // visibilitychange 이벤트
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('[Bulletins] visibilitychange 이벤트 - 데이터 다시 로드')
-        if ((window as any).__bulletinsCache) {
-          delete (window as any).__bulletinsCache
-        }
-        loadBulletins()
-      }
-    }
-
-    // 모바일에서 주기적으로 서버에서 최신 데이터 확인 (모바일 어드민과의 동기화 보장)
-    const isMobileDevice = isMobile()
-    let intervalId: NodeJS.Timeout | null = null
-    
-    if (isMobileDevice) {
-      // 모바일: 2초마다 서버에서 강제로 최신 데이터 확인
-      intervalId = setInterval(async () => {
-        if (!document.hidden) {
-          console.log('[Bulletins] 모바일 주기적 서버 동기화 체크')
-          // 캐시 완전히 무효화
-          if ((window as any).__bulletinsCache) {
-            delete (window as any).__bulletinsCache
-          }
-          if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-            (window as any).cachedData.bulletins = undefined
-          }
-          // 서버에서 강제로 최신 데이터 로드
-          await loadBulletins()
-        }
-      }, 2000) // 2초마다 체크
-    } else {
-      // PC: 5초마다 서버에서 강제로 최신 데이터 확인
-      intervalId = setInterval(async () => {
-        if (!document.hidden) {
-          console.log('[Bulletins] PC 주기적 서버 동기화 체크')
-          // 캐시 완전히 무효화
-          if ((window as any).__bulletinsCache) {
-            delete (window as any).__bulletinsCache
-          }
-          if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-            (window as any).cachedData.bulletins = undefined
-          }
-          // 서버에서 강제로 최신 데이터 로드
-          await loadBulletins()
-        }
-      }, 5000) // 5초마다 체크
-    }
-    
-    window.addEventListener('focus', handleFocus)
     window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
     
     return () => {
-      window.removeEventListener('focus', handleFocus)
       window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      if (intervalId) {
-        clearInterval(intervalId)
-      }
     }
   }, [])
 
