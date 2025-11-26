@@ -76,19 +76,11 @@ export default function Home() {
     loadData()
     
     // 주보 업데이트 이벤트 리스너
+    // 주보 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleBulletinsUpdate = async () => {
-      console.log('[Home] bulletinsUpdated 이벤트 수신 - 주보 다시 로드')
-      // 캐시 완전히 무효화
-      if ((window as any).__bulletinsCache) {
-        delete (window as any).__bulletinsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-        (window as any).cachedData.bulletins = undefined
-      }
-      
-      // 서버에서 강제로 최신 데이터 가져오기
-      const storedBulletins = await getBulletins(true)
-      console.log('[Home] 주보 업데이트 후 로드 완료:', storedBulletins.length, '개', storedBulletins.map(b => ({ id: b.id, title: b.title })))
+      // 서버 저장 완료 대기 후 로드
+      await new Promise(resolve => setTimeout(resolve, 300))
+      const storedBulletins = await getBulletins(true) // 업데이트 이벤트 시에만 강제 새로고침
       setBulletins(storedBulletins.slice(0, 6))
     }
     
