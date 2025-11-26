@@ -564,19 +564,20 @@ export default function Home() {
           </div>
 
           <div className="grid lg:grid-cols-[2fr,1fr] gap-6">
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden min-h-[400px]">
               {activeNoticeContent.items.length > 0 ? (
-                activeNoticeContent.items.map(item => {
-                  const isBulletin = activeNoticeTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
-                  let bulletinItem: BulletinItem | null = null
-                  if (isBulletin && 'bulletin' in item) {
-                    bulletinItem = item.bulletin as BulletinItem
-                  }
-                  return (
-                    <div
-                      key={item.id}
-                      className="p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/60 hover:to-transparent transition-all duration-300 group"
-                    >
+                <div className="divide-y divide-gray-100">
+                  {activeNoticeContent.items.map(item => {
+                    const isBulletin = activeNoticeTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
+                    let bulletinItem: BulletinItem | null = null
+                    if (isBulletin && 'bulletin' in item) {
+                      bulletinItem = item.bulletin as BulletinItem
+                    }
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-6 hover:bg-gradient-to-r hover:from-purple-50/60 hover:to-transparent transition-all duration-300 group"
+                      >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
@@ -626,11 +627,18 @@ export default function Home() {
                           )}
                         </div>
                       </div>
-                    </div>
-                  )
-                })
+                      </div>
+                    )
+                  })}
+                </div>
               ) : (
-                <div className="p-10 text-center text-gray-500">{activeNoticeContent.emptyText}</div>
+                <div className="flex flex-col items-center justify-center p-16 text-center min-h-[400px]">
+                  <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-gray-500 text-lg font-medium">{activeNoticeContent.emptyText}</p>
+                  <p className="text-gray-400 text-sm mt-2">새로운 소식이 등록되면 여기에 표시됩니다.</p>
+                </div>
               )}
               {activeNoticeTab === 'bulletin' && bulletins.length > 0 && (
                 <div className="p-6 border-t border-gray-100">
@@ -814,33 +822,53 @@ export default function Home() {
                 className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
+                  {/* 썸네일 이미지 (항상 표시) */}
                   <img
                     src={album.cover}
                     alt={album.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
                     style={{ backgroundColor: '#f3f4f6' }}
                     loading="lazy"
                     decoding="async"
                     onLoad={(e) => {
-                      const img = e.currentTarget
-                      img.style.backgroundColor = 'transparent'
-                      
-                      // 썸네일 로드 완료 후 원본으로 교체 (있는 경우)
-                      if (album.originalCover && album.cover !== album.originalCover) {
-                        const originalImg = new Image()
-                        originalImg.onload = () => {
-                          img.src = album.originalCover!
-                        }
-                        originalImg.src = album.originalCover
-                      }
-                    }}
-                    onError={(e) => {
-                      // 썸네일 로드 실패 시 원본 시도
-                      if (album.originalCover && e.currentTarget.src !== album.originalCover) {
-                        e.currentTarget.src = album.originalCover
-                      }
+                      e.currentTarget.style.backgroundColor = 'transparent'
                     }}
                   />
+                  {/* 원본 이미지 (썸네일과 다를 때만, 부드럽게 전환) */}
+                  {album.originalCover && album.cover !== album.originalCover && (
+                    <img
+                      src={album.originalCover}
+                      alt={album.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 group-hover:opacity-100"
+                      style={{ backgroundColor: 'transparent' }}
+                      loading="lazy"
+                      decoding="async"
+                      onLoad={(e) => {
+                        // 원본이 로드되면 썸네일을 숨기고 원본을 표시
+                        const container = e.currentTarget.parentElement
+                        if (container) {
+                          const thumbnail = container.querySelector('img:first-of-type') as HTMLImageElement
+                          if (thumbnail) {
+                            thumbnail.style.opacity = '0'
+                          }
+                          e.currentTarget.style.opacity = '1'
+                        }
+                      }}
+                      onError={(e) => {
+                        // 원본 로드 실패 시 썸네일 유지
+                        e.currentTarget.style.display = 'none'
+                        const container = e.currentTarget.parentElement
+                        if (container) {
+                          const thumbnail = container.querySelector('img:first-of-type') as HTMLImageElement
+                          if (thumbnail) {
+                            thumbnail.style.opacity = '1'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                  {/* 호버 시 스케일 효과를 위한 래퍼 */}
+                  <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105 pointer-events-none"></div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
                   <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-400">
                     <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 backdrop-blur text-white text-xs font-medium">
