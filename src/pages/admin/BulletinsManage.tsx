@@ -77,15 +77,35 @@ export default function BulletinsManage() {
     }
 
     try {
-      setBulletins(newBulletins) // 즉시 UI 업데이트
-      await saveBulletins(newBulletins) // 네이버 클라우드에 저장
+      console.log('[BulletinsManage] 주보 저장 시작:', {
+        editingId,
+        newBulletinsCount: newBulletins.length,
+        newBulletins: newBulletins.map(b => ({ id: b.id, title: b.title, fileUrl: b.fileUrl?.substring(0, 50) }))
+      })
+      
+      // 네이버 클라우드에 저장
+      await saveBulletins(newBulletins)
+      
       console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
+      
+      // 저장 완료 후 서버에서 다시 로드하여 저장 확인
+      await new Promise(resolve => setTimeout(resolve, 500))
+      const verifyBulletins = await getBulletins(true) // 서버에서 다시 로드하여 저장 확인
+      console.log('[BulletinsManage] 저장 후 서버 확인 - 주보 수:', verifyBulletins.length, verifyBulletins.map(b => ({ id: b.id, title: b.title })))
+      
+      // UI 업데이트
+      setBulletins(verifyBulletins)
+      
       // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
       await new Promise(resolve => setTimeout(resolve, 300))
       window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
       resetForm()
     } catch (error) {
       console.error('[BulletinsManage] 주보 저장 실패:', error)
+      // 에러 상세 정보 로깅
+      if (error instanceof Error) {
+        console.error('[BulletinsManage] 에러 상세:', error.message, error.stack)
+      }
       alert('주보 저장 중 오류가 발생했습니다. 다시 시도해 주세요.')
       // 실패 시 원래 상태로 복구
       await loadBulletins(true)

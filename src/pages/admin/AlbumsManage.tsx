@@ -30,7 +30,12 @@ export default function AlbumsManage() {
 
   useEffect(() => {
     const init = async () => {
-      await ensureDefaultAlbumExists()
+      // 초기 로드 시에만 기본 앨범 확인 (서버에 데이터가 전혀 없을 때만)
+      const existingAlbums = await getAlbums(true)
+      if (existingAlbums.length === 0) {
+        console.log('[AlbumsManage] 서버에 앨범이 없음 - 기본 앨범 생성 확인')
+        await ensureDefaultAlbumExists()
+      }
       await loadAlbums()
     }
     init()

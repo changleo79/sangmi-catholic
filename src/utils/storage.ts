@@ -300,22 +300,39 @@ const loadDataFromServer = async <T>(type: string, forceRefresh = false): Promis
 // 서버에 데이터 저장 (공통 함수)
 const saveDataToServer = async (type: string, data: any): Promise<boolean> => {
   try {
+    console.log(`[saveDataToServer] ${type} 저장 시작:`, Array.isArray(data) ? `${data.length}개` : '데이터 있음')
+    
+    const requestBody = JSON.stringify({ type, data })
+    console.log(`[saveDataToServer] ${type} 요청 본문 크기:`, requestBody.length, 'bytes')
+    
     const response = await fetch('/api/save-metadata', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ type, data })
+      body: requestBody
     })
+    
     if (response.ok) {
-      console.log(`[saveDataToServer] ${type} 서버 저장 성공`)
+      const result = await response.json()
+      console.log(`[saveDataToServer] ${type} 서버 저장 성공:`, result)
       return true
     } else {
       const text = await response.text()
-      console.warn(`[saveDataToServer] ${type} 서버 저장 실패:`, text)
+      console.error(`[saveDataToServer] ${type} 서버 저장 실패:`, response.status, response.statusText, text)
+      // 에러 응답도 JSON일 수 있으므로 파싱 시도
+      try {
+        const errorJson = JSON.parse(text)
+        console.error(`[saveDataToServer] ${type} 에러 상세:`, errorJson)
+      } catch (e) {
+        // JSON 파싱 실패 시 무시
+      }
     }
   } catch (error) {
-    console.warn(`[saveDataToServer] ${type} 서버 저장 오류:`, error)
+    console.error(`[saveDataToServer] ${type} 서버 저장 오류:`, error)
+    if (error instanceof Error) {
+      console.error(`[saveDataToServer] ${type} 에러 상세:`, error.message, error.stack)
+    }
   }
   return false
 }
@@ -660,17 +677,30 @@ export const getBulletins = async (forceRefresh = false): Promise<BulletinItem[]
 }
 
 export const saveBulletins = async (bulletins: BulletinItem[]): Promise<void> => {
-  // 서버에 저장
-  const success = await saveDataToServer('bulletins', bulletins)
-  if (!success) {
-    throw new Error('서버 저장 실패')
+  try {
+    console.log('[saveBulletins] 저장 시작:', bulletins.length, '개 주보')
+    
+    // 서버에 저장
+    const success = await saveDataToServer('bulletins', bulletins)
+    if (!success) {
+      console.error('[saveBulletins] 서버 저장 실패 - saveDataToServer가 false 반환')
+      throw new Error('서버 저장 실패')
+    }
+    
+    console.log('[saveBulletins] 서버 저장 성공')
+    
+    // 캐시 업데이트
+    cachedData.bulletins = bulletins
+    
+    // 다른 페이지에서 업데이트를 감지할 수 있도록 이벤트 발생
+    window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
+  } catch (error) {
+    console.error('[saveBulletins] 저장 실패:', error)
+    if (error instanceof Error) {
+      console.error('[saveBulletins] 에러 상세:', error.message, error.stack)
+    }
+    throw error
   }
-  
-  // 캐시 업데이트
-  cachedData.bulletins = bulletins
-  
-  // 다른 페이지에서 업데이트를 감지할 수 있도록 이벤트 발생
-  window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
 }
 
 export const exportBulletins = async (): Promise<void> => {
