@@ -57,9 +57,6 @@ export default function Albums() {
     }
   }
 
-  const initializeDefaultAlbum = () => {
-    ensureDefaultAlbumExists()
-  }
 
   const filteredAlbums = useMemo(() => {
     const query = tagQuery.trim().toLowerCase()

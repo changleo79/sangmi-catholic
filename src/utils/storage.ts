@@ -187,11 +187,17 @@ let cachedData: {
 // 초기화 플래그 (한 번만 실행)
 let isInitialized = false
 
+// 초기화 진행 중 플래그 (중복 호출 방지)
+let isInitializing = false
+
 export const initializeData = async (): Promise<void> => {
-  // 이미 초기화되었으면 스킵
-  if (isInitialized) {
+  // 이미 초기화되었거나 초기화 중이면 스킵
+  if (isInitialized || isInitializing) {
     return
   }
+  
+  // 초기화 시작 플래그 설정
+  isInitializing = true
   
   try {
     // 모든 데이터를 서버에서 로드 (초기 로드만)
@@ -225,9 +231,14 @@ export const initializeData = async (): Promise<void> => {
     if (!cachedData.sacraments) cachedData.sacraments = []
     if (cachedData.catechism === undefined) cachedData.catechism = null
     if (!cachedData.bulletins) cachedData.bulletins = []
+    
+    // 초기화 완료 플래그 설정
+    isInitialized = true
   } catch (e) {
     console.error('데이터 초기화 실패:', e)
-    // 에러 발생 시에도 플래그는 유지 (무한 루프 방지)
+  } finally {
+    // 초기화 완료 (성공/실패 관계없이)
+    isInitializing = false
   }
 }
 
