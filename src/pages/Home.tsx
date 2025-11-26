@@ -75,13 +75,19 @@ export default function Home() {
   useEffect(() => {
     loadData()
     
-    // 주보 업데이트 이벤트 리스너
     // 주보 업데이트 이벤트 리스너만 유지 (어드민에서 저장 시에만 새로고침)
     const handleBulletinsUpdate = async () => {
       // 서버 저장 완료 대기 후 로드
       await new Promise(resolve => setTimeout(resolve, 300))
       const storedBulletins = await getBulletins(true) // 업데이트 이벤트 시에만 강제 새로고침
-      setBulletins(storedBulletins.slice(0, 6))
+      const newBulletins = storedBulletins.slice(0, 6)
+      // 데이터가 실제로 변경되었을 때만 상태 업데이트
+      setBulletins(prev => {
+        if (prev.length === newBulletins.length && prev.every((b, i) => b.id === newBulletins[i]?.id)) {
+          return prev
+        }
+        return newBulletins
+      })
     }
     
     window.addEventListener('bulletinsUpdated', handleBulletinsUpdate)
