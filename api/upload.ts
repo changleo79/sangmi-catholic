@@ -205,7 +205,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 .webp({ quality: 70 }) // WebP 포맷으로 압축 (품질 70%로 용량 최소화)
                 .toBuffer()
 
-              const thumbnailKey = `albums/${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
+              // bulletins 폴더인 경우 bulletins/thumbnails 경로 사용, 그 외는 albums 경로 사용
+              const thumbnailKey = folder === 'bulletins'
+                ? `bulletins/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
+                : `albums/${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
               
               await s3Client.send(
                 new PutObjectCommand({
