@@ -109,14 +109,15 @@ export default function Home() {
         return true
       })
       
-      // 썸네일과 원본 URL 모두 저장 (Albums 페이지와 동일한 방식)
+      // 원본 URL 우선 사용 (선명도 개선), 썸네일은 백그라운드 로딩용으로만 사용
       const recentAlbums = savedAlbums.slice(0, 4).map(album => {
         const firstPhoto = album.photos && album.photos.length > 0 ? album.photos[0] : null
         const thumbnailUrl = firstPhoto?.thumbnailUrl
         const originalUrl = album.cover || firstPhoto?.src || ''
+        // 원본 URL을 우선 사용하여 선명도 개선
         return {
           id: album.id,
-          cover: thumbnailUrl || originalUrl, // 썸네일 우선, 없으면 원본
+          cover: originalUrl || thumbnailUrl || '', // 원본 우선, 없으면 썸네일
           thumbnailUrl: thumbnailUrl || undefined,
           originalUrl: originalUrl || undefined,
           title: album.title
@@ -880,13 +881,12 @@ export default function Home() {
                       const img = e.currentTarget
                       img.style.backgroundColor = 'transparent'
                       
-                      // 썸네일이 로드되었고 원본이 있으면 백그라운드에서 원본 로드 후 교체 (Albums 페이지와 동일)
-                      if (album.thumbnailUrl && album.originalUrl && img.src === album.thumbnailUrl) {
-                        const originalImg = new Image()
-                        originalImg.onload = () => {
-                          img.src = album.originalUrl!
+                      // 원본 URL이 있고 현재 썸네일을 표시 중이면 원본으로 교체 (선명도 개선)
+                      if (album.originalUrl && album.thumbnailUrl && img.src.includes(album.thumbnailUrl)) {
+                        // 원본이 이미 로드되어 있으면 즉시 교체
+                        if (img.src !== album.originalUrl) {
+                          img.src = album.originalUrl
                         }
-                        originalImg.src = album.originalUrl
                       }
                     }}
                     onError={(e) => {

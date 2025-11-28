@@ -32,6 +32,7 @@ export default function PdfViewerModal({
   onClose
 }: PdfViewerModalProps) {
   const scrollPositionRef = useRef<number>(0)
+  const modalContentRef = useRef<HTMLDivElement>(null)
   const [imageError, setImageError] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const [imageSrc, setImageSrc] = useState<string>(fileUrl)
@@ -47,14 +48,19 @@ export default function PdfViewerModal({
     // 모달이 열릴 때 현재 스크롤 위치 저장 (스크롤 복원용)
     scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
     
-    // 모바일에서 모달이 열릴 때 스크롤을 맨 위로 이동
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
-    if (isMobileDevice) {
-      // 모달 컨텐츠가 상단에 보이도록 스크롤을 맨 위로 이동
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      document.documentElement.scrollTop = 0
-      document.body.scrollTop = 0
-    }
+    // 모달이 열릴 때 모달 컨텐츠 스크롤을 맨 위로 초기화 (모바일/PC 모두)
+    setTimeout(() => {
+      if (modalContentRef.current) {
+        modalContentRef.current.scrollTop = 0
+      }
+      // 모바일에서 페이지 스크롤도 맨 위로 이동
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
+      if (isMobileDevice) {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+        document.documentElement.scrollTop = 0
+        document.body.scrollTop = 0
+      }
+    }, 0)
     
     // body 스크롤은 허용 (모달 바깥에서 스크롤)
     // 모달은 fixed로 배치하되, body는 자유롭게 스크롤 가능
@@ -230,6 +236,7 @@ export default function PdfViewerModal({
         </header>
 
         <div 
+          ref={modalContentRef}
           data-pdf-modal-content
           className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden" 
           style={{ 
