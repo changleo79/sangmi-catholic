@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
@@ -155,6 +156,7 @@ function App() {
               <BottomNav />
               <Footer />
               <ScrollToTop />
+              <SpeedInsights />
             </div>
           }
         />
