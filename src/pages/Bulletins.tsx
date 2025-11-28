@@ -230,21 +230,20 @@ export default function Bulletins() {
             <p className="text-gray-500 text-lg">등록된 주보가 없습니다.</p>
           </div>
         )}
-
-        {/* PDF Viewer Modal */}
-        {selectedBulletin && selectedBulletin.fileUrl && (
-          <PdfViewerModal
-            isOpen={isPdfModalOpen}
-            title={selectedBulletin.title}
-            description={selectedBulletin.description}
-            fileUrl={selectedBulletin.fileUrl}
-            onClose={() => {
-              setIsPdfModalOpen(false)
-              setTimeout(() => setSelectedBulletin(null), 300)
-            }}
-          />
-        )}
       </div>
+      {/* PDF Viewer Modal - News 페이지와 동일한 위치로 이동 */}
+      {selectedBulletin && selectedBulletin.fileUrl && (
+        <PdfViewerModal
+          isOpen={isPdfModalOpen}
+          title={selectedBulletin.title}
+          description={selectedBulletin.description}
+          fileUrl={selectedBulletin.fileUrl}
+          onClose={() => {
+            setIsPdfModalOpen(false)
+            setTimeout(() => setSelectedBulletin(null), 300)
+          }}
+        />
+      )}
     </div>
   )
 }
