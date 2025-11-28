@@ -49,9 +49,16 @@ export default function PdfViewerModal({
     scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
     
     // 모달이 열릴 때 모달 컨텐츠 스크롤을 맨 위로 초기화 (모바일/PC 모두)
-    setTimeout(() => {
+    // 여러 번 시도하여 확실하게 스크롤 초기화
+    const resetScroll = () => {
       if (modalContentRef.current) {
         modalContentRef.current.scrollTop = 0
+        // 강제로 스크롤 위치 확인
+        requestAnimationFrame(() => {
+          if (modalContentRef.current) {
+            modalContentRef.current.scrollTop = 0
+          }
+        })
       }
       // 모바일에서 페이지 스크롤도 맨 위로 이동
       const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
@@ -60,7 +67,12 @@ export default function PdfViewerModal({
         document.documentElement.scrollTop = 0
         document.body.scrollTop = 0
       }
-    }, 0)
+    }
+    
+    // 즉시 실행 및 약간의 지연 후 재실행 (모달 렌더링 완료 대기)
+    resetScroll()
+    setTimeout(resetScroll, 10)
+    setTimeout(resetScroll, 100)
     
     // body 스크롤은 허용 (모달 바깥에서 스크롤)
     // 모달은 fixed로 배치하되, body는 자유롭게 스크롤 가능
@@ -194,7 +206,7 @@ export default function PdfViewerModal({
         }
       }}
     >
-      <div className="relative w-full h-full sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-visible flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
+      <div className="relative w-full h-full sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
