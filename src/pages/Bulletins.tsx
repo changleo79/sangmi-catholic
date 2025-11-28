@@ -155,9 +155,7 @@ export default function Bulletins() {
                         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         style={{ 
                           backgroundColor: '#f3f4f6', 
-                          pointerEvents: 'none',
-                          imageRendering: 'high-quality',
-                          imageRendering: '-webkit-optimize-contrast'
+                          pointerEvents: 'none'
                         }}
                         onLoad={(e) => {
                           (e.target as HTMLImageElement).style.backgroundColor = 'transparent'

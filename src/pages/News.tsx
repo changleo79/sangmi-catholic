@@ -378,9 +378,7 @@ export default function News() {
                                 objectFit: 'cover',
                                 objectPosition: 'center',
                                 backgroundColor: '#f3f4f6', // 로딩 중 배경색
-                                pointerEvents: 'none', // 이미지 클릭 방지 (부모 div에서 처리)
-                                imageRendering: 'high-quality', // 고해상도 렌더링
-                                imageRendering: '-webkit-optimize-contrast' // 웹킷 최적화
+                                pointerEvents: 'none' // 이미지 클릭 방지 (부모 div에서 처리)
                               }}
                               loading={bulletins.indexOf(bulletin) < 3 ? "eager" : "lazy"}
                               decoding="async"
