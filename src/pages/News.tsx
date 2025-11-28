@@ -6,6 +6,21 @@ import { getRecruitments, getBulletins, type RecruitmentItem, type BulletinItem 
 import PdfViewerModal from '../components/PdfViewerModal'
 import type { NoticeItem } from '../data/notices'
 
+// 이미지 URL을 프록시를 통해 로드하는 함수
+const getProxiedImageUrl = (url: string): string => {
+  // data: URL이나 같은 도메인 이미지는 그대로 사용
+  if (url.startsWith('data:') || url.startsWith('/')) {
+    return url
+  }
+  
+  // 외부 이미지는 프록시를 통해 로드
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`
+  }
+  
+  return url
+}
+
 export default function News() {
   const [notices, setNotices] = useState<NoticeItem[]>([])
   const [recruit, setRecruit] = useState<RecruitmentItem[]>([])
@@ -272,19 +287,22 @@ export default function News() {
                   >
                     <div className="flex flex-col h-full">
                       {(() => {
-                        // 썸네일 URL 우선, 없으면 fileUrl이 이미지인 경우 사용
+                        // 썸네일 URL 우선, 없거나 빈 문자열이면 fileUrl이 이미지인 경우 사용
                         // PDF 파일인 경우도 fileUrl을 썸네일로 사용 (iframe으로 표시)
                         const isImageFile = bulletin.fileUrl && (
                           bulletin.fileUrl.startsWith('data:image/') || 
-                          bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                          bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ||
                           (bulletin.fileUrl.startsWith('http') && bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
                         )
-                        const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
+                        // thumbnailUrl이 없거나 빈 문자열이면 이미지 파일인 경우 fileUrl 사용
+                        const thumbnailUrl = (bulletin.thumbnailUrl && bulletin.thumbnailUrl.trim() !== '') 
+                          ? bulletin.thumbnailUrl 
+                          : (isImageFile ? bulletin.fileUrl : null)
                         
                         return thumbnailUrl ? (
                           <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-gray-100" style={{ minHeight: '200px', maxHeight: '400px' }}>
                             <img
-                              src={thumbnailUrl}
+                              src={getProxiedImageUrl(thumbnailUrl)}
                               alt={bulletin.title}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                               style={{ 
@@ -296,15 +314,24 @@ export default function News() {
                                 backgroundColor: '#f3f4f6', // 로딩 중 배경색
                                 pointerEvents: 'none' // 이미지 클릭 방지 (부모 div에서 처리)
                               }}
-                              loading="lazy"
+                              loading={bulletins.indexOf(bulletin) < 3 ? "eager" : "lazy"}
                               decoding="async"
-                              crossOrigin={thumbnailUrl.startsWith('http') && !thumbnailUrl.startsWith('data:') ? 'anonymous' : undefined}
+                              fetchPriority={bulletins.indexOf(bulletin) < 3 ? "high" : "auto"}
+                              width="300"
+                              height="400"
                               draggable={false}
                               onDragStart={(e) => e.preventDefault()}
                               onError={(e) => {
-                                console.error('[News] 썸네일 이미지 로드 실패:', thumbnailUrl, e)
+                                console.error('[News] 썸네일 이미지 로드 실패:', thumbnailUrl, '프록시 URL:', e.currentTarget.src)
+                                const target = e.currentTarget as HTMLImageElement
+                                // 프록시 실패 시 프록시 URL에 타임스탬프 추가하여 재시도 (원본 URL로 재시도하지 않음)
+                                if (target.src.includes('/api/proxy-image') && !target.src.includes('_retry=')) {
+                                  console.log('[News] 프록시 실패, 프록시 URL 재시도:', thumbnailUrl)
+                                  const proxiedUrl = getProxiedImageUrl(thumbnailUrl)
+                                  target.src = `${proxiedUrl}&_retry=${Date.now()}`
+                                  return
+                                }
                                 // 이미지 로드 실패 시 PDF 아이콘 표시
-                                const target = e.currentTarget
                                 target.style.display = 'none'
                                 const parent = target.parentElement
                                 if (parent) {
@@ -322,12 +349,8 @@ export default function News() {
                               }}
                               onLoad={(e) => {
                                 // 로드 성공 시 배경색 제거
-                                e.currentTarget.style.backgroundColor = ''
-                                // 로드 성공 시 배경색 제거
                                 const target = e.currentTarget
                                 target.style.backgroundColor = 'transparent'
-                              }}
-                              onLoadStart={() => {
                               }}
                             />
                           </div>

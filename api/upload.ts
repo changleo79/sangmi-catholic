@@ -192,51 +192,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const cdnDomain = requiredEnv.cdnDomain.replace(/\/$/, '')
           const cdnUrl = `https://${cdnDomain}/${cdnPath}`
 
-          // 이미지인 경우 썸네일 생성 (작은 용량으로 최적화)
+          // 이미지인 경우 원본 URL을 썸네일로 사용 (별도 썸네일 생성 불필요)
+          // 앨범의 경우에만 썸네일 생성 (주보는 원본 사용)
           let thumbnailUrl: string | undefined = undefined
           if (isImage) {
-            try {
-              // 썸네일 생성 (200x200, cover-fit, WebP 포맷으로 압축, 품질 70%로 용량 최소화)
-              const thumbnailBuffer = await sharp(file.buffer)
-                .resize(200, 200, {
-                  fit: 'cover',
-                  position: 'center'
-                })
-                .webp({ quality: 70 }) // WebP 포맷으로 압축 (품질 70%로 용량 최소화)
-                .toBuffer()
+            if (folder === 'bulletins') {
+              // 주보는 원본 URL을 썸네일로 사용
+              thumbnailUrl = cdnUrl
+            } else {
+              // 앨범은 썸네일 생성 (성능 최적화)
+              try {
+                // 썸네일 생성 (200x200, cover-fit, WebP 포맷으로 압축, 품질 70%로 용량 최소화)
+                const thumbnailBuffer = await sharp(file.buffer)
+                  .resize(200, 200, {
+                    fit: 'cover',
+                    position: 'center'
+                  })
+                  .webp({ quality: 70 }) // WebP 포맷으로 압축 (품질 70%로 용량 최소화)
+                  .toBuffer()
 
-              // bulletins 폴더인 경우 bulletins/thumbnails 경로 사용, 그 외는 albums 경로 사용
-              const thumbnailKey = folder === 'bulletins'
-                ? `bulletins/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
-                : `albums/${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
-              
-              await s3Client.send(
-                new PutObjectCommand({
-                  Bucket: requiredEnv.bucket!,
-                  Key: thumbnailKey,
-                  Body: thumbnailBuffer,
-                  ContentType: 'image/webp',
-                  ACL: 'public-read',
-                  CacheControl: 'public, max-age=31536000, immutable'
-                })
-              )
+                // albums 폴더의 경우만 썸네일 생성
+                const thumbnailKey = `albums/${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
+                
+                await s3Client.send(
+                  new PutObjectCommand({
+                    Bucket: requiredEnv.bucket!,
+                    Key: thumbnailKey,
+                    Body: thumbnailBuffer,
+                    ContentType: 'image/webp',
+                    ACL: 'public-read',
+                    CacheControl: 'public, max-age=31536000, immutable'
+                  })
+                )
 
-              // 썸네일 CDN URL 생성
-              let thumbnailCdnPath = thumbnailKey
-              if (cdnPathPrefix) {
-                const prefix = cdnPathPrefix.replace(/^\/|\/$/g, '')
-                if (prefix && thumbnailKey.startsWith(prefix + '/')) {
-                  thumbnailCdnPath = thumbnailKey.substring(prefix.length + 1)
-                } else if (prefix && thumbnailKey.startsWith(prefix)) {
-                  thumbnailCdnPath = thumbnailKey.substring(prefix.length)
+                // 썸네일 CDN URL 생성
+                let thumbnailCdnPath = thumbnailKey
+                if (cdnPathPrefix) {
+                  const prefix = cdnPathPrefix.replace(/^\/|\/$/g, '')
+                  if (prefix && thumbnailKey.startsWith(prefix + '/')) {
+                    thumbnailCdnPath = thumbnailKey.substring(prefix.length + 1)
+                  } else if (prefix && thumbnailKey.startsWith(prefix)) {
+                    thumbnailCdnPath = thumbnailKey.substring(prefix.length)
+                  }
                 }
+                
+                thumbnailUrl = `https://${cdnDomain}/${thumbnailCdnPath}`
+                console.log(`[upload] 썸네일 생성 완료: ${thumbnailUrl}`)
+              } catch (thumbnailError) {
+                console.error(`[upload] 썸네일 생성 실패 (${file.originalName}):`, thumbnailError)
+                // 썸네일 생성 실패 시 원본 URL 사용
+                thumbnailUrl = cdnUrl
               }
-              
-              thumbnailUrl = `https://${cdnDomain}/${thumbnailCdnPath}`
-              console.log(`[upload] 썸네일 생성 완료: ${thumbnailUrl}`)
-            } catch (thumbnailError) {
-              console.error(`[upload] 썸네일 생성 실패 (${file.originalName}):`, thumbnailError)
-              // 썸네일 생성 실패해도 원본은 업로드 성공이므로 계속 진행
             }
           }
 

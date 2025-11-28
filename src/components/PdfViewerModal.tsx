@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { fetchPdfBlob } from '../utils/pdf'
 
 interface PdfViewerModalProps {
@@ -9,6 +9,21 @@ interface PdfViewerModalProps {
   onClose: () => void
 }
 
+// 이미지 URL을 프록시를 통해 로드하는 함수
+const getProxiedImageUrl = (url: string): string => {
+  // data: URL이나 같은 도메인 이미지는 그대로 사용
+  if (url.startsWith('data:') || url.startsWith('/')) {
+    return url
+  }
+  
+  // 외부 이미지는 프록시를 통해 로드
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`
+  }
+  
+  return url
+}
+
 export default function PdfViewerModal({
   isOpen,
   title,
@@ -17,10 +32,15 @@ export default function PdfViewerModal({
   onClose
 }: PdfViewerModalProps) {
   const scrollPositionRef = useRef<number>(0)
+  const [imageError, setImageError] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const [imageSrc, setImageSrc] = useState<string>(fileUrl)
 
   useEffect(() => {
     if (!isOpen) {
-      // 모달이 닫힐 때는 특별한 처리 불필요 (body 스크롤이 이미 활성화되어 있음)
+      // 모달이 닫힐 때 상태 초기화
+      setImageError(false)
+      setRetryCount(0)
       return
     }
 
@@ -42,6 +62,23 @@ export default function PdfViewerModal({
       window.removeEventListener('keydown', handleEscape)
     }
   }, [isOpen, onClose])
+
+  // fileUrl이 변경되면 에러 상태 초기화 및 이미지 소스 업데이트
+  useEffect(() => {
+    setImageError(false)
+    setRetryCount(0)
+    
+    // 이미지 파일인 경우 프록시 URL 사용
+    const isImage = fileUrl.startsWith('data:image/') || 
+                   fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ||
+                   (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
+    
+    if (isImage) {
+      setImageSrc(getProxiedImageUrl(fileUrl))
+    } else {
+      setImageSrc(fileUrl)
+    }
+  }, [fileUrl])
 
 
 
@@ -198,46 +235,65 @@ export default function PdfViewerModal({
             
             return isImage ? (
                 <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
-                  <img
-                    src={fileUrl}
-                    alt={title}
-                    className="w-full h-auto object-contain"
-                    style={{ 
-                      maxWidth: '100%', 
-                      display: 'block',
-                      backgroundColor: '#f3f4f6', // 로딩 중 배경색
-                      minHeight: '400px'
-                    }}
-                    crossOrigin={fileUrl.startsWith('http') && !fileUrl.startsWith('data:') ? 'anonymous' : undefined}
-                    onError={(e) => {
-                      console.error('[PdfViewerModal] 이미지 로드 실패:', fileUrl, e)
-                      const target = e.currentTarget
-                      target.style.display = 'none'
-                      const parent = target.parentElement
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
-                            <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p>이미지를 불러올 수 없습니다.</p>
-                            <p class="text-xs text-gray-400 mt-2">URL: ${fileUrl.substring(0, 50)}...</p>
-                          </div>
-                        `
-                      }
-                    }}
-                    onLoad={(e) => {
-                      // 로드 성공 시 배경색 제거
-                      e.currentTarget.style.backgroundColor = ''
-                      console.log('[PdfViewerModal] 이미지 로드 성공:', fileUrl)
-                      // 로드 성공 시 배경색 제거
-                      const target = e.currentTarget
-                      target.style.backgroundColor = 'transparent'
-                    }}
-                    onLoadStart={() => {
-                      console.log('[PdfViewerModal] 이미지 로드 시작:', fileUrl)
-                    }}
-                  />
+                  {imageError ? (
+                    <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
+                      <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-center mb-2">이미지를 불러올 수 없습니다.</p>
+                      <p className="text-xs text-gray-400 mb-4 break-all text-center px-4">
+                        URL: {fileUrl.length > 80 ? `${fileUrl.substring(0, 80)}...` : fileUrl}
+                      </p>
+                      {retryCount < 2 && (
+                        <button
+                          onClick={() => {
+                            setImageError(false)
+                            setRetryCount(prev => prev + 1)
+                          }}
+                          className="px-4 py-2 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-sm"
+                        >
+                          다시 시도
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <img
+                      key={`img-${imageSrc}-${retryCount}`}
+                      src={imageSrc}
+                      alt={title}
+                      className="w-full h-auto object-contain"
+                      style={{ 
+                        maxWidth: '100%', 
+                        display: 'block',
+                        backgroundColor: '#f3f4f6', // 로딩 중 배경색
+                        minHeight: '400px'
+                      }}
+                      loading="eager"
+                      decoding="async"
+                      onError={(e) => {
+                        console.error('[PdfViewerModal] 이미지 로드 실패:', imageSrc, fileUrl)
+                        // 프록시를 통해 로드했는데 실패하면 프록시 URL에 타임스탬프 추가하여 재시도 (원본 URL로 재시도하지 않음)
+                        if (imageSrc.includes('/api/proxy-image') && retryCount < 2 && !imageSrc.includes('_retry=')) {
+                          console.log('[PdfViewerModal] 프록시 실패, 프록시 URL 재시도:', fileUrl)
+                          const proxiedUrl = getProxiedImageUrl(fileUrl)
+                          setImageSrc(`${proxiedUrl}&_retry=${Date.now()}`)
+                          setRetryCount(prev => prev + 1)
+                        } else {
+                          setImageError(true)
+                        }
+                      }}
+                      onLoad={(e) => {
+                        // 로드 성공 시 배경색 제거
+                        const target = e.currentTarget
+                        target.style.backgroundColor = 'transparent'
+                        setImageError(false)
+                        console.log('[PdfViewerModal] 이미지 로드 성공:', imageSrc)
+                      }}
+                      onLoadStart={() => {
+                        console.log('[PdfViewerModal] 이미지 로드 시작:', imageSrc)
+                      }}
+                    />
+                  )}
                 </div>
               ) : (
                 <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: '600px', height: '80vh' }}>

@@ -38,16 +38,17 @@ export default function AlbumsManage() {
   }, [])
 
   const loadAlbums = async () => {
-    console.log('[AlbumsManage] 서버에서 앨범 로드 시작')
-    // 캐시 무효화하고 서버에서 강제 로드
-    if ((window as any).__albumsCache) {
-      delete (window as any).__albumsCache
+    console.log('[AlbumsManage] 앨범 로드 시작')
+    // 먼저 캐시된 데이터를 빠르게 표시
+    const cachedAlbums = await getAlbums(false) // 캐시 우선 사용
+    if (cachedAlbums.length > 0) {
+      setAlbums(cachedAlbums)
+      console.log('[AlbumsManage] 캐시된 앨범 표시:', cachedAlbums.length, '개')
     }
-    if ((window as any).cachedData && (window as any).cachedData.albums) {
-      (window as any).cachedData.albums = undefined
-    }
+    
+    // 백그라운드에서 서버에서 최신 데이터 로드
     const stored = await getAlbums(true) // 서버에서 강제 로드
-    console.log('[AlbumsManage] 서버에서 앨범 로드 완료:', stored.length, '개', stored.map(a => ({ id: a.id, title: a.title })))
+    console.log('[AlbumsManage] 서버에서 앨범 로드 완료:', stored.length, '개')
     setAlbums(stored)
   }
 

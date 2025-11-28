@@ -175,6 +175,8 @@ export default function Albums() {
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
                         decoding="async"
+                        width="400"
+                        height="300"
                         style={{ backgroundColor: '#f3f4f6' }}
                         onLoad={(e) => {
                           const img = e.currentTarget

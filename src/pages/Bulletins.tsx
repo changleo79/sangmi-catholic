@@ -2,6 +2,21 @@ import { useState, useEffect } from 'react'
 import { getBulletins, type BulletinItem } from '../utils/storage'
 import PdfViewerModal from '../components/PdfViewerModal'
 
+// 이미지 URL을 프록시를 통해 로드하는 함수
+const getProxiedImageUrl = (url: string): string => {
+  // data: URL이나 같은 도메인 이미지는 그대로 사용
+  if (url.startsWith('data:') || url.startsWith('/')) {
+    return url
+  }
+  
+  // 외부 이미지는 프록시를 통해 로드
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`
+  }
+  
+  return url
+}
+
 // 모바일 감지 함수
 const isMobile = () => {
   return window.innerWidth < 768 || 
@@ -72,14 +87,17 @@ export default function Bulletins() {
         {bulletins.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {bulletins.map((bulletin) => {
-              // 썸네일 URL 우선, 없으면 fileUrl이 이미지인 경우 사용
+              // 썸네일 URL 우선, 없거나 빈 문자열이면 fileUrl이 이미지인 경우 사용
               const isImageFile = bulletin.fileUrl && (
                 bulletin.fileUrl.startsWith('data:image/') || 
-                bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ||
                 (bulletin.fileUrl.startsWith('http') && bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
               )
               
-              const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
+              // thumbnailUrl이 없거나 빈 문자열이면 이미지 파일인 경우 fileUrl 사용
+              const thumbnailUrl = (bulletin.thumbnailUrl && bulletin.thumbnailUrl.trim() !== '') 
+                ? bulletin.thumbnailUrl 
+                : (isImageFile ? bulletin.fileUrl : null)
               
               return (
                 <div
@@ -126,19 +144,28 @@ export default function Bulletins() {
                   <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
                     {thumbnailUrl ? (
                       <img
-                        src={thumbnailUrl}
+                        src={getProxiedImageUrl(thumbnailUrl)}
                         alt={bulletin.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        crossOrigin="anonymous"
-                        loading="lazy"
+                        loading={bulletins.indexOf(bulletin) < 6 ? "eager" : "lazy"}
                         decoding="async"
+                        fetchPriority={bulletins.indexOf(bulletin) < 6 ? "high" : "auto"}
+                        width="300"
+                        height="400"
                         style={{ backgroundColor: '#f3f4f6', pointerEvents: 'none' }}
                         onLoad={(e) => {
                           (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
                         }}
                         onError={(e) => {
-                          console.error('[Bulletins] 썸네일 로드 실패:', thumbnailUrl)
+                          console.error('[Bulletins] 썸네일 로드 실패:', thumbnailUrl, '프록시 URL:', (e.target as HTMLImageElement).src)
                           const target = e.target as HTMLImageElement
+                          // 프록시 실패 시 프록시 URL에 타임스탬프 추가하여 재시도 (원본 URL로 재시도하지 않음)
+                          if (target.src.includes('/api/proxy-image') && !target.src.includes('_retry=')) {
+                            console.log('[Bulletins] 프록시 실패, 프록시 URL 재시도:', thumbnailUrl)
+                            const proxiedUrl = getProxiedImageUrl(thumbnailUrl)
+                            target.src = `${proxiedUrl}&_retry=${Date.now()}`
+                            return
+                          }
                           target.style.display = 'none'
                           const parent = target.parentElement
                           if (parent) {

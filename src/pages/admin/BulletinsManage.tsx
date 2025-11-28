@@ -2,12 +2,26 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { getBulletins, saveBulletins, type BulletinItem } from '../../utils/storage'
 
+// 이미지 URL을 프록시를 통해 로드하는 함수
+const getProxiedImageUrl = (url: string): string => {
+  // data: URL이나 같은 도메인 이미지는 그대로 사용
+  if (url.startsWith('data:') || url.startsWith('/')) {
+    return url
+  }
+  
+  // 외부 이미지는 프록시를 통해 로드
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return `/api/proxy-image?url=${encodeURIComponent(url)}`
+  }
+  
+  return url
+}
+
 export default function BulletinsManage() {
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
   const [isEditing, setIsEditing] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [pdfInputType, setPdfInputType] = useState<'upload' | 'url'>('upload')
-  const [thumbnailInputType, setThumbnailInputType] = useState<'upload' | 'url'>('url')
   const [formData, setFormData] = useState<Omit<BulletinItem, 'id'>>({
     title: '',
     date: new Date().toISOString().split('T')[0],
@@ -17,13 +31,13 @@ export default function BulletinsManage() {
   })
 
   useEffect(() => {
-    // 어드민 진입 시 항상 네이버 클라우드에서 최신 데이터 로드
-    console.log('[BulletinsManage] 어드민 페이지 진입 - 네이버 클라우드에서 최신 데이터 로드')
-    loadBulletins(true) // 항상 서버에서 강제 로드
+    // 어드민 진입 시 캐시 먼저 표시, 백그라운드에서 최신 데이터 로드
+    console.log('[BulletinsManage] 어드민 페이지 진입')
+    loadBulletins(false) // 먼저 캐시 표시
     
     // 페이지 포커스 시에도 최신 데이터 로드 (다른 탭에서 네이버 클라우드 수정 시 반영)
     const handleFocus = () => {
-      console.log('[BulletinsManage] 페이지 포커스 - 네이버 클라우드에서 최신 데이터 로드')
+      console.log('[BulletinsManage] 페이지 포커스 - 최신 데이터 로드')
       loadBulletins(true)
     }
     
@@ -35,17 +49,19 @@ export default function BulletinsManage() {
 
   const loadBulletins = async (forceRefresh = false) => {
     console.log('[BulletinsManage] 주보 로드 시작 - forceRefresh:', forceRefresh)
-    if (forceRefresh) {
-      // 캐시 무효화하고 서버에서 강제 로드
-      if ((window as any).__bulletinsCache) {
-        delete (window as any).__bulletinsCache
-      }
-      if ((window as any).cachedData && (window as any).cachedData.bulletins) {
-        (window as any).cachedData.bulletins = undefined
+    
+    // 먼저 캐시된 데이터를 빠르게 표시 (앨범처럼)
+    if (!forceRefresh) {
+      const cachedBulletins = await getBulletins(false) // 캐시 우선 사용
+      if (cachedBulletins.length > 0) {
+        setBulletins(cachedBulletins)
+        console.log('[BulletinsManage] 캐시된 주보 표시:', cachedBulletins.length, '개')
       }
     }
-    const stored = await getBulletins(forceRefresh) // forceRefresh에 따라 캐시 사용 또는 서버 로드
-    console.log('[BulletinsManage] 주보 로드 완료:', stored.length, '개', stored.map(b => ({ id: b.id, title: b.title })))
+    
+    // 백그라운드에서 서버에서 최신 데이터 로드 (setTimeout 제거 - 즉시 처리)
+    const stored = await getBulletins(forceRefresh)
+    console.log('[BulletinsManage] 서버에서 주보 로드 완료:', stored.length, '개')
     setBulletins(stored)
   }
 
@@ -58,22 +74,42 @@ export default function BulletinsManage() {
       return
     }
     
-    // 먼저 서버에서 최신 데이터 로드하여 동기화
-    const latestBulletins = await getBulletins(true) // 네이버 클라우드에서 최신 데이터 가져오기
-    const newBulletins = [...latestBulletins]
+    // 이미지 파일인지 확인하고 썸네일 자동 설정
+    const isImageFile = formData.fileUrl && (
+      formData.fileUrl.startsWith('data:image/') ||
+      formData.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
+    )
+    
+    // 이미지 파일이면 자동으로 원본 URL을 썸네일로 사용
+    // 이미지 파일이 아니면 썸네일을 빈 문자열로 설정 (PDF 아이콘 표시)
+    const finalFormData = {
+      ...formData,
+      thumbnailUrl: isImageFile ? formData.fileUrl : ''
+    }
+    
+    console.log('[BulletinsManage] 저장 시 썸네일 설정:', {
+      fileUrl: finalFormData.fileUrl?.substring(0, 80),
+      isImageFile,
+      thumbnailUrl: finalFormData.thumbnailUrl?.substring(0, 80),
+      thumbnailUrlLength: finalFormData.thumbnailUrl?.length
+    })
+    
+    // 현재 상태를 기반으로 업데이트 (서버 재로드 불필요)
+    const currentBulletins = [...bulletins]
+    const newBulletins = [...currentBulletins]
 
     if (editingId) {
       const index = newBulletins.findIndex(b => b.id === editingId)
       if (index !== -1) {
-        newBulletins[index] = { ...formData, id: editingId }
+        newBulletins[index] = { ...finalFormData, id: editingId }
       } else {
         // 수정 중인 주보가 서버에 없으면 추가
-        newBulletins.unshift({ ...formData, id: editingId })
+        newBulletins.unshift({ ...finalFormData, id: editingId })
       }
     } else {
       // 고유 ID 생성 (Date.now() + 랜덤 문자열로 충돌 방지)
       const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-      newBulletins.unshift({ ...formData, id: newId })
+      newBulletins.unshift({ ...finalFormData, id: newId })
     }
 
     try {
@@ -83,21 +119,15 @@ export default function BulletinsManage() {
         newBulletins: newBulletins.map(b => ({ id: b.id, title: b.title, fileUrl: b.fileUrl?.substring(0, 50) }))
       })
       
+      // 낙관적 업데이트: 즉시 UI 업데이트
+      setBulletins(newBulletins)
+      
       // 네이버 클라우드에 저장
       await saveBulletins(newBulletins)
       
-      console.log('[BulletinsManage] 주보 저장 완료 (서버 동기화):', newBulletins.length, '개', newBulletins.map(b => ({ id: b.id, title: b.title })))
+      console.log('[BulletinsManage] 주보 저장 완료:', newBulletins.length, '개')
       
-      // 저장 완료 후 서버에서 다시 로드하여 저장 확인
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const verifyBulletins = await getBulletins(true) // 서버에서 다시 로드하여 저장 확인
-      console.log('[BulletinsManage] 저장 후 서버 확인 - 주보 수:', verifyBulletins.length, verifyBulletins.map(b => ({ id: b.id, title: b.title })))
-      
-      // UI 업데이트
-      setBulletins(verifyBulletins)
-      
-      // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // 이벤트 발생 (지연 없이)
       window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
       resetForm()
     } catch (error) {
@@ -115,16 +145,23 @@ export default function BulletinsManage() {
   const handleEdit = (bulletin: BulletinItem) => {
     // fileUrl이 data:로 시작하면 업로드된 파일, 아니면 URL
     const isFileUploaded = bulletin.fileUrl.startsWith('data:')
-    const isThumbnailUploaded = bulletin.thumbnailUrl?.startsWith('data:')
+    
+    // 이미지 파일인지 확인
+    const isImageFile = bulletin.fileUrl && (
+      bulletin.fileUrl.startsWith('data:image/') ||
+      bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
+    )
     
     setPdfInputType(isFileUploaded ? 'upload' : 'url')
-    setThumbnailInputType(isThumbnailUploaded ? 'upload' : 'url')
+    
+    // 이미지 파일이면 자동으로 원본 URL을 썸네일로 사용
+    const thumbnailUrl = isImageFile ? bulletin.fileUrl : (bulletin.thumbnailUrl || '')
     
     setFormData({
       title: bulletin.title,
       date: bulletin.date,
       fileUrl: bulletin.fileUrl,
-      thumbnailUrl: bulletin.thumbnailUrl || '',
+      thumbnailUrl: thumbnailUrl,
       description: bulletin.description || ''
     })
     setEditingId(bulletin.id)
@@ -135,26 +172,19 @@ export default function BulletinsManage() {
   const handleDelete = async (id: string) => {
     if (confirm('정말 삭제하시겠습니까?')) {
       try {
-        // 먼저 서버에서 최신 데이터 로드하여 동기화
-        const latestBulletins = await getBulletins(true) // 네이버 클라우드에서 최신 데이터 가져오기
-        const newBulletins = latestBulletins.filter(b => b.id !== id)
+        // 낙관적 업데이트: 즉시 UI에서 제거
+        const currentBulletins = [...bulletins]
+        const newBulletins = currentBulletins.filter(b => b.id !== id)
+        setBulletins(newBulletins) // 즉시 UI 업데이트
         
-        console.log('[BulletinsManage] 삭제 전 주보 수:', latestBulletins.length, '삭제 후 주보 수:', newBulletins.length)
+        console.log('[BulletinsManage] 삭제 시작 - 낙관적 업데이트:', id, '남은 주보 수:', newBulletins.length)
         
-        // 네이버 클라우드에 저장
+        // 백그라운드에서 서버 동기화
+        // 현재 상태에서 삭제 (서버에서 최신 데이터 로드 불필요)
         await saveBulletins(newBulletins)
-        console.log('[BulletinsManage] 주보 삭제 저장 완료:', id, '남은 주보 수:', newBulletins.length)
+        console.log('[BulletinsManage] 주보 삭제 저장 완료:', id)
         
-        // 저장 완료 후 약간의 지연을 두고 서버에서 다시 로드하여 저장 확인
-        await new Promise(resolve => setTimeout(resolve, 500))
-        const verifyBulletins = await getBulletins(true) // 서버에서 다시 로드하여 저장 확인
-        console.log('[BulletinsManage] 삭제 후 서버 확인 - 주보 수:', verifyBulletins.length, verifyBulletins.map(b => ({ id: b.id, title: b.title })))
-        
-        // UI 업데이트
-        setBulletins(verifyBulletins)
-        
-        // 서버 저장 완료 후 약간의 지연을 두고 이벤트 발생 (모바일 동기화 보장)
-        await new Promise(resolve => setTimeout(resolve, 300))
+        // 이벤트 발생 (지연 없이)
         window.dispatchEvent(new CustomEvent('bulletinsUpdated'))
       } catch (error) {
         console.error('[BulletinsManage] 주보 삭제 실패:', error)
@@ -174,7 +204,6 @@ export default function BulletinsManage() {
       description: ''
     })
     setPdfInputType('upload')
-    setThumbnailInputType('url')
     setIsEditing(false)
     setEditingId(null)
   }
@@ -213,11 +242,12 @@ export default function BulletinsManage() {
       if (result.uploads && result.uploads.length > 0) {
         const uploadedFile = result.uploads[0]
         const fileUrl = uploadedFile.url
-        const thumbnailUrl = uploadedFile.thumbnailUrl || (isImage ? uploadedFile.url : undefined)
+        // 이미지 파일인 경우 원본 URL을 썸네일로 사용 (별도 썸네일 생성 불필요)
+        const thumbnailUrl = isImage ? fileUrl : (uploadedFile.thumbnailUrl || undefined)
 
-        // 이미지 파일인 경우 자동으로 썸네일로도 사용
-        if (isImage && !formData.thumbnailUrl) {
-          setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl }))
+        // 이미지 파일인 경우 자동으로 원본을 썸네일로 설정
+        if (isImage) {
+          setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl: fileUrl }))
         } else {
           setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl: thumbnailUrl || prev.thumbnailUrl }))
         }
@@ -230,45 +260,6 @@ export default function BulletinsManage() {
     }
   }
 
-  const handleThumbnailFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드 가능합니다.')
-      return
-    }
-
-    try {
-      // 파일을 서버에 업로드 (Base64 대신 서버에 저장)
-      const uploadFormData = new FormData()
-      uploadFormData.append('files', file)
-      uploadFormData.append('albumId', 'bulletins') // 주보는 bulletins 폴더에 저장
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: uploadFormData
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('[BulletinsManage] 썸네일 업로드 실패:', response.status, errorText)
-        throw new Error('파일 업로드 실패')
-      }
-
-      const result = await response.json()
-      if (result.uploads && result.uploads.length > 0) {
-        const uploadedFile = result.uploads[0]
-        const thumbnailUrl = uploadedFile.thumbnailUrl || uploadedFile.url
-        setFormData(prev => ({ ...prev, thumbnailUrl }))
-      } else {
-        throw new Error('업로드 응답에 파일이 없습니다.')
-      }
-    } catch (error) {
-      console.error('[BulletinsManage] 썸네일 업로드 실패:', error)
-      alert('썸네일 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.')
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -376,83 +367,37 @@ export default function BulletinsManage() {
                     <input
                       type="url"
                       value={formData.fileUrl && formData.fileUrl.startsWith('data:') ? '' : (formData.fileUrl || '')}
-                      onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
+                      onChange={(e) => {
+                        const url = e.target.value
+                        // 이미지 파일인 경우 자동으로 썸네일로 설정
+                        const isImageUrl = url && (
+                          url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) || 
+                          url.startsWith('data:image/')
+                        )
+                        setFormData({ 
+                          ...formData, 
+                          fileUrl: url,
+                          // 이미지 파일이면 원본 URL을 썸네일로 사용, 아니면 빈 문자열
+                          thumbnailUrl: isImageUrl ? url : ''
+                        })
+                        console.log('[BulletinsManage] URL 입력 - 썸네일 자동 설정:', {
+                          url: url.substring(0, 50),
+                          isImageUrl,
+                          thumbnailUrl: isImageUrl ? url.substring(0, 50) : ''
+                        })
+                      }}
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                       placeholder="예: /files/bulletin-2025-11.pdf 또는 https://..."
                       required={!formData.fileUrl || !formData.fileUrl.startsWith('data:')}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      💡 PDF 또는 이미지 파일 URL을 입력하세요. (예: /files/bulletin-2025-11.pdf 또는 https://...)
+                      💡 PDF 또는 이미지 파일 URL을 입력하세요. 이미지 파일인 경우 자동으로 썸네일로 설정됩니다.
                     </p>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  썸네일 이미지 (선택)
-                  <span className="ml-2 text-xs font-normal text-gray-500">
-                    💡 JPG 파일 업로드 시 자동으로 썸네일이 설정됩니다. PDF 파일인 경우에만 별도로 썸네일을 올려주세요.
-                  </span>
-                </label>
-                
-                {/* 입력 방식 선택 */}
-                <div className="flex gap-4 mb-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="thumbnailInputType"
-                      value="upload"
-                      checked={thumbnailInputType === 'upload'}
-                      onChange={(e) => setThumbnailInputType(e.target.value as 'upload' | 'url')}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">파일 업로드</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="thumbnailInputType"
-                      value="url"
-                      checked={thumbnailInputType === 'url'}
-                      onChange={(e) => setThumbnailInputType(e.target.value as 'upload' | 'url')}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">URL 입력</span>
-                  </label>
-                </div>
-
-                {thumbnailInputType === 'upload' ? (
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleThumbnailFileUpload}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      💡 이미지 파일을 선택하면 Base64로 변환되어 저장됩니다. (PDF 파일인 경우에만 필요)
-                    </p>
-                    {formData.thumbnailUrl && formData.thumbnailUrl.startsWith('data:') && (
-                      <div className="mt-3 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                        <img src={formData.thumbnailUrl} alt="썸네일 미리보기" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    <input
-                      type="url"
-                      value={formData.thumbnailUrl && formData.thumbnailUrl.startsWith('data:') ? '' : (formData.thumbnailUrl || '')}
-                      onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                      placeholder="예: /files/bulletin-2025-11-thumb.jpg"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      💡 주보의 썸네일 이미지 URL을 입력하세요. 없으면 기본 PDF 아이콘이 표시됩니다. (PDF 파일인 경우에만 필요)
-                    </p>
-                    {formData.thumbnailUrl && !formData.thumbnailUrl.startsWith('data:') && formData.thumbnailUrl.trim() !== '' && (
-                      <div className="mt-3 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                        <img src={formData.thumbnailUrl} alt="썸네일 미리보기" className="w-full h-full object-cover" />
+                    {formData.fileUrl && formData.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) && (
+                      <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-xs text-blue-700">
+                          ✓ 이미지 파일이 감지되었습니다. 썸네일이 자동으로 설정됩니다.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -504,17 +449,58 @@ export default function BulletinsManage() {
                     className="p-4 rounded-lg border border-gray-200 hover:border-catholic-logo/30 transition-all"
                   >
                     <div className="flex items-start gap-4">
-                      {bulletin.thumbnailUrl ? (
-                        <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                          <img src={bulletin.thumbnailUrl} alt={bulletin.title} className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="w-20 h-28 rounded-lg bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-8 h-8 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </div>
-                      )}
+                      {(() => {
+                        // 썸네일 URL이 없으면 이미지 파일인지 확인하여 자동 설정
+                        const isImageFile = bulletin.fileUrl && (
+                          bulletin.fileUrl.startsWith('data:image/') ||
+                          bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
+                        )
+                        const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
+                        
+                        return thumbnailUrl ? (
+                          <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                            <img 
+                              src={getProxiedImageUrl(thumbnailUrl)} 
+                              alt={bulletin.title} 
+                              className="w-full h-full object-cover"
+                              loading={bulletins.indexOf(bulletin) < 10 ? "eager" : "lazy"}
+                              decoding="async"
+                              fetchPriority={bulletins.indexOf(bulletin) < 10 ? "high" : "auto"}
+                              onError={(e) => {
+                                console.error('[BulletinsManage] 썸네일 로드 실패:', thumbnailUrl, '프록시 URL:', e.currentTarget.src)
+                                const target = e.currentTarget as HTMLImageElement
+                                // 프록시 실패 시 프록시 URL에 타임스탬프 추가하여 재시도 (원본 URL로 재시도하지 않음)
+                                if (target.src.includes('/api/proxy-image') && !target.src.includes('_retry=')) {
+                                  console.log('[BulletinsManage] 프록시 실패, 프록시 URL 재시도:', thumbnailUrl)
+                                  const proxiedUrl = getProxiedImageUrl(thumbnailUrl)
+                                  target.src = `${proxiedUrl}&_retry=${Date.now()}`
+                                  return
+                                }
+                                target.style.display = 'none'
+                                const parent = target.parentElement
+                                if (parent) {
+                                  parent.innerHTML = `
+                                    <div class="w-20 h-28 rounded-lg bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center">
+                                      <svg class="w-8 h-8 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                      </svg>
+                                    </div>
+                                  `
+                                }
+                              }}
+                              onLoad={(e) => {
+                                (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-28 rounded-lg bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center flex-shrink-0">
+                            <svg className="w-8 h-8 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </div>
+                        )
+                      })()}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-900 mb-1">{bulletin.title}</h3>
                         <p className="text-sm text-gray-600 mb-1">{bulletin.date}</p>
