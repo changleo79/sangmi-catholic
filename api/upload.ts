@@ -192,27 +192,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const cdnDomain = requiredEnv.cdnDomain.replace(/\/$/, '')
           const cdnUrl = `https://${cdnDomain}/${cdnPath}`
 
-          // 이미지인 경우 원본 URL을 썸네일로 사용 (별도 썸네일 생성 불필요)
-          // 앨범의 경우에만 썸네일 생성 (주보는 원본 사용)
+          // 이미지인 경우 썸네일 생성 (앨범과 주보 모두)
           let thumbnailUrl: string | undefined = undefined
           if (isImage) {
-            if (folder === 'bulletins') {
-              // 주보는 원본 URL을 썸네일로 사용
-              thumbnailUrl = cdnUrl
-            } else {
-              // 앨범은 썸네일 생성 (성능 최적화)
-              try {
-                // 썸네일 생성 (200x200, cover-fit, WebP 포맷으로 압축, 품질 70%로 용량 최소화)
-                const thumbnailBuffer = await sharp(file.buffer)
-                  .resize(200, 200, {
-                    fit: 'cover',
-                    position: 'center'
-                  })
-                  .webp({ quality: 70 }) // WebP 포맷으로 압축 (품질 70%로 용량 최소화)
-                  .toBuffer()
+            // 앨범과 주보 모두 썸네일 생성 (성능 최적화 및 해상도 개선)
+            try {
+              // 주보는 300x400 (3:4 비율), 앨범은 200x200
+              const thumbnailSize = folder === 'bulletins' 
+                ? { width: 300, height: 400 } 
+                : { width: 200, height: 200 }
+              
+              // 썸네일 생성 (cover-fit, WebP 포맷으로 압축, 품질 80%로 해상도 유지)
+              const thumbnailBuffer = await sharp(file.buffer)
+                .resize(thumbnailSize.width, thumbnailSize.height, {
+                  fit: 'cover',
+                  position: 'center'
+                })
+                .webp({ quality: 80 }) // 품질 80%로 해상도 유지
+                .toBuffer()
 
-                // albums 폴더의 경우만 썸네일 생성
-                const thumbnailKey = `albums/${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
+              // 썸네일 키 생성 (앨범과 주보 모두)
+              const thumbnailKey = `${folder}/thumbnails/${safeFileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '.webp')}`
                 
                 await s3Client.send(
                   new PutObjectCommand({
@@ -243,7 +243,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 // 썸네일 생성 실패 시 원본 URL 사용
                 thumbnailUrl = cdnUrl
               }
-            }
           }
 
           return {

@@ -152,7 +152,12 @@ export default function Bulletins() {
                         fetchPriority={bulletins.indexOf(bulletin) < 6 ? "high" : "auto"}
                         width="300"
                         height="400"
-                        style={{ backgroundColor: '#f3f4f6', pointerEvents: 'none' }}
+                        style={{ 
+                          backgroundColor: '#f3f4f6', 
+                          pointerEvents: 'none',
+                          imageRendering: 'high-quality',
+                          imageRendering: '-webkit-optimize-contrast'
+                        }}
                         onLoad={(e) => {
                           (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
                         }}
