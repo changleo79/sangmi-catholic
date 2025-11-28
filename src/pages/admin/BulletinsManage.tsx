@@ -31,14 +31,13 @@ export default function BulletinsManage() {
   })
 
   useEffect(() => {
-    // 어드민 진입 시 캐시 먼저 표시, 백그라운드에서 최신 데이터 로드
-    console.log('[BulletinsManage] 어드민 페이지 진입')
-    loadBulletins(false) // 먼저 캐시 표시
+    // 어드민 진입 시 캐시 먼저 표시, 백그라운드에서 최신 데이터 로드 (앨범처럼)
+    loadBulletins()
     
     // 페이지 포커스 시에도 최신 데이터 로드 (다른 탭에서 네이버 클라우드 수정 시 반영)
     const handleFocus = () => {
       console.log('[BulletinsManage] 페이지 포커스 - 최신 데이터 로드')
-      loadBulletins(true)
+      loadBulletins()
     }
     
     window.addEventListener('focus', handleFocus)
@@ -47,20 +46,17 @@ export default function BulletinsManage() {
     }
   }, [])
 
-  const loadBulletins = async (forceRefresh = false) => {
-    console.log('[BulletinsManage] 주보 로드 시작 - forceRefresh:', forceRefresh)
-    
+  const loadBulletins = async () => {
+    console.log('[BulletinsManage] 주보 로드 시작')
     // 먼저 캐시된 데이터를 빠르게 표시 (앨범처럼)
-    if (!forceRefresh) {
-      const cachedBulletins = await getBulletins(false) // 캐시 우선 사용
-      if (cachedBulletins.length > 0) {
-        setBulletins(cachedBulletins)
-        console.log('[BulletinsManage] 캐시된 주보 표시:', cachedBulletins.length, '개')
-      }
+    const cachedBulletins = await getBulletins(false) // 캐시 우선 사용
+    if (cachedBulletins.length > 0) {
+      setBulletins(cachedBulletins)
+      console.log('[BulletinsManage] 캐시된 주보 표시:', cachedBulletins.length, '개')
     }
     
-    // 백그라운드에서 서버에서 최신 데이터 로드 (setTimeout 제거 - 즉시 처리)
-    const stored = await getBulletins(forceRefresh)
+    // 백그라운드에서 서버에서 최신 데이터 로드
+    const stored = await getBulletins(true) // 서버에서 강제 로드
     console.log('[BulletinsManage] 서버에서 주보 로드 완료:', stored.length, '개')
     setBulletins(stored)
   }
@@ -138,7 +134,7 @@ export default function BulletinsManage() {
       }
       alert('주보 저장 중 오류가 발생했습니다. 다시 시도해 주세요.')
       // 실패 시 원래 상태로 복구
-      await loadBulletins(true)
+      await loadBulletins()
     }
   }
 
@@ -190,7 +186,7 @@ export default function BulletinsManage() {
         console.error('[BulletinsManage] 주보 삭제 실패:', error)
         alert('주보 삭제 중 오류가 발생했습니다. 다시 시도해 주세요.')
         // 실패 시 원래 상태로 복구
-        await loadBulletins(true)
+        await loadBulletins()
       }
     }
   }

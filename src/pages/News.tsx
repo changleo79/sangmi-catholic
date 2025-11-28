@@ -40,7 +40,38 @@ export default function News() {
   }
 
   const loadData = async (forceRefresh = false) => {
-    // 초기 로드 시에만 서버에서 강제 로드, 이후에는 캐시 활용
+    // 먼저 캐시된 데이터를 빠르게 표시 (앨범처럼)
+    if (!forceRefresh) {
+      const [cachedNotices, cachedRecruitments, cachedBulletins] = await Promise.all([
+        getNotices(false),
+        getRecruitments(false),
+        getBulletins(false)
+      ])
+      
+      if (cachedNotices.length > 0) {
+        setNotices(cachedNotices)
+      } else {
+        setNotices(defaultNotices)
+      }
+
+      if (cachedRecruitments.length > 0) {
+        setRecruit(cachedRecruitments)
+      } else {
+        setRecruit([
+          { id: '1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
+          { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
+        ])
+      }
+      
+      // 최신순 정렬
+      const sortedCachedBulletins = cachedBulletins.sort((a: BulletinItem, b: BulletinItem) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime()
+      })
+      
+      setBulletins(sortedCachedBulletins)
+    }
+    
+    // 백그라운드에서 서버에서 최신 데이터 로드
     const [storedNotices, storedRecruitments, loadedBulletins] = await Promise.all([
       getNotices(forceRefresh),
       getRecruitments(forceRefresh),
@@ -56,7 +87,6 @@ export default function News() {
     if (storedRecruitments.length > 0) {
       setRecruit(storedRecruitments)
     } else {
-      // 기본값
       setRecruit([
         { id: '1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
         { id: '2', title: '주일학교 교사 모집', summary: '신앙으로 아이들을 함께 돌보실 교사 모집' }
@@ -88,6 +118,33 @@ export default function News() {
       window.removeEventListener('bulletinsUpdated', handleBulletinsUpdate)
     }
   }, [])
+
+  // 첫 번째 주보 이미지 프리로드 (성능 최적화)
+  useEffect(() => {
+    if (bulletins.length > 0) {
+      const firstBulletin = bulletins[0]
+      const isImageFile = firstBulletin.fileUrl && (
+        firstBulletin.fileUrl.startsWith('data:image/') || 
+        firstBulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
+      )
+      const thumbnailUrl = (firstBulletin.thumbnailUrl && firstBulletin.thumbnailUrl.trim() !== '') 
+        ? firstBulletin.thumbnailUrl 
+        : (isImageFile ? firstBulletin.fileUrl : null)
+      
+      if (thumbnailUrl) {
+        const link = document.createElement('link')
+        link.rel = 'preload'
+        link.as = 'image'
+        link.href = getProxiedImageUrl(thumbnailUrl)
+        link.fetchPriority = 'high'
+        document.head.appendChild(link)
+        
+        return () => {
+          document.head.removeChild(link)
+        }
+      }
+    }
+  }, [bulletins])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
