@@ -32,7 +32,7 @@ export default function Home() {
   const [notices, setNotices] = useState<NoticeItem[]>([])
   const [recruitments, setRecruitments] = useState<RecruitmentItem[]>([])
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
-  const [displayAlbums, setDisplayAlbums] = useState<Array<{ id: string; cover: string; title: string }>>([])
+  const [displayAlbums, setDisplayAlbums] = useState<Array<{ id: string; cover: string; thumbnailUrl?: string; originalUrl?: string; title: string }>>([])
   const [catechismInfo, setCatechismInfo] = useState<CatechismInfo>({
     title: '예비신자 교리학교',
     description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
@@ -109,7 +109,7 @@ export default function Home() {
         return true
       })
       
-      // 썸네일만 사용 (깜빡임 방지)
+      // 썸네일과 원본 URL 모두 저장 (Albums 페이지와 동일한 방식)
       const recentAlbums = savedAlbums.slice(0, 4).map(album => {
         const firstPhoto = album.photos && album.photos.length > 0 ? album.photos[0] : null
         const thumbnailUrl = firstPhoto?.thumbnailUrl
@@ -117,6 +117,8 @@ export default function Home() {
         return {
           id: album.id,
           cover: thumbnailUrl || originalUrl, // 썸네일 우선, 없으면 원본
+          thumbnailUrl: thumbnailUrl || undefined,
+          originalUrl: originalUrl || undefined,
           title: album.title
         }
       })
@@ -875,11 +877,26 @@ export default function Home() {
                     width="400"
                     height="300"
                     onLoad={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
+                      const img = e.currentTarget
+                      img.style.backgroundColor = 'transparent'
+                      
+                      // 썸네일이 로드되었고 원본이 있으면 백그라운드에서 원본 로드 후 교체 (Albums 페이지와 동일)
+                      if (album.thumbnailUrl && album.originalUrl && img.src === album.thumbnailUrl) {
+                        const originalImg = new Image()
+                        originalImg.onload = () => {
+                          img.src = album.originalUrl!
+                        }
+                        originalImg.src = album.originalUrl
+                      }
                     }}
                     onError={(e) => {
-                      // 이미지 로드 실패 시 대체 이미지
-                      e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="14"%3E이미지 없음%3C/text%3E%3C/svg%3E'
+                      // 썸네일 로드 실패 시 원본 시도
+                      if (album.originalUrl && e.currentTarget.src !== album.originalUrl) {
+                        e.currentTarget.src = album.originalUrl
+                      } else {
+                        // 둘 다 실패 시 대체 이미지
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="14"%3E이미지 없음%3C/text%3E%3C/svg%3E'
+                      }
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
