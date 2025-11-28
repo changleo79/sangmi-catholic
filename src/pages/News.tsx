@@ -119,29 +119,38 @@ export default function News() {
     }
   }, [])
 
-  // 첫 번째 주보 이미지 프리로드 (성능 최적화)
+  // 첫 3개 주보 이미지 프리로드 (성능 최적화)
   useEffect(() => {
     if (bulletins.length > 0) {
-      const firstBulletin = bulletins[0]
-      const isImageFile = firstBulletin.fileUrl && (
-        firstBulletin.fileUrl.startsWith('data:image/') || 
-        firstBulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
-      )
-      const thumbnailUrl = (firstBulletin.thumbnailUrl && firstBulletin.thumbnailUrl.trim() !== '') 
-        ? firstBulletin.thumbnailUrl 
-        : (isImageFile ? firstBulletin.fileUrl : null)
+      const preloadImages = bulletins.slice(0, 3).map(bulletin => {
+        const isImageFile = bulletin.fileUrl && (
+          bulletin.fileUrl.startsWith('data:image/') || 
+          bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
+        )
+        const thumbnailUrl = (bulletin.thumbnailUrl && bulletin.thumbnailUrl.trim() !== '') 
+          ? bulletin.thumbnailUrl 
+          : (isImageFile ? bulletin.fileUrl : null)
+        return thumbnailUrl
+      }).filter(Boolean) as string[]
       
-      if (thumbnailUrl) {
+      preloadImages.forEach((thumbnailUrl, index) => {
         const link = document.createElement('link')
         link.rel = 'preload'
         link.as = 'image'
         link.href = getProxiedImageUrl(thumbnailUrl)
-        link.fetchPriority = 'high'
+        link.fetchPriority = index === 0 ? 'high' : 'auto'
         document.head.appendChild(link)
-        
-        return () => {
-          document.head.removeChild(link)
-        }
+      })
+      
+      return () => {
+        preloadImages.forEach(() => {
+          const links = document.head.querySelectorAll('link[rel="preload"][as="image"]')
+          links.forEach(link => {
+            if (link.getAttribute('href')?.includes('proxy-image')) {
+              document.head.removeChild(link)
+            }
+          })
+        })
       }
     }
   }, [bulletins])
@@ -375,9 +384,10 @@ export default function News() {
                               }}
                               loading={bulletins.indexOf(bulletin) < 3 ? "eager" : "lazy"}
                               decoding="async"
-                              fetchPriority={bulletins.indexOf(bulletin) < 3 ? "high" : "auto"}
+                              fetchPriority={bulletins.indexOf(bulletin) === 0 ? "high" : bulletins.indexOf(bulletin) < 3 ? "auto" : "low"}
                               width="300"
                               height="400"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                               draggable={false}
                               onDragStart={(e) => e.preventDefault()}
                               onError={(e) => {

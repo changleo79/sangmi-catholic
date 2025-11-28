@@ -456,22 +456,16 @@ export default function BulletinsManage() {
                         return thumbnailUrl ? (
                           <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
                             <img 
-                              src={getProxiedImageUrl(thumbnailUrl)} 
+                              src={thumbnailUrl} 
                               alt={bulletin.title} 
                               className="w-full h-full object-cover"
                               loading={bulletins.indexOf(bulletin) < 10 ? "eager" : "lazy"}
                               decoding="async"
                               fetchPriority={bulletins.indexOf(bulletin) < 10 ? "high" : "auto"}
+                              referrerPolicy="no-referrer"
                               onError={(e) => {
-                                console.error('[BulletinsManage] 썸네일 로드 실패:', thumbnailUrl, '프록시 URL:', e.currentTarget.src)
+                                console.error('[BulletinsManage] 썸네일 로드 실패:', thumbnailUrl)
                                 const target = e.currentTarget as HTMLImageElement
-                                // 프록시 실패 시 프록시 URL에 타임스탬프 추가하여 재시도 (원본 URL로 재시도하지 않음)
-                                if (target.src.includes('/api/proxy-image') && !target.src.includes('_retry=')) {
-                                  console.log('[BulletinsManage] 프록시 실패, 프록시 URL 재시도:', thumbnailUrl)
-                                  const proxiedUrl = getProxiedImageUrl(thumbnailUrl)
-                                  target.src = `${proxiedUrl}&_retry=${Date.now()}`
-                                  return
-                                }
                                 target.style.display = 'none'
                                 const parent = target.parentElement
                                 if (parent) {

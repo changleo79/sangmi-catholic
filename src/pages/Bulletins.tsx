@@ -149,9 +149,10 @@ export default function Bulletins() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading={bulletins.indexOf(bulletin) < 6 ? "eager" : "lazy"}
                         decoding="async"
-                        fetchPriority={bulletins.indexOf(bulletin) < 6 ? "high" : "auto"}
+                        fetchPriority={bulletins.indexOf(bulletin) === 0 ? "high" : bulletins.indexOf(bulletin) < 6 ? "auto" : "low"}
                         width="300"
                         height="400"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         style={{ 
                           backgroundColor: '#f3f4f6', 
                           pointerEvents: 'none',
