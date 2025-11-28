@@ -232,15 +232,16 @@ export default function Bulletins() {
         )}
 
         {/* PDF Viewer Modal */}
-        {selectedBulletin && (
+        {selectedBulletin && selectedBulletin.fileUrl && (
           <PdfViewerModal
             isOpen={isPdfModalOpen}
+            title={selectedBulletin.title}
+            description={selectedBulletin.description}
+            fileUrl={selectedBulletin.fileUrl}
             onClose={() => {
               setIsPdfModalOpen(false)
-              setSelectedBulletin(null)
+              setTimeout(() => setSelectedBulletin(null), 300)
             }}
-            fileUrl={selectedBulletin.fileUrl}
-            title={selectedBulletin.title}
           />
         )}
       </div>
