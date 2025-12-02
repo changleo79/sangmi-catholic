@@ -52,7 +52,13 @@ export default function PdfViewerModal({
     // 여러 번 시도하여 확실하게 스크롤 초기화
     const resetScroll = () => {
       if (modalContentRef.current) {
+        // 스크롤을 강제로 맨 위로 이동
         modalContentRef.current.scrollTop = 0
+        // 헤더를 찾아서 scrollIntoView를 사용하여 헤더가 보이도록 함
+        const header = document.getElementById('pdf-modal-header')
+        if (header && modalContentRef.current.contains(header.parentElement)) {
+          header.scrollIntoView({ behavior: 'instant', block: 'start', inline: 'nearest' })
+        }
         // 강제로 스크롤 위치 확인
         requestAnimationFrame(() => {
           if (modalContentRef.current) {
@@ -73,6 +79,7 @@ export default function PdfViewerModal({
     resetScroll()
     setTimeout(resetScroll, 10)
     setTimeout(resetScroll, 100)
+    setTimeout(resetScroll, 300) // 모달 애니메이션 완료 후에도 한 번 더 실행
     
     // body 스크롤은 허용 (모달 바깥에서 스크롤)
     // 모달은 fixed로 배치하되, body는 자유롭게 스크롤 가능
@@ -207,7 +214,7 @@ export default function PdfViewerModal({
       }}
     >
       <div className="relative w-full h-full sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
+        <header id="pdf-modal-header" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
             {description && <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">{description}</p>}
