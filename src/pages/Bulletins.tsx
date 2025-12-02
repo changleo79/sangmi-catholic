@@ -61,6 +61,11 @@ export default function Bulletins() {
 
   const handleBulletinClick = (bulletin: BulletinItem) => {
     if (bulletin && bulletin.fileUrl) {
+      // 모달이 열릴 때 페이지 스크롤을 맨 위로 이동 (News 페이지와 동일하게)
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+      
       setSelectedBulletin(bulletin)
       setIsPdfModalOpen(true)
     } else {

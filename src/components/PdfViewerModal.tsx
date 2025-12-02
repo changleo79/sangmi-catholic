@@ -56,8 +56,12 @@ export default function PdfViewerModal({
         modalContentRef.current.scrollTop = 0
         // 헤더를 찾아서 scrollIntoView를 사용하여 헤더가 보이도록 함
         const header = document.getElementById('pdf-modal-header')
-        if (header && modalContentRef.current.contains(header.parentElement)) {
-          header.scrollIntoView({ behavior: 'instant', block: 'start', inline: 'nearest' })
+        if (header) {
+          // 헤더가 모달 컨텐츠의 부모 요소에 있는지 확인
+          const modalContainer = header.closest('[class*="flex flex-col"]')
+          if (modalContainer) {
+            header.scrollIntoView({ behavior: 'instant', block: 'start', inline: 'nearest' })
+          }
         }
         // 강제로 스크롤 위치 확인
         requestAnimationFrame(() => {
@@ -66,13 +70,10 @@ export default function PdfViewerModal({
           }
         })
       }
-      // 모바일에서 페이지 스크롤도 맨 위로 이동
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768
-      if (isMobileDevice) {
-        window.scrollTo({ top: 0, behavior: 'instant' })
-        document.documentElement.scrollTop = 0
-        document.body.scrollTop = 0
-      }
+      // 모든 디바이스에서 페이지 스크롤도 맨 위로 이동 (News 페이지와 동일하게)
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
     }
     
     // 즉시 실행 및 약간의 지연 후 재실행 (모달 렌더링 완료 대기)
