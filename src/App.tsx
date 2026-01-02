@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import Header from './components/Header'
+import AdminHeader from './components/AdminHeader'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
 import ScrollProgress from './components/ScrollProgress'
@@ -62,6 +63,86 @@ function App() {
         {/* Admin Login - No Header/Footer */}
         <Route path="/admin/login" element={<AdminLogin />} />
         
+        {/* Admin Pages - With AdminHeader */}
+        <Route
+          path="/admin/*"
+          element={
+            <div className="min-h-screen flex flex-col">
+              <AdminHeader />
+              <main className="flex-grow page-enter-active">
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/notices"
+                    element={
+                      <ProtectedRoute>
+                        <NoticesManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/recruitments"
+                    element={
+                      <ProtectedRoute>
+                        <RecruitmentsManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/faqs"
+                    element={
+                      <ProtectedRoute>
+                        <FAQsManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/albums"
+                    element={
+                      <ProtectedRoute>
+                        <AlbumsManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/mass"
+                    element={
+                      <ProtectedRoute>
+                        <MassManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/bulletins"
+                    element={
+                      <ProtectedRoute>
+                        <BulletinsManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/backups"
+                    element={
+                      <ProtectedRoute>
+                        <BackupManage />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </main>
+              <ScrollToTop />
+              <SpeedInsights />
+            </div>
+          }
+        />
+        
         {/* Public Pages - With Header/Footer */}
         <Route
           path="/*"
@@ -85,72 +166,6 @@ function App() {
                   <Route path="/office" element={<Office />} />
                   <Route path="/directions" element={<Directions />} />
                   <Route path="/mass" element={<Mass />} />
-                  
-                  {/* Admin Routes - With Header/Footer */}
-                  <Route
-                    path="/admin"
-                    element={
-                      <ProtectedRoute>
-                        <AdminDashboard />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/notices"
-                    element={
-                      <ProtectedRoute>
-                        <NoticesManage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/recruitments"
-                    element={
-                      <ProtectedRoute>
-                        <RecruitmentsManage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/faqs"
-                    element={
-                      <ProtectedRoute>
-                        <FAQsManage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/albums"
-                    element={
-                      <ProtectedRoute>
-                        <AlbumsManage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/mass"
-                    element={
-                      <ProtectedRoute>
-                        <MassManage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/bulletins"
-                    element={
-                      <ProtectedRoute>
-                        <BulletinsManage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/backups"
-                    element={
-                      <ProtectedRoute>
-                        <BackupManage />
-                      </ProtectedRoute>
-                    }
-                  />
                 </Routes>
               </main>
               <BottomNav />
