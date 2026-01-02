@@ -752,28 +752,28 @@ export default function Home() {
                           <Link
                             key={`important-${idx}-${notice.title}`}
                             to={`/news/${noticeId}`}
-                            className="block rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 md:p-8 text-white group flex-1"
+                            className="block rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 md:p-8 text-white group flex-1 flex flex-col"
                             style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}
                           >
                         <div className="flex items-center gap-4 mb-4">
-                          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
+                          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-lg flex-shrink-0">
                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                             </svg>
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="px-2 py-0.5 text-xs font-semibold bg-white/30 text-white rounded-full">중요공지</span>
                               <span className="text-sm text-white/80">{notice.date}</span>
                             </div>
-                            <h2 className="text-xl md:text-2xl font-bold group-hover:underline break-words line-clamp-2">{notice.title}</h2>
+                            <h2 className="text-xl md:text-2xl font-bold group-hover:underline break-words">{notice.title}</h2>
                           </div>
                           <svg className="w-5 h-5 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </div>
                         {notice.summary && (
-                          <p className="text-white/90 mb-2 text-sm md:text-base leading-relaxed whitespace-pre-line line-clamp-2 break-words">
+                          <p className="text-white/90 mb-2 text-sm md:text-base leading-relaxed whitespace-pre-line break-words flex-1">
                             {notice.summary}
                           </p>
                         )}
