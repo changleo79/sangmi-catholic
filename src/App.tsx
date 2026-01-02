@@ -29,6 +29,8 @@ import BackupManage from './pages/admin/BackupManage'
 import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
 import Bulletins from './pages/Bulletins'
+import Notices from './pages/Notices'
+import Recruitments from './pages/Recruitments'
 import NoticeDetail from './pages/NoticeDetail'
 import RecruitmentDetail from './pages/RecruitmentDetail'
 import OrganizationTree from './pages/OrganizationTree'
@@ -157,6 +159,8 @@ function App() {
                   <Route path="/notice" element={<Notice />} />
                   <Route path="/news" element={<News />} />
                   <Route path="/news/:id" element={<NoticeDetail />} />
+                  <Route path="/notices" element={<Notices />} />
+                  <Route path="/recruitments" element={<Recruitments />} />
                   <Route path="/recruitments/:id" element={<RecruitmentDetail />} />
                   <Route path="/albums" element={<Albums />} />
                   <Route path="/albums/:id" element={<AlbumDetail />} />

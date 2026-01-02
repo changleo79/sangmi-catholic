@@ -32,11 +32,6 @@ export default function News() {
   const initialNoticesCount = 4
   const initialRecruitCount = 4
   const initialBulletinsCount = 3
-  
-  // 전체보기 상태
-  const [showAllNotices, setShowAllNotices] = useState(false)
-  const [showAllRecruit, setShowAllRecruit] = useState(false)
-  const [showAllBulletins, setShowAllBulletins] = useState(false)
 
   // 모바일 감지 함수
   const isMobile = () => {
@@ -187,21 +182,21 @@ export default function News() {
                 <h2 className="text-3xl font-bold text-gray-900">공지사항</h2>
               </div>
               {notices.length > 0 && (
-                <button
-                  onClick={() => setShowAllNotices(!showAllNotices)}
-                  className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
+                <Link
+                  to="/notices"
+                  className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 inline-block"
                   style={{ backgroundColor: '#7B1F4B' }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
                 >
-                  {showAllNotices ? '접기' : `공지사항 전체보기 (${notices.length}개)`}
-                </button>
+                  전체보기
+                </Link>
               )}
             </div>
             <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
               {notices
                 .filter((n): n is NoticeItem => n !== null && n !== undefined && n.title !== undefined)
-                .slice(0, showAllNotices ? notices.length : initialNoticesCount)
+                .slice(0, initialNoticesCount)
                 .map((n, i) => {
                   const noticeId = `${n.date}-${encodeURIComponent(n.title)}`
                   return (
@@ -229,19 +224,6 @@ export default function News() {
                     </Link>
                   )
                 })}
-              {notices.length > initialNoticesCount && (
-                <div className="p-6 border-t border-gray-100 text-center">
-                  <button
-                    onClick={() => setShowAllNotices(!showAllNotices)}
-                    className="inline-block px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105"
-                    style={{ backgroundColor: '#7B1F4B' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-                  >
-                    {showAllNotices ? '접기' : `공지사항 전체보기 (${notices.length}개)`}
-                  </button>
-                </div>
-              )}
             </div>
           </section>
 
@@ -253,21 +235,21 @@ export default function News() {
                 <h2 className="text-3xl font-bold text-gray-900">단체 소식</h2>
               </div>
               {recruit.length > 0 && (
-                <button
-                  onClick={() => setShowAllRecruit(!showAllRecruit)}
-                  className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
+                <Link
+                  to="/recruitments"
+                  className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 inline-block"
                   style={{ backgroundColor: '#7B1F4B' }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
                 >
-                  {showAllRecruit ? '접기' : `단체 소식 전체보기 (${recruit.length}개)`}
-                </button>
+                  전체보기
+                </Link>
               )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {recruit
                 .filter((r): r is RecruitmentItem => r !== null && r !== undefined && r.title !== undefined)
-                .slice(0, showAllRecruit ? recruit.length : initialRecruitCount)
+                .slice(0, initialRecruitCount)
                 .map((r) => (
                   <Link
                     key={r.id}
@@ -290,19 +272,6 @@ export default function News() {
                 </Link>
               ))}
             </div>
-            {recruit.length > initialRecruitCount && (
-              <div className="text-center mt-6">
-                <button
-                  onClick={() => setShowAllRecruit(!showAllRecruit)}
-                  className="inline-block px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105"
-                  style={{ backgroundColor: '#7B1F4B' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-                >
-                  {showAllRecruit ? '접기' : `단체 소식 전체보기 (${recruit.length}개)`}
-                </button>
-              </div>
-            )}
           </section>
 
           {/* 주보 안내 Section */}
@@ -313,15 +282,15 @@ export default function News() {
                 <h2 className="text-3xl font-bold text-gray-900">주보 안내</h2>
               </div>
               {bulletins.length > 0 && (
-                <button
-                  onClick={() => setShowAllBulletins(!showAllBulletins)}
-                  className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
+                <Link
+                  to="/bulletins"
+                  className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 inline-block"
                   style={{ backgroundColor: '#7B1F4B' }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
                 >
-                  {showAllBulletins ? '접기' : `주보 전체보기 (${bulletins.length}개)`}
-                </button>
+                  전체보기
+                </Link>
               )}
             </div>
             {bulletins.length > 0 ? (
@@ -329,7 +298,7 @@ export default function News() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {bulletins
                     .filter((bulletin): bulletin is BulletinItem => bulletin !== null && bulletin !== undefined && bulletin.title !== undefined)
-                    .slice(0, showAllBulletins ? bulletins.length : initialBulletinsCount)
+                    .slice(0, initialBulletinsCount)
                     .map((bulletin) => (
                   <div
                     key={bulletin.id}
