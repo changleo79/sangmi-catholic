@@ -246,18 +246,8 @@ export default function OrganizationTree() {
                </div>
  
                {/* Level 2: 총회장 */}
-              <div className="flex justify-center mb-6 relative">
-                {/* 주임신부 → 총회장 연결선 */}
-                <div 
-                  className="absolute top-0 left-1/2 transform -translate-x-1/2"
-                  style={{ 
-                    width: '2px',
-                    height: '24px',
-                    backgroundColor: '#7B1F4B',
-                    zIndex: 1
-                  }}
-                ></div>
-                <div className="relative inline-block z-10">
+              <div className="flex justify-center mb-6">
+                <div className="relative inline-block">
                   <div
                     className="block px-8 py-5 rounded-xl shadow-lg text-center"
                     style={{ 
@@ -273,18 +263,8 @@ export default function OrganizationTree() {
                </div>
  
                {/* Level 3: 총무 */}
-              <div className="flex justify-center mb-6 relative">
-                {/* 총회장 → 총무 연결선 */}
-                <div 
-                  className="absolute top-0 left-1/2 transform -translate-x-1/2"
-                  style={{ 
-                    width: '2px',
-                    height: '24px',
-                    backgroundColor: '#7B1F4B',
-                    zIndex: 1
-                  }}
-                ></div>
-                <div className="relative inline-block z-10">
+              <div className="flex justify-center mb-6">
+                <div className="relative inline-block">
                   <div
                     className="block px-6 py-4 rounded-lg shadow-md text-center bg-white border-2 border-gray-200"
                     style={{ 
@@ -300,51 +280,19 @@ export default function OrganizationTree() {
  
                {/* Level 4: 위원회들 */}
                <div className="relative mb-4 md:px-[80px]" style={{ paddingTop: '24px' }}>
-                {/* 총무 → 위원회들 연결선 (세로선 + 가로 분기선) */}
-                <div className="absolute top-0 left-1/2 transform -translate-x-1/2" style={{ zIndex: 1, width: '100%' }}>
-                  {/* 세로선 (총무에서 중앙까지) */}
-                  <div 
-                    style={{ 
-                      width: '2px',
-                      height: '24px',
-                      backgroundColor: '#7B1F4B',
-                      margin: '0 auto'
-                    }}
-                  ></div>
-                  {/* 가로 분기선 (위원회들 위로) - 전체 너비 */}
-                  <div 
-                    style={{ 
-                      width: '100%',
-                      height: '2px',
-                      backgroundColor: '#7B1F4B',
-                      position: 'absolute',
-                      top: '24px',
-                      left: '0'
-                    }}
-                  ></div>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
-                  {parentOrganizations.map((org, index) => {
+                {/* 상단 연결선 제거 (요청에 따라 숨김) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5" style={{ marginTop: '20px' }}>
+                  {parentOrganizations.map((org) => {
                     const info = getOrganizationInfo(org)
                     const subOrgs = getSubOrganizations(org)
                     const hasSubOrgs = subOrgs.length > 0
 
                     return (
                       <div key={`${org}-${refreshKey}`} className="relative flex flex-col items-center w-full">
-                        {/* 가로 분기선에서 위원회로 내려가는 세로선 */}
-                        <div 
-                          className="absolute top-0 left-1/2 transform -translate-x-1/2"
-                          style={{ 
-                            width: '2px',
-                            height: '24px',
-                            backgroundColor: '#7B1F4B',
-                            zIndex: 1
-                          }}
-                        ></div>
+                        {/* 위쪽 연결선 제거 */}
                         
                         {/* Committee Box */}
-                        <div className="relative w-full flex justify-center z-10" style={{ marginTop: '24px' }}>
+                        <div className="relative w-full flex justify-center z-10">
                           <div className="relative" style={{ width: '180px' }}>
                             <div
                               className="block px-4 py-4 rounded-xl shadow-lg text-center bg-white border-2 border-gray-200 w-full"
@@ -358,89 +306,27 @@ export default function OrganizationTree() {
                               )}
                             </div>
                             
-                            {/* 위원회 박스에서 하위 단체로 내려가는 세로선 */}
-                            {hasSubOrgs && (
-                              <div 
-                                className="absolute top-full left-1/2 transform -translate-x-1/2"
-                                style={{ 
-                                  width: '2px',
-                                  height: '24px',
-                                  backgroundColor: '#7B1F4B',
-                                  zIndex: 1
-                                }}
-                              ></div>
-                            )}
+                            {/* 위원회 박스에서 하위 단체로 내려가는 선 - 재정위원회는 단체가 없으므로 선 없음, PC만 표시 */}
+                            {/* 요청에 따라 하위 연결선도 제거 */}
                           </div>
                         </div>
 
                         {/* Sub Organizations */}
                         {hasSubOrgs && (
                           <div className="mt-6 w-full relative">
-                            {/* 하위 단체들 위의 가로 분기선 */}
-                            {subOrgs.length > 1 && (
-                              <div 
-                                className="absolute top-0 left-1/2 transform -translate-x-1/2"
-                                style={{ 
-                                  width: `${(subOrgs.length - 1) * 100}%`,
-                                  maxWidth: 'calc(100% - 160px)',
-                                  height: '2px',
-                                  backgroundColor: '#7B1F4B',
-                                  zIndex: 1
-                                }}
-                              ></div>
-                            )}
-                            
-                            <div className="space-y-2" style={{ marginTop: '24px' }}>
-                              {subOrgs.map((subOrg, subIndex) => {
+                            <div className="space-y-2">
+                              {subOrgs.map((subOrg) => {
                                 const subInfo = getOrganizationInfo(subOrg)
-                                const isFirst = subIndex === 0
-                                const isLast = subIndex === subOrgs.length - 1
 
                                 return (
                                   <div key={`${subOrg}-${refreshKey}`} className="relative flex justify-center">
                                     <div className="relative" style={{ width: '160px' }}>
-                                      {/* 가로 분기선에서 하위 단체로 내려가는 세로선 */}
-                                      <div 
-                                        className="absolute top-0 left-1/2 transform -translate-x-1/2"
-                                        style={{ 
-                                          width: '2px',
-                                          height: '24px',
-                                          backgroundColor: '#7B1F4B',
-                                          zIndex: 1
-                                        }}
-                                      ></div>
-                                      
-                                      {/* 하위 단체가 하나일 때는 선만, 여러 개일 때는 가로선과 연결 */}
-                                      {subOrgs.length > 1 && !isFirst && (
-                                        <div 
-                                          className="absolute top-0"
-                                          style={{ 
-                                            width: '50%',
-                                            height: '2px',
-                                            backgroundColor: '#7B1F4B',
-                                            zIndex: 1,
-                                            left: '0'
-                                          }}
-                                        ></div>
-                                      )}
-                                      {subOrgs.length > 1 && !isLast && (
-                                        <div 
-                                          className="absolute top-0"
-                                          style={{ 
-                                            width: '50%',
-                                            height: '2px',
-                                            backgroundColor: '#7B1F4B',
-                                            zIndex: 1,
-                                            right: '0'
-                                          }}
-                                        ></div>
-                                      )}
+                                      {/* 연결선 제거 */}
                                       
                                       <div
                                         className="block px-3 py-2.5 rounded-lg shadow-sm text-center bg-gray-50 border border-gray-200 w-full z-10 relative"
                                         style={{ 
-                                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
-                                          marginTop: '24px'
+                                          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
                                         }}
                                       >
                                         <span className="text-sm font-semibold text-gray-800 block">{subInfo.name}</span>
