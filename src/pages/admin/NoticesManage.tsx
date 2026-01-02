@@ -30,9 +30,13 @@ export default function NoticesManage() {
       (window as any).cachedData.notices = undefined
     }
     const stored = await getNotices(true) // 서버에서 강제 로드
-    if (stored.length > 0) {
-      console.log('[NoticesManage] 서버에서 공지사항 로드 완료:', stored.length, '개')
-      setNotices(stored)
+    // null이나 undefined 항목 필터링
+    const validNotices = stored.filter((notice): notice is NoticeItem => 
+      notice !== null && notice !== undefined && notice.title !== undefined
+    )
+    if (validNotices.length > 0) {
+      console.log('[NoticesManage] 서버에서 공지사항 로드 완료:', validNotices.length, '개')
+      setNotices(validNotices)
     } else {
       // 기본 데이터 로드
       console.log('[NoticesManage] 기본 데이터 사용')
@@ -43,9 +47,13 @@ export default function NoticesManage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const newNotices = [...notices]
+    // null 항목 필터링
+    const validNotices = notices.filter((notice): notice is NoticeItem => 
+      notice !== null && notice !== undefined && notice.title !== undefined
+    )
+    const newNotices = [...validNotices]
     
-    if (editingIndex !== null) {
+    if (editingIndex !== null && editingIndex >= 0 && editingIndex < validNotices.length) {
       newNotices[editingIndex] = formData
     } else {
       newNotices.unshift(formData)
@@ -59,7 +67,11 @@ export default function NoticesManage() {
 
   const handleDelete = async (index: number) => {
     if (confirm('정말 삭제하시겠습니까?')) {
-      const newNotices = notices.filter((_, i) => i !== index)
+      // null 항목 필터링 후 삭제
+      const validNotices = notices.filter((notice): notice is NoticeItem => 
+        notice !== null && notice !== undefined && notice.title !== undefined
+      )
+      const newNotices = validNotices.filter((_, i) => i !== index)
       setNotices(newNotices)
       await saveNotices(newNotices) // 서버에 저장 완료 대기
     }
@@ -96,13 +108,23 @@ export default function NoticesManage() {
   }
 
   const handleEdit = (index: number) => {
-    const notice = notices[index]
+    // null 항목 필터링
+    const validNotices = notices.filter((notice): notice is NoticeItem => 
+      notice !== null && notice !== undefined && notice.title !== undefined
+    )
+    if (index < 0 || index >= validNotices.length) {
+      console.error('[NoticesManage] 잘못된 인덱스:', index)
+      return
+    }
+    const notice = validNotices[index]
     // imageUrl이 data:로 시작하면 업로드된 파일, 아니면 URL
     if (notice.imageUrl) {
       setImageInputType(notice.imageUrl.startsWith('data:') ? 'upload' : 'url')
     }
     setFormData(notice)
-    setEditingIndex(index)
+    // 원본 배열에서의 실제 인덱스 찾기
+    const actualIndex = notices.findIndex(n => n === notice)
+    setEditingIndex(actualIndex >= 0 ? actualIndex : index)
     setIsEditing(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -335,39 +357,45 @@ export default function NoticesManage() {
               {notices.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">공지사항이 없습니다.</p>
               ) : (
-                notices.map((notice, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-lg border border-gray-200 hover:border-catholic-logo/30 transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{notice.title}</h3>
-                        <p className="text-sm text-gray-600 mb-1">{notice.date}</p>
-                        {notice.summary && (
-                          <p className="text-sm text-gray-500">{notice.summary}</p>
-                        )}
+                notices
+                  .filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)
+                  .map((notice, index) => {
+                    // 필터링 후 실제 인덱스 찾기
+                    const actualIndex = notices.findIndex(n => n === notice)
+                    return (
+                      <div
+                        key={notice.id || index}
+                        className="p-4 rounded-lg border border-gray-200 hover:border-catholic-logo/30 transition-all"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 mb-1">{notice.title || '(제목 없음)'}</h3>
+                            <p className="text-sm text-gray-600 mb-1">{notice.date || ''}</p>
+                            {notice.summary && (
+                              <p className="text-sm text-gray-500">{notice.summary}</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEdit(actualIndex)}
+                              className="px-3 py-1 rounded text-sm text-white font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+                              style={{ backgroundColor: '#7B1F4B' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() => handleDelete(actualIndex)}
+                              className="px-3 py-1 rounded text-sm bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(index)}
-                          className="px-3 py-1 rounded text-sm text-white font-medium transition-all duration-300 hover:scale-105 active:scale-95"
-                          style={{ backgroundColor: '#7B1F4B' }}
-                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-                        >
-                          수정
-                        </button>
-                        <button
-                          onClick={() => handleDelete(index)}
-                          className="px-3 py-1 rounded text-sm bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                    )
+                  })
               )}
             </div>
           </div>
