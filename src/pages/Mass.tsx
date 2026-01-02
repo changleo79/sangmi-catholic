@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { getMassSchedule, getSacraments, getCatechismInfo } from '../utils/storage'
 import type { MassScheduleItem, SacramentItem, CatechismInfo } from '../utils/storage'
 import ShareButton from '../components/ShareButton'
-import { facilitySchedules, facilityScheduleNote, shuttleRoutes } from '../data/schedules'
+import { facilitySchedules, facilityScheduleNote } from '../data/schedules'
 
 export default function Mass() {
   const [massSchedule, setMassSchedule] = useState<MassScheduleItem[]>([])
@@ -281,59 +281,6 @@ export default function Mass() {
             </div>
           </section>
 
-          {/* 주일 교중미사 셔틀 안내 */}
-          <section className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">주일 교중미사 셔틀 운행 안내</h2>
-                <p className="text-sm text-gray-600 mt-1">2025년 4월 13일 기준 · 성당 도착 후 10:00 교중미사 참여</p>
-              </div>
-              <a
-                href="/directions"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-catholic-logo text-catholic-logo font-semibold hover:bg-catholic-logo hover:text-white transition-all duration-300"
-              >
-                오시는 길 페이지에서 자세히 보기
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {shuttleRoutes.map((route) => (
-                <div key={route.title} className="border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{route.title}</h3>
-                      <p className="text-sm text-gray-500 mt-1">{route.description}</p>
-                    </div>
-                    <span
-                      className="inline-flex items-center justify-center w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] rounded-full text-white font-semibold text-xs flex-shrink-0"
-                      style={{ background: route.accent }}
-                    >
-                      탑승
-                    </span>
-                  </div>
-                  <div className="space-y-4">
-                    {route.courses.map((course, courseIdx) => (
-                      <div key={`${route.title}-course-${courseIdx}`} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        {course.label && (
-                          <p className="text-sm font-semibold text-gray-700 mb-2">{course.label}</p>
-                        )}
-                        <ul className="space-y-2 text-sm text-gray-700">
-                          {course.stops.map((stop, stopIdx) => (
-                            <li key={`${route.title}-stop-${courseIdx}-${stopIdx}`} className="flex items-start gap-2">
-                              <span className="text-catholic-logo font-semibold">{stop.time}</span>
-                              <span className="flex-1">{stop.location}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
         </div>
       </div>
     </div>
