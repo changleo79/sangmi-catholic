@@ -562,11 +562,6 @@ export default function Home() {
               <p className="text-sm text-gray-600 leading-relaxed">
                 주일과 평일 미사 시간, 성물방 운영, 사무장·관리장 근무 시간을 한눈에 확인하세요.
               </p>
-              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                {['주일 10:00 교중미사', '화·목 19:30 저녁미사', '사무실 공휴일 휴무'].map(item => (
-                  <span key={item} className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">{item}</span>
-                ))}
-              </div>
             </Link>
             <Link
               to="/directions"
@@ -591,11 +586,6 @@ export default function Home() {
               <p className="text-sm text-gray-600 leading-relaxed">
                 1지역 카니발, 3·4지역·5·6지역 25인승 셔틀 운행 시간과 탑승 위치를 안내합니다.
               </p>
-              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                {['1지역 09:00 롯데스카이', '3·4지역 09:25 신일 정류장', '5·6지역 09:00·09:25 다회 운행'].map(item => (
-                  <span key={item} className="px-3 py-1 rounded-full bg-gray-50 border border-gray-200">{item}</span>
-                ))}
-              </div>
             </Link>
           </div>
         </div>
