@@ -139,7 +139,7 @@ export default function NoticeDetail() {
               </div>
             ) : notice.summary ? (
               <div className="mb-6 p-4 bg-gray-50 rounded-lg border-l-4" style={{ borderColor: '#7B1F4B' }}>
-                <p className="text-gray-700 leading-relaxed">{notice.summary}</p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">{notice.summary}</p>
               </div>
             ) : (
               <div className="text-gray-500">내용이 없습니다.</div>

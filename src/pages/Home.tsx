@@ -661,7 +661,7 @@ export default function Home() {
                               </h3>
                             </div>
                           {item.summary && (
-                            <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">{item.summary}</p>
+                            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line line-clamp-2">{item.summary}</p>
                           )}
                           {isBulletin && bulletinItem ? (
                             <button

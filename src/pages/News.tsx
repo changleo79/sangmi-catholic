@@ -200,7 +200,7 @@ export default function News() {
                             </h3>
                           </div>
                         {n.summary && (
-                          <p className="text-gray-600 ml-5 text-sm leading-relaxed line-clamp-2">{n.summary}</p>
+                          <p className="text-gray-600 ml-5 text-sm leading-relaxed whitespace-pre-line line-clamp-2">{n.summary}</p>
                         )}
                       </div>
                       <span className="text-gray-400 text-sm whitespace-nowrap font-medium group-hover:text-gray-500 transition-colors">
@@ -252,7 +252,7 @@ export default function News() {
                         <h3 className="text-xl font-bold text-gray-900 mb-2 transition-colors duration-300 group" onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }} onMouseLeave={(e) => { e.currentTarget.style.color = '' }}>
                           {r.title || '(제목 없음)'}
                         </h3>
-                      <p className="text-gray-600 leading-relaxed text-sm line-clamp-3">{r.summary}</p>
+                      <p className="text-gray-600 leading-relaxed text-sm whitespace-pre-line line-clamp-3">{r.summary}</p>
                     </div>
                   </div>
                 </Link>
@@ -453,7 +453,7 @@ export default function News() {
                         </h3>
                         <p className="text-sm text-gray-500 mb-3">{bulletin.date}</p>
                         {bulletin.description && (
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{bulletin.description}</p>
+                          <p className="text-sm text-gray-600 mb-4 whitespace-pre-line line-clamp-2">{bulletin.description}</p>
                         )}
                         <div className="flex items-center gap-2 text-catholic-logo font-medium text-sm group-hover:gap-3 transition-all">
                           <span>주보 보기</span>
