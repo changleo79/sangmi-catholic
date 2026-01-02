@@ -362,9 +362,11 @@ export default function NoticesManage() {
                   .map((notice, index) => {
                     // 필터링 후 실제 인덱스 찾기
                     const actualIndex = notices.findIndex(n => n === notice)
+                    // key는 title과 date 조합으로 고유성 보장
+                    const uniqueKey = `${notice.title}-${notice.date}-${index}`
                     return (
                       <div
-                        key={notice.id || index}
+                        key={uniqueKey}
                         className="p-4 rounded-lg border border-gray-200 hover:border-catholic-logo/30 transition-all"
                       >
                         <div className="flex items-start justify-between gap-4">
