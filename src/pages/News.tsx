@@ -186,7 +186,7 @@ export default function News() {
                 <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
                 <h2 className="text-3xl font-bold text-gray-900">공지사항</h2>
               </div>
-              {notices.length > initialNoticesCount && (
+              {notices.length > 0 && (
                 <button
                   onClick={() => setShowAllNotices(!showAllNotices)}
                   className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
@@ -194,7 +194,7 @@ export default function News() {
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
                 >
-                  {showAllNotices ? '접기' : '전체보기'}
+                  {showAllNotices ? '접기' : `공지사항 전체보기 (${notices.length}개)`}
                 </button>
               )}
             </div>
@@ -252,7 +252,7 @@ export default function News() {
                 <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
                 <h2 className="text-3xl font-bold text-gray-900">단체 소식</h2>
               </div>
-              {recruit.length > initialRecruitCount && (
+              {recruit.length > 0 && (
                 <button
                   onClick={() => setShowAllRecruit(!showAllRecruit)}
                   className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
@@ -260,7 +260,7 @@ export default function News() {
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
                 >
-                  {showAllRecruit ? '접기' : '전체보기'}
+                  {showAllRecruit ? '접기' : `단체 소식 전체보기 (${recruit.length}개)`}
                 </button>
               )}
             </div>
