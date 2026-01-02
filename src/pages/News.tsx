@@ -312,7 +312,7 @@ export default function News() {
                 <div className="w-1 h-8 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
                 <h2 className="text-3xl font-bold text-gray-900">주보 안내</h2>
               </div>
-              {bulletins.length > initialBulletinsCount && (
+              {bulletins.length > 0 && (
                 <button
                   onClick={() => setShowAllBulletins(!showAllBulletins)}
                   className="text-sm md:text-base px-4 py-2 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105"
@@ -320,7 +320,7 @@ export default function News() {
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
                 >
-                  {showAllBulletins ? '접기' : '전체보기'}
+                  {showAllBulletins ? '접기' : `주보 전체보기 (${bulletins.length}개)`}
                 </button>
               )}
             </div>
@@ -498,19 +498,6 @@ export default function News() {
                   </div>
                   ))}
                 </div>
-                {bulletins.length > initialBulletinsCount && (
-                  <div className="text-center mt-6">
-                    <button
-                      onClick={() => setShowAllBulletins(!showAllBulletins)}
-                      className="inline-block px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105"
-                      style={{ backgroundColor: '#7B1F4B' }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-                    >
-                      {showAllBulletins ? '접기' : `주보 전체보기 (${bulletins.length}개)`}
-                    </button>
-                  </div>
-                )}
               </>
             ) : (
               <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-100">
