@@ -16,23 +16,32 @@
   /* 모바일 폰트 크기 증가 */
   @media (max-width: 767px) {
     body {
-      font-size: 16px;
+      font-size: 17px;
     }
     
     p, span, div, a, button {
-      font-size: 15px;
+      font-size: 16px;
     }
     
     h1 {
-      font-size: 1.875rem;
+      font-size: 2rem;
     }
     
     h2 {
-      font-size: 1.5rem;
+      font-size: 1.625rem;
     }
     
     h3 {
-      font-size: 1.25rem;
+      font-size: 1.375rem;
+    }
+    
+    /* 작은 텍스트도 조금 더 키움 */
+    .text-sm {
+      font-size: 0.9375rem;
+    }
+    
+    .text-xs {
+      font-size: 0.8125rem;
     }
   }
   
