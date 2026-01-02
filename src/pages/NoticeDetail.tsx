@@ -15,28 +15,32 @@ export default function NoticeDetail() {
         const storedNotices = await getNotices()
         
         // ID는 "date-encodedTitle" 형태
-        // React Router는 URL 파라미터를 디코딩하므로, id는 이미 디코딩된 상태일 수 있음
-        // 하지만 인코딩된 상태일 수도 있으므로 양쪽 모두 처리
+        // 날짜 부분(YYYY-MM-DD)을 먼저 분리하고, 나머지 부분만 디코딩
         
-        let decodedId = id
-        try {
-          // 이미 디코딩되어 있으면 그대로, 아니면 디코딩 시도
-          decodedId = decodeURIComponent(id)
-        } catch (e) {
-          // 디코딩 실패 시 원본 사용
-          decodedId = id
-        }
+        // 날짜 패턴 찾기 (YYYY-MM-DD)
+        const dateMatch = id.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/)
         
-        // date와 title 분리 (format: "YYYY-MM-DD-title")
-        const parts = decodedId.split('-')
-        if (parts.length >= 4) {
-          // date는 처음 3개 부분 (YYYY-MM-DD)
-          const date = `${parts[0]}-${parts[1]}-${parts[2]}`
-          // title은 나머지 부분을 다시 합치기 (하이픈이 포함된 경우 대비)
-          const title = parts.slice(3).join('-')
+        if (dateMatch) {
+          const date = dateMatch[1] // "2026-01-03"
+          const encodedTitle = dateMatch[2] // 인코딩된 제목 부분
+          
+          // 제목 부분 디코딩 시도
+          let title = encodedTitle
+          try {
+            // URL 인코딩된 경우 디코딩
+            title = decodeURIComponent(encodedTitle)
+          } catch (e) {
+            // 디코딩 실패 시 원본 사용 (이미 디코딩된 상태일 수 있음)
+            title = encodedTitle
+          }
+          
+          console.log('[NoticeDetail] 파싱 결과:', { date, title, originalId: id })
           
           // 저장된 공지사항에서 찾기
-          let found = storedNotices.find(n => n.date === date && n.title === title)
+          let found = storedNotices.find(n => {
+            // 날짜와 제목이 정확히 일치하는지 확인
+            return n.date === date && n.title === title
+          })
           
           // 기본값에서도 찾기
           if (!found) {
@@ -44,27 +48,35 @@ export default function NoticeDetail() {
           }
           
           if (found) {
+            console.log('[NoticeDetail] 공지사항 찾음:', found.title)
             setNotice(found)
             return
+          } else {
+            console.log('[NoticeDetail] 공지사항을 찾지 못함. 저장된 공지사항:', storedNotices.map(n => ({ date: n.date, title: n.title })))
           }
         }
         
         // 위 방법으로 못 찾으면 인코딩된 형태로 직접 비교
         const found = storedNotices.find(n => {
           const noticeId = `${n.date}-${encodeURIComponent(n.title)}`
-          return noticeId === id
+          // 원본 ID와 디코딩된 ID 모두 비교
+          return noticeId === id || noticeId === decodeURIComponent(id)
         })
         
         if (found) {
+          console.log('[NoticeDetail] 인코딩된 형태로 공지사항 찾음:', found.title)
           setNotice(found)
         } else {
           // 기본값에서도 인코딩된 형태로 찾기
           const foundDefault = defaultNotices.find(n => {
             const noticeId = `${n.date}-${encodeURIComponent(n.title)}`
-            return noticeId === id
+            return noticeId === id || noticeId === decodeURIComponent(id)
           })
           if (foundDefault) {
+            console.log('[NoticeDetail] 기본값에서 공지사항 찾음:', foundDefault.title)
             setNotice(foundDefault)
+          } else {
+            console.error('[NoticeDetail] 공지사항을 찾을 수 없음. ID:', id)
           }
         }
       }
