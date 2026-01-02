@@ -206,7 +206,7 @@ export default function PdfViewerModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-0 sm:p-2 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-start sm:items-center justify-center p-0 sm:p-2 sm:p-4 animate-fade-in overflow-y-auto"
       onClick={(e) => {
         // 배경 클릭 시 닫기
         if (e.target === e.currentTarget) {
@@ -214,7 +214,7 @@ export default function PdfViewerModal({
         }
       }}
     >
-      <div className="relative w-full h-full sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col" style={{ marginTop: 0, marginBottom: 0 }}>
+      <div className="relative w-full h-auto sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col mt-4 sm:mt-0 mb-4 sm:mb-0" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
         <header id="pdf-modal-header" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
