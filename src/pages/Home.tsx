@@ -764,14 +764,14 @@ export default function Home() {
                               <span className="px-2 py-0.5 text-xs font-semibold bg-white/30 text-white rounded-full">중요공지</span>
                               <span className="text-sm text-white/80">{notice.date}</span>
                             </div>
-                            <h2 className="text-xl md:text-2xl font-bold group-hover:underline">{notice.title}</h2>
+                            <h2 className="text-xl md:text-2xl font-bold group-hover:underline break-words line-clamp-2">{notice.title}</h2>
                           </div>
-                          <svg className="w-5 h-5 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </div>
                         {notice.summary && (
-                          <p className="text-white/90 mb-2 text-sm md:text-base leading-relaxed line-clamp-2">
+                          <p className="text-white/90 mb-2 text-sm md:text-base leading-relaxed whitespace-pre-line line-clamp-2 break-words">
                             {notice.summary}
                           </p>
                         )}
@@ -790,14 +790,14 @@ export default function Home() {
                         </div>
                         <h2 className="text-2xl md:text-3xl font-bold">{catechismInfo.title}</h2>
                       </div>
-                      <p className="text-blue-100 mb-4 text-base md:text-lg leading-relaxed">
+                      <p className="text-blue-100 mb-4 text-base md:text-lg leading-relaxed whitespace-pre-line line-clamp-3">
                         {catechismInfo.description}
                       </p>
                       <div className="flex items-center gap-2 text-blue-100">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        <p className="font-semibold">{catechismInfo.contact}</p>
+                        <p className="font-semibold whitespace-pre-line break-words">{catechismInfo.contact}</p>
                       </div>
                     </div>
                   )
