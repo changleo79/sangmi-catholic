@@ -5,6 +5,7 @@ export type NoticeItem = {
   content?: string // 상세 내용
   imageUrl?: string // 이미지 URL (선택)
   linkUrl?: string // optional detail or PDF link
+  isImportant?: boolean // 중요공지 여부
 }
 
 export const notices: NoticeItem[] = [
