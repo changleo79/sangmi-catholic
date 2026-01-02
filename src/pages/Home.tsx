@@ -376,7 +376,7 @@ export default function Home() {
 
   return (
     <div className="bg-gradient-to-b from-white via-gray-50 to-white">
-      <section className="relative w-full h-[60vh] min-h-[400px] md:h-[80vh] md:min-h-[620px] flex items-center overflow-hidden">
+      <section className="relative w-full h-[75vh] min-h-[520px] md:h-[80vh] md:min-h-[620px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           {slideImages.map((img, index) => (
             <div
@@ -423,7 +423,7 @@ export default function Home() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex gap-2 md:bottom-18 lg:bottom-24">
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 flex gap-2 sm:bottom-14 md:bottom-18 lg:bottom-24">
           {slideImages.map((_, index) => (
             <button
               key={index}
@@ -436,38 +436,36 @@ export default function Home() {
           ))}
         </div>
         <div className="relative z-20 container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 md:gap-12">
-            <div className="max-w-2xl text-left text-white space-y-3 md:space-y-6">
-              <span className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-white/15 text-xs md:text-sm font-medium tracking-wide">
-                <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-white/80 animate-pulse"></span>
+          <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-12">
+            <div className="max-w-2xl text-left text-white space-y-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-sm font-medium tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-white/80 animate-pulse"></span>
                 수원교구 상미성당
               </span>
-              <h1 className="text-3xl md:text-4xl lg:text-6xl font-extrabold leading-tight drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
+              <h1 className="text-4xl md:text-6xl font-extrabold leading-tight drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
                 기도와 말씀 안에서<br className="hidden md:block" /> 하나 되는 공동체
               </h1>
-              <p className="text-sm md:text-base lg:text-lg text-white/80 leading-relaxed hidden sm:block">
+              <p className="text-base md:text-lg text-white/80 leading-relaxed">
                 본당 소식과 단체 활동, 신앙 삶을 풍성하게 하는 모든 안내를 한 자리에서 만나보세요.
               </p>
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:gap-3 pt-1 md:pt-2 max-w-xs sm:max-w-none">
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:flex-wrap sm:gap-3 pt-2 max-w-xs sm:max-w-none">
                 <Link
                   to="/mass"
-                  className="group inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 py-2 md:px-5 md:py-3 rounded-lg md:rounded-xl bg-white/85 text-gray-900 text-sm md:text-base font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  className="group inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/85 text-gray-900 font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                 >
-                  <svg className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V4m8 3V4m-9 9h10M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2" />
                   </svg>
-                  <span className="hidden sm:inline">미사 안내</span>
-                  <span className="sm:hidden">미사</span>
+                  미사 안내
                 </Link>
                 <Link
                   to="/news"
-                  className="group inline-flex items-center justify-center gap-1.5 md:gap-2 px-3 py-2 md:px-5 md:py-3 rounded-lg md:rounded-xl bg-white/15 text-white text-sm md:text-base font-semibold border border-white/40 hover:bg-white/25 hover:-translate-y-1 transition-all duration-300"
+                  className="group inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/15 text-white font-semibold border border-white/40 hover:bg-white/25 hover:-translate-y-1 transition-all duration-300"
                 >
-                  <svg className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V7a2 2 0 012-2h4l2-2h6a2 2 0 012 2v15z" />
                   </svg>
-                  <span className="hidden sm:inline">공지 · 소식</span>
-                  <span className="sm:hidden">소식</span>
+                  공지 · 소식
                 </Link>
               </div>
             </div>
@@ -877,34 +875,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={gallerySectionRef} className="py-12 md:py-20">
+      <section ref={gallerySectionRef} className="py-20">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-4 mb-6 md:mb-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
             <div>
-              <p className="text-xs md:text-sm font-semibold text-catholic-logo mb-1 md:mb-2">성당 앨범</p>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">사진으로 기억하는 상미성당</h2>
-              <p className="text-xs md:text-sm text-gray-600 leading-relaxed mt-1 md:mt-2 hidden sm:block">
+              <p className="text-sm font-semibold text-catholic-logo mb-2">성당 앨범</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">사진으로 기억하는 상미성당</h2>
+              <p className="text-sm text-gray-600 leading-relaxed mt-2">
                 본당 행사와 단체 활동의 모습을 앨범에서 모아보세요.
               </p>
             </div>
             <Link
               to="/albums"
-              className="inline-flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-semibold text-catholic-logo hover:text-catholic-logo-dark transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo hover:text-catholic-logo-dark transition-colors"
             >
-              <span className="hidden sm:inline">앨범 전체 보기</span>
-              <span className="sm:hidden">전체보기</span>
-              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              앨범 전체 보기
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {displayAlbums.map((album, i) => (
               <Link
                 key={album.id || i}
                 to={album.id ? `/albums/${album.id}` : '/albums'}
-                className="group flex flex-col rounded-xl md:rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm md:shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 md:hover:-translate-y-2"
+                className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
                   <img
@@ -949,8 +946,8 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
-                <div className="px-3 py-2.5 md:px-5 md:py-4 border-t border-gray-100">
-                  <h3 className="text-xs md:text-sm font-semibold text-gray-900 truncate group-hover:text-catholic-logo transition-colors">
+                <div className="px-5 py-4 border-t border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-catholic-logo transition-colors">
                     {album.title}
                   </h3>
                 </div>
