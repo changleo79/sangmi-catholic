@@ -742,7 +742,7 @@ export default function Home() {
                           <Link
                             key={`important-${idx}-${notice.title}`}
                             to={`/news/${noticeId}`}
-                            className="block rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 md:p-8 text-white group flex-1 flex flex-col"
+                            className={`block rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 md:p-8 text-white group flex-1 flex flex-col ${idx > 0 ? 'hidden md:block' : ''}`}
                             style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}
                           >
                         <div className="flex items-center gap-4 mb-4">
