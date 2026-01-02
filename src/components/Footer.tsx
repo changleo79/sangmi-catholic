@@ -144,11 +144,8 @@ export default function Footer() {
         
         {/* 구분선 및 저작권 */}
         <div className="mt-8 md:mt-12 pt-6 md:pt-8 text-center" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.15)' }}>
-          <p className="text-xs md:text-sm mb-1 md:mb-2" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+          <p className="text-xs md:text-sm" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
             © 2025 상미성당. All rights reserved.
-          </p>
-          <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-            아시시의 성 프란치스코 상미성당 | 용인교구
           </p>
         </div>
       </div>
