@@ -48,11 +48,17 @@ export default function Home() {
 
   const loadData = async () => {
     const storedNotices = await getNotices()
-    setNotices(storedNotices.length > 0 ? storedNotices : defaultNotices)
+    // null 항목 필터링
+    const validNotices = (storedNotices.length > 0 ? storedNotices : defaultNotices)
+      .filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)
+    setNotices(validNotices)
 
     const storedRecruitments = await getRecruitments()
     if (storedRecruitments.length > 0) {
-      setRecruitments(storedRecruitments.slice(0, 6))
+      // null 항목 필터링
+      const validRecruitments = storedRecruitments
+        .filter((recruitment): recruitment is RecruitmentItem => recruitment !== null && recruitment !== undefined && recruitment.title !== undefined)
+      setRecruitments(validRecruitments.slice(0, 6))
     } else {
       setRecruitments([
         { id: 'recruit-default-1', title: '전례 성가단 단원 모집', summary: '주일 11시 미사 전례 성가단 단원 모집' },
@@ -62,7 +68,10 @@ export default function Home() {
 
     // App.tsx에서 이미 initializeData()로 데이터를 로드했으므로 캐시 활용
     const storedBulletins = await getBulletins(false)
-    setBulletins(storedBulletins.slice(0, 6))
+    // null 항목 필터링
+    const validBulletins = storedBulletins
+      .filter((bulletin): bulletin is BulletinItem => bulletin !== null && bulletin !== undefined && bulletin.title !== undefined)
+    setBulletins(validBulletins.slice(0, 6))
 
     const catechism = await getCatechismInfo()
     if (catechism) {
@@ -296,13 +305,16 @@ export default function Home() {
     notice: {
       label: '공지사항',
       description: '본당의 주요 안내와 행정 소식',
-      items: notices.slice(0, 4).map((item, idx) => ({
-        id: `notice-${idx}-${item.title}`,
-        title: item.title,
-        summary: item.summary,
-        date: formatDate(item.date),
-        to: '/news'
-      })),
+      items: notices
+        .filter((item): item is NoticeItem => item !== null && item !== undefined && item.title !== undefined)
+        .slice(0, 4)
+        .map((item, idx) => ({
+          id: `notice-${idx}-${item.title}`,
+          title: item.title,
+          summary: item.summary,
+          date: formatDate(item.date),
+          to: '/news'
+        })),
       emptyText: '등록된 공지사항이 없습니다.',
       ctaLabel: '공지사항 전체 보기',
       ctaLink: '/news'
@@ -310,12 +322,15 @@ export default function Home() {
     recruitment: {
       label: '단체 소식',
       description: '함께할 봉사와 단체 모집 안내',
-      items: recruitments.slice(0, 4).map(item => ({
-        id: item.id,
-        title: item.title,
-        summary: item.summary,
-        to: '/news'
-      })),
+      items: recruitments
+        .filter((item): item is RecruitmentItem => item !== null && item !== undefined && item.title !== undefined)
+        .slice(0, 4)
+        .map(item => ({
+          id: item.id,
+          title: item.title,
+          summary: item.summary,
+          to: '/news'
+        })),
       emptyText: '현재 모집 중인 단체가 없습니다.',
       ctaLabel: '단체 소식 전체 보기',
       ctaLink: '/news'
@@ -323,15 +338,18 @@ export default function Home() {
     bulletin: {
       label: '주보 안내',
       description: '주일 주보 PDF를 내려받을 수 있습니다.',
-      items: bulletins.slice(0, 4).map(item => ({
-        id: item.id,
-        title: item.title,
-        summary: item.description,
-        date: formatDate(item.date),
-        to: '/news',
-        fileUrl: item.fileUrl,
-        bulletin: item
-      })),
+      items: bulletins
+        .filter((item): item is BulletinItem => item !== null && item !== undefined && item.title !== undefined)
+        .slice(0, 4)
+        .map(item => ({
+          id: item.id,
+          title: item.title,
+          summary: item.description,
+          date: formatDate(item.date),
+          to: '/news',
+          fileUrl: item.fileUrl,
+          bulletin: item
+        })),
       emptyText: '등록된 주보가 없습니다.',
       ctaLabel: '주보 안내 전체 보기',
       ctaLink: '/news'
@@ -621,25 +639,27 @@ export default function Home() {
           <div className="grid lg:grid-cols-[2fr,1fr] gap-6">
             <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
               {activeNoticeContent.items.length > 0 ? (
-                activeNoticeContent.items.map(item => {
-                  const isBulletin = activeNoticeTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
-                  let bulletinItem: BulletinItem | null = null
-                  if (isBulletin && 'bulletin' in item) {
-                    bulletinItem = item.bulletin as BulletinItem
-                  }
-                  return (
-                    <div
-                      key={item.id}
-                      className="p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/60 hover:to-transparent transition-all duration-300 group"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="w-2 h-2 rounded-full bg-catholic-logo/70 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors">
-                              {item.title}
-                            </h3>
-                          </div>
+                activeNoticeContent.items
+                  .filter(item => item !== null && item !== undefined && item.title !== undefined)
+                  .map(item => {
+                    const isBulletin = activeNoticeTab === 'bulletin' && 'fileUrl' in item && item.fileUrl
+                    let bulletinItem: BulletinItem | null = null
+                    if (isBulletin && 'bulletin' in item) {
+                      bulletinItem = item.bulletin as BulletinItem
+                    }
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-6 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50/60 hover:to-transparent transition-all duration-300 group"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="w-2 h-2 rounded-full bg-catholic-logo/70 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors">
+                                {item.title || '(제목 없음)'}
+                              </h3>
+                            </div>
                           {item.summary && (
                             <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">{item.summary}</p>
                           )}
