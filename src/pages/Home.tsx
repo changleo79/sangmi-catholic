@@ -48,9 +48,14 @@ export default function Home() {
 
   const loadData = async () => {
     const storedNotices = await getNotices()
-    // null 항목 필터링
+    // null 항목 필터링 및 최신순 정렬
     const validNotices = (storedNotices.length > 0 ? storedNotices : defaultNotices)
       .filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)
+      .sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0
+        const dateB = b.date ? new Date(b.date).getTime() : 0
+        return dateB - dateA // 최신순
+      })
     setNotices(validNotices)
 
     const storedRecruitments = await getRecruitments()
@@ -104,6 +109,11 @@ export default function Home() {
       const storedNotices = await getNotices(true)
       const validNotices = (storedNotices.length > 0 ? storedNotices : defaultNotices)
         .filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)
+        .sort((a, b) => {
+          const dateA = a.date ? new Date(a.date).getTime() : 0
+          const dateB = b.date ? new Date(b.date).getTime() : 0
+          return dateB - dateA // 최신순
+        })
       setNotices(validNotices)
     }
     
@@ -129,8 +139,14 @@ export default function Home() {
         return true
       })
       
+      // 최신순 정렬 후 최근 4개만 선택
+      const sortedAlbums = savedAlbums.sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0
+        const dateB = b.date ? new Date(b.date).getTime() : 0
+        return dateB - dateA // 최신순
+      })
       // 원본 URL 우선 사용 (선명도 개선), 썸네일은 백그라운드 로딩용으로만 사용
-      const recentAlbums = savedAlbums.slice(0, 4).map(album => {
+      const recentAlbums = sortedAlbums.slice(0, 4).map(album => {
         const firstPhoto = album.photos && album.photos.length > 0 ? album.photos[0] : null
         const thumbnailUrl = firstPhoto?.thumbnailUrl
         const originalUrl = album.cover || firstPhoto?.src || ''
@@ -280,14 +296,14 @@ export default function Home() {
       )
     },
     {
-      title: '성당 앨범',
-      description: '행사 사진 모음',
-      to: '/albums',
+      title: '관할구역',
+      description: '본당 관할구역 안내',
+      to: '/jurisdiction',
       accent: '#4C9C84',
       background: 'linear-gradient(135deg, rgba(76, 156, 132, 0.14) 0%, rgba(76, 156, 132, 0.04) 100%)',
       icon: (
         <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v3M4 19V5m0 14h16m-6-6l2 2 3-3m-9 1a2 2 0 110-4 2 2 0 010 4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
       )
     },

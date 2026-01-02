@@ -13,6 +13,29 @@
     -moz-osx-font-smoothing: grayscale;
   }
   
+  /* 모바일 폰트 크기 증가 */
+  @media (max-width: 767px) {
+    body {
+      font-size: 16px;
+    }
+    
+    p, span, div, a, button {
+      font-size: 15px;
+    }
+    
+    h1 {
+      font-size: 1.875rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+  
   /* 터치 최적화 */
   * {
     -webkit-tap-highlight-color: transparent;

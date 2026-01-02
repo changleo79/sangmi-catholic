@@ -49,9 +49,14 @@ export default function News() {
         getBulletins(false)
       ])
       
-      // null 항목 필터링
+      // null 항목 필터링 및 최신순 정렬
       const validCachedNotices = (cachedNotices.length > 0 ? cachedNotices : defaultNotices)
         .filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)
+        .sort((a, b) => {
+          const dateA = a.date ? new Date(a.date).getTime() : 0
+          const dateB = b.date ? new Date(b.date).getTime() : 0
+          return dateB - dateA // 최신순
+        })
       setNotices(validCachedNotices)
 
       if (cachedRecruitments.length > 0) {
@@ -82,9 +87,14 @@ export default function News() {
       getBulletins(forceRefresh)
     ])
     
-    // null 항목 필터링
+    // null 항목 필터링 및 최신순 정렬
     const validStoredNotices = (storedNotices.length > 0 ? storedNotices : defaultNotices)
       .filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)
+      .sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0
+        const dateB = b.date ? new Date(b.date).getTime() : 0
+        return dateB - dateA // 최신순
+      })
     setNotices(validStoredNotices)
 
     if (storedRecruitments.length > 0) {

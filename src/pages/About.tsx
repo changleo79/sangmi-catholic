@@ -57,25 +57,6 @@ export default function About() {
               <h2 className="text-3xl font-bold text-gray-900">역대 본당신부님 소개</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* 1대 본당신부 */}
-              <div className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                <div className="aspect-square w-full max-w-[220px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center">
-                  <img
-                    src="/images/past-priest-choi.jpg"
-                    alt="초대 주임신부 최범근 요한사도 신부님"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    style={{ objectPosition: 'center top' }}
-                  />
-                </div>
-                <div className="text-center">
-                  <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-2 transition-all duration-300 group-hover:scale-105" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
-                    초대 주임신부
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-catholic-logo transition-colors duration-300">최범근 요한사도</h3>
-                  <p className="text-sm text-gray-600 mb-2">재임기간 : 2019년 6월 18일 ~ 2025년 6월 16일</p>
-                </div>
-              </div>
-              
               {/* 2대 본당신부 */}
               <div className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                 <div className="aspect-square w-full max-w-[220px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center">
@@ -92,6 +73,25 @@ export default function About() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-catholic-logo transition-colors duration-300">정진성 아우구스티노</h3>
                   <p className="text-sm text-gray-600 mb-2">재임기간 : 2025년 6월 17일 ~ 현재</p>
+                </div>
+              </div>
+              
+              {/* 1대 본당신부 */}
+              <div className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-100 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <div className="aspect-square w-full max-w-[220px] mx-auto mb-4 rounded-xl overflow-hidden bg-gray-200 shadow-lg group-hover:shadow-xl transition-all duration-300 flex items-center justify-center">
+                  <img
+                    src="/images/past-priest-choi.jpg"
+                    alt="초대 주임신부 최범근 요한사도 신부님"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    style={{ objectPosition: 'center top' }}
+                  />
+                </div>
+                <div className="text-center">
+                  <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-2 transition-all duration-300 group-hover:scale-105" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)', color: '#7B1F4B' }}>
+                    초대 주임신부
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-catholic-logo transition-colors duration-300">최범근 요한사도</h3>
+                  <p className="text-sm text-gray-600 mb-2">재임기간 : 2019년 6월 18일 ~ 2025년 6월 16일</p>
                 </div>
               </div>
             </div>

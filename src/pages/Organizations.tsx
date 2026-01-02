@@ -54,8 +54,8 @@ export default function Organizations() {
           </p>
         </div>
 
-        {/* Link to Organization Tree */}
-        <div className="mb-12 text-center">
+        {/* Links to Organization Tree and Jurisdiction */}
+        <div className="mb-12 text-center flex flex-wrap justify-center gap-4">
           <Link
             to="/organizations/tree"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 shadow-lg"
@@ -67,6 +67,18 @@ export default function Organizations() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
             </svg>
             조직도 보기
+          </Link>
+          <Link
+            to="/jurisdiction"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 shadow-lg"
+            style={{ backgroundColor: '#7B1F4B' }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            관할구역 보기
           </Link>
         </div>
 
