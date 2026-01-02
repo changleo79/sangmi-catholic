@@ -48,21 +48,17 @@ export default function PdfViewerModal({
     // 모달이 열릴 때 현재 스크롤 위치 저장 (스크롤 복원용)
     scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop
     
+    // 모달이 열릴 때 페이지 스크롤을 맨 위로 이동
+    window.scrollTo({ top: 0, behavior: 'instant' })
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+    
     // 모달이 열릴 때 모달 컨텐츠 스크롤을 맨 위로 초기화 (모바일/PC 모두)
     // 여러 번 시도하여 확실하게 스크롤 초기화
     const resetScroll = () => {
       if (modalContentRef.current) {
         // 스크롤을 강제로 맨 위로 이동
         modalContentRef.current.scrollTop = 0
-        // 헤더를 찾아서 scrollIntoView를 사용하여 헤더가 보이도록 함
-        const header = document.getElementById('pdf-modal-header')
-        if (header) {
-          // 헤더가 모달 컨텐츠의 부모 요소에 있는지 확인
-          const modalContainer = header.closest('[class*="flex flex-col"]')
-          if (modalContainer) {
-            header.scrollIntoView({ behavior: 'instant', block: 'start', inline: 'nearest' })
-          }
-        }
         // 강제로 스크롤 위치 확인
         requestAnimationFrame(() => {
           if (modalContentRef.current) {
@@ -70,10 +66,6 @@ export default function PdfViewerModal({
           }
         })
       }
-      // 모든 디바이스에서 페이지 스크롤도 맨 위로 이동 (News 페이지와 동일하게)
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      document.documentElement.scrollTop = 0
-      document.body.scrollTop = 0
     }
     
     // 즉시 실행 및 약간의 지연 후 재실행 (모달 렌더링 완료 대기)
@@ -81,6 +73,7 @@ export default function PdfViewerModal({
     setTimeout(resetScroll, 10)
     setTimeout(resetScroll, 100)
     setTimeout(resetScroll, 300) // 모달 애니메이션 완료 후에도 한 번 더 실행
+    setTimeout(resetScroll, 500) // 추가 지연으로 확실하게 스크롤 초기화
     
     // body 스크롤은 허용 (모달 바깥에서 스크롤)
     // 모달은 fixed로 배치하되, body는 자유롭게 스크롤 가능
@@ -214,7 +207,7 @@ export default function PdfViewerModal({
         }
       }}
     >
-      <div className="relative w-full h-auto sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col mt-4 sm:mt-0 mb-4 sm:mb-0" style={{ maxHeight: 'calc(100vh - 2rem)' }}>
+      <div className="relative w-full h-auto sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col mt-4 sm:mt-8 mb-4 sm:mb-8" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
         <header id="pdf-modal-header" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
@@ -261,7 +254,8 @@ export default function PdfViewerModal({
           className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden" 
           style={{ 
             scrollBehavior: 'auto',
-            WebkitOverflowScrolling: 'touch'
+            WebkitOverflowScrolling: 'touch',
+            scrollPaddingTop: '0'
           } as React.CSSProperties}
         >
           {(() => {
@@ -325,6 +319,12 @@ export default function PdfViewerModal({
                         target.style.backgroundColor = 'transparent'
                         setImageError(false)
                         console.log('[PdfViewerModal] 이미지 로드 성공:', imageSrc)
+                        // 이미지 로드 후 모달 컨텐츠 스크롤을 맨 위로 이동
+                        setTimeout(() => {
+                          if (modalContentRef.current) {
+                            modalContentRef.current.scrollTop = 0
+                          }
+                        }, 100)
                       }}
                       onLoadStart={() => {
                         console.log('[PdfViewerModal] 이미지 로드 시작:', imageSrc)
@@ -336,12 +336,18 @@ export default function PdfViewerModal({
                 <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: '600px', height: '80vh' }}>
                   <iframe
                     key={`iframe-${fileUrl}`}
-                    src={`${fileUrl}#toolbar=0&zoom=page-fit&view=FitH`}
+                    src={`${fileUrl}#toolbar=0&zoom=page-fit&view=FitV&page=1`}
                     title={title}
                     className="w-full h-full"
                     style={{ border: 'none', minHeight: '600px' }}
                     onLoad={() => {
                       console.log('[PdfViewerModal] iframe 로드 성공:', fileUrl)
+                      // iframe 로드 후 모달 컨텐츠 스크롤을 맨 위로 이동
+                      setTimeout(() => {
+                        if (modalContentRef.current) {
+                          modalContentRef.current.scrollTop = 0
+                        }
+                      }, 100)
                     }}
                   />
                 </div>
