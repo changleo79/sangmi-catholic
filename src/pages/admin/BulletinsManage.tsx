@@ -17,6 +17,114 @@ const getProxiedImageUrl = (url: string): string => {
   return url
 }
 
+// 이미지 압축 함수 (모든 이미지 압축, Vercel 4.5MB 제한 대응)
+const compressImage = (file: File, maxSizeMB: number = 3.5, maxWidth: number = 1920, maxHeight: number = 1920): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    // 이미지가 아닌 경우 그대로 반환
+    if (!file.type.startsWith('image/')) {
+      resolve(file)
+      return
+    }
+
+    const fileSizeMB = file.size / 1024 / 1024
+    
+    // 모든 이미지를 압축 (크기 제한 체크 제거)
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const img = new Image()
+      img.onload = () => {
+        // 원본 크기
+        let width = img.width
+        let height = img.height
+
+        // 최대 크기로 리사이즈 (1920x1920px 초과 시)
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height)
+          width = Math.round(width * ratio)
+          height = Math.round(height * ratio)
+        }
+
+        // Canvas로 리사이즈 및 압축
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        
+        if (!ctx) {
+          reject(new Error('Canvas 컨텍스트를 생성할 수 없습니다.'))
+          return
+        }
+
+        // 고품질 리사이징
+        ctx.drawImage(img, 0, 0, width, height)
+
+        // JPEG 품질 조정 (파일 크기에 따라 품질 조정)
+        // 작은 파일은 높은 품질, 큰 파일은 더 압축
+        let quality = 0.90  // 기본 품질을 90%로 높임 (작은 파일용)
+        if (fileSizeMB > 5) {
+          quality = 0.75  // 5MB 초과: 75%
+        } else if (fileSizeMB > 4) {
+          quality = 0.80  // 4MB 초과: 80%
+        } else if (fileSizeMB > 2) {
+          quality = 0.85  // 2MB 초과: 85%
+        } else if (fileSizeMB > 1) {
+          quality = 0.90  // 1MB 초과: 90%
+        }
+        // 1MB 이하는 90% 품질 유지
+
+        // JPEG로 변환 (PNG도 JPEG로 변환하여 크기 감소)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('이미지 압축 실패'))
+              return
+            }
+
+            const compressedFile = new File(
+              [blob],
+              file.name.replace(/\.(png|gif|webp)$/i, '.jpg'),
+              { type: 'image/jpeg', lastModified: Date.now() }
+            )
+
+            const compressedSizeMB = compressedFile.size / 1024 / 1024
+            console.log(`[압축 완료] ${file.name}: ${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB (${((1 - compressedFile.size / file.size) * 100).toFixed(1)}% 감소)`)
+
+            // 여전히 크면 품질을 더 낮춰서 재압축
+            if (compressedSizeMB > maxSizeMB && quality > 0.6) {
+              quality = Math.max(0.6, quality - 0.1)
+              canvas.toBlob(
+                (blob2) => {
+                  if (!blob2) {
+                    resolve(compressedFile)
+                    return
+                  }
+                  const finalFile = new File(
+                    [blob2],
+                    compressedFile.name,
+                    { type: 'image/jpeg', lastModified: Date.now() }
+                  )
+                  console.log(`[재압축 완료] ${file.name}: ${(finalFile.size / 1024 / 1024).toFixed(2)}MB`)
+                  resolve(finalFile)
+                },
+                'image/jpeg',
+                quality
+              )
+            } else {
+              resolve(compressedFile)
+            }
+          },
+          'image/jpeg',
+          quality
+        )
+      }
+      img.onerror = () => reject(new Error('이미지 로드 실패'))
+      img.src = e.target?.result as string
+    }
+    reader.onerror = () => reject(new Error('파일 읽기 실패'))
+    reader.readAsDataURL(file)
+  })
+}
+
 export default function BulletinsManage() {
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
   const [isEditing, setIsEditing] = useState(false)
@@ -218,10 +326,30 @@ export default function BulletinsManage() {
     }
 
     try {
+      // 이미지 파일인 경우 압축 (Vercel 4.5MB 제한 대응)
+      let fileToUpload = file
+      if (isImage) {
+        try {
+          console.log(`[주보 압축 시작] ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+          fileToUpload = await compressImage(file)
+        } catch (compressError) {
+          console.warn(`[주보 압축 실패] ${file.name}, 원본 파일로 업로드 시도:`, compressError)
+          // 압축 실패 시 원본 파일로 업로드 시도
+        }
+      }
+
       // 파일을 서버에 업로드 (Base64 대신 서버에 저장)
       const uploadFormData = new FormData()
-      uploadFormData.append('files', file)
+      uploadFormData.append('files', fileToUpload)
       uploadFormData.append('albumId', 'bulletins') // 주보는 bulletins 폴더에 저장
+
+      const uploadSizeMB = fileToUpload.size / 1024 / 1024
+      console.log(`[주보 업로드 중] ${file.name} (${uploadSizeMB.toFixed(2)}MB)`)
+
+      // 여전히 크면 경고
+      if (uploadSizeMB > 4) {
+        console.warn(`[경고] 주보 파일이 여전히 큽니다: ${uploadSizeMB.toFixed(2)}MB. Vercel 제한(4.5MB)에 가까울 수 있습니다.`)
+      }
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -229,9 +357,16 @@ export default function BulletinsManage() {
       })
 
       if (!response.ok) {
+        let errorMessage = '파일 업로드 실패'
+        
+        // 413 오류인 경우 특별 처리
+        if (response.status === 413) {
+          errorMessage = `파일 크기가 너무 큽니다 (${uploadSizeMB.toFixed(2)}MB).\n\nVercel의 요청 본문 크기 제한(약 4.5MB)을 초과했습니다.\n\n해결 방법:\n1. 이미지 파일을 더 작게 압축하거나\n2. 이미지 편집 프로그램으로 크기를 줄인 후 다시 시도해 주세요.\n\n원본 파일 크기: ${(file.size / 1024 / 1024).toFixed(2)}MB\n압축 후 크기: ${uploadSizeMB.toFixed(2)}MB`
+        }
+        
         const errorText = await response.text()
         console.error('[BulletinsManage] 파일 업로드 실패:', response.status, errorText)
-        throw new Error('파일 업로드 실패')
+        throw new Error(errorMessage)
       }
 
       const result = await response.json()

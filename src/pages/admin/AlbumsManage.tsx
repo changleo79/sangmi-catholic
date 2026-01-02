@@ -5,7 +5,7 @@ import type { AlbumPhoto } from '../../data/albums'
 
 const generateDraftId = () => `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
-// 이미지 압축 함수 (Vercel 4.5MB 제한 대응)
+// 이미지 압축 함수 (모든 이미지 압축, Vercel 4.5MB 제한 대응)
 const compressImage = (file: File, maxSizeMB: number = 3.5, maxWidth: number = 1920, maxHeight: number = 1920): Promise<File> => {
   return new Promise((resolve, reject) => {
     // 이미지가 아닌 경우 그대로 반환
@@ -14,14 +14,9 @@ const compressImage = (file: File, maxSizeMB: number = 3.5, maxWidth: number = 1
       return
     }
 
-    // 이미 작은 파일은 압축하지 않음
     const fileSizeMB = file.size / 1024 / 1024
-    if (fileSizeMB <= maxSizeMB) {
-      console.log(`[압축 스킵] ${file.name}: ${fileSizeMB.toFixed(2)}MB (이미 작음)`)
-      resolve(file)
-      return
-    }
-
+    
+    // 모든 이미지를 압축 (크기 제한 체크 제거)
     const reader = new FileReader()
     reader.onload = (e) => {
       const img = new Image()
@@ -30,7 +25,7 @@ const compressImage = (file: File, maxSizeMB: number = 3.5, maxWidth: number = 1
         let width = img.width
         let height = img.height
 
-        // 최대 크기로 리사이즈
+        // 최대 크기로 리사이즈 (1920x1920px 초과 시)
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height)
           width = Math.round(width * ratio)
@@ -51,13 +46,19 @@ const compressImage = (file: File, maxSizeMB: number = 3.5, maxWidth: number = 1
         // 고품질 리사이징
         ctx.drawImage(img, 0, 0, width, height)
 
-        // JPEG 품질 조정 (큰 파일일수록 더 압축)
-        let quality = 0.85
+        // JPEG 품질 조정 (파일 크기에 따라 품질 조정)
+        // 작은 파일은 높은 품질, 큰 파일은 더 압축
+        let quality = 0.90  // 기본 품질을 90%로 높임 (작은 파일용)
         if (fileSizeMB > 5) {
-          quality = 0.75
+          quality = 0.75  // 5MB 초과: 75%
         } else if (fileSizeMB > 4) {
-          quality = 0.80
+          quality = 0.80  // 4MB 초과: 80%
+        } else if (fileSizeMB > 2) {
+          quality = 0.85  // 2MB 초과: 85%
+        } else if (fileSizeMB > 1) {
+          quality = 0.90  // 1MB 초과: 90%
         }
+        // 1MB 이하는 90% 품질 유지
 
         // JPEG로 변환 (PNG도 JPEG로 변환하여 크기 감소)
         canvas.toBlob(
