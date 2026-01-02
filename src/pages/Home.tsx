@@ -939,39 +939,46 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={gallerySectionRef} className="py-20">
+      <section ref={gallerySectionRef} className="py-12 md:py-20 bg-gradient-to-b from-white to-gray-50/50">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
-            <div>
-              <p className="text-sm font-semibold text-catholic-logo mb-2">성당 앨범</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">사진으로 기억하는 상미성당</h2>
-              <p className="text-sm text-gray-600 leading-relaxed mt-2">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 md:gap-4 mb-6 md:mb-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-catholic-logo/10 text-xs md:text-sm font-semibold text-catholic-logo">
+                  성당 앨범
+                </span>
+              </div>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-2">
+                사진으로 기억하는 상미성당
+              </h2>
+              <p className="text-xs md:text-sm text-gray-600 leading-relaxed hidden sm:block">
                 본당 행사와 단체 활동의 모습을 앨범에서 모아보세요.
               </p>
             </div>
             <Link
               to="/albums"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-catholic-logo hover:text-catholic-logo-dark transition-colors"
+              className="inline-flex items-center gap-1.5 md:gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-lg md:rounded-xl bg-catholic-logo text-white text-xs md:text-sm font-semibold hover:bg-catholic-logo-dark transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 whitespace-nowrap"
             >
-              앨범 전체 보기
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="hidden sm:inline">앨범 전체 보기</span>
+              <span className="sm:hidden">전체보기</span>
+              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
             {displayAlbums.map((album, i) => (
               <Link
                 key={album.id || i}
                 to={album.id ? `/albums/${album.id}` : '/albums'}
-                className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                className="group flex flex-col rounded-xl md:rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-sm md:shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 md:hover:-translate-y-2"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-gray-200">
                   <img
                     src={album.cover}
                     alt={album.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundColor: '#f3f4f6' }}
                     loading={i < 2 ? 'eager' : 'lazy'}
                     decoding="async"
@@ -1000,20 +1007,37 @@ export default function Home() {
                       }
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
-                  <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-400">
-                    <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 backdrop-blur text-white text-xs font-medium">
-                      사진 더 보기
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* 모바일: 간단한 오버레이 */}
+                  <div className="md:hidden absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {/* PC: 상세한 오버레이 */}
+                  <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                  <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 right-3 md:right-4 opacity-0 group-hover:opacity-100 transition-all duration-400">
+                    <span className="inline-flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1.5 md:py-2 rounded-lg md:rounded-xl bg-white/20 backdrop-blur-md text-white text-xs font-medium border border-white/30">
+                      <span className="hidden md:inline">사진 더 보기</span>
+                      <span className="md:hidden">더보기</span>
+                      <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </span>
                   </div>
+                  {/* PC: 코너 배지 */}
+                  <div className="hidden md:block absolute top-3 right-3 w-8 h-8 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <svg className="w-4 h-4 text-catholic-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
                 </div>
-                <div className="px-5 py-4 border-t border-gray-100">
-                  <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-catholic-logo transition-colors">
+                <div className="px-3 py-2.5 md:px-5 md:py-4 border-t border-gray-100 bg-white">
+                  <h3 className="text-xs md:text-sm font-semibold text-gray-900 truncate group-hover:text-catholic-logo transition-colors leading-tight">
                     {album.title}
                   </h3>
+                  {/* PC: 추가 정보 */}
+                  <div className="hidden md:flex items-center gap-2 mt-2">
+                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-xs text-gray-500">앨범 보기</span>
+                  </div>
                 </div>
               </Link>
             ))}
