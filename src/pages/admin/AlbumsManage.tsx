@@ -5,6 +5,113 @@ import type { AlbumPhoto } from '../../data/albums'
 
 const generateDraftId = () => `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
+// 이미지 압축 함수 (Vercel 4.5MB 제한 대응)
+const compressImage = (file: File, maxSizeMB: number = 3.5, maxWidth: number = 1920, maxHeight: number = 1920): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    // 이미지가 아닌 경우 그대로 반환
+    if (!file.type.startsWith('image/')) {
+      resolve(file)
+      return
+    }
+
+    // 이미 작은 파일은 압축하지 않음
+    const fileSizeMB = file.size / 1024 / 1024
+    if (fileSizeMB <= maxSizeMB) {
+      console.log(`[압축 스킵] ${file.name}: ${fileSizeMB.toFixed(2)}MB (이미 작음)`)
+      resolve(file)
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const img = new Image()
+      img.onload = () => {
+        // 원본 크기
+        let width = img.width
+        let height = img.height
+
+        // 최대 크기로 리사이즈
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height)
+          width = Math.round(width * ratio)
+          height = Math.round(height * ratio)
+        }
+
+        // Canvas로 리사이즈 및 압축
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        
+        if (!ctx) {
+          reject(new Error('Canvas 컨텍스트를 생성할 수 없습니다.'))
+          return
+        }
+
+        // 고품질 리사이징
+        ctx.drawImage(img, 0, 0, width, height)
+
+        // JPEG 품질 조정 (큰 파일일수록 더 압축)
+        let quality = 0.85
+        if (fileSizeMB > 5) {
+          quality = 0.75
+        } else if (fileSizeMB > 4) {
+          quality = 0.80
+        }
+
+        // JPEG로 변환 (PNG도 JPEG로 변환하여 크기 감소)
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('이미지 압축 실패'))
+              return
+            }
+
+            const compressedFile = new File(
+              [blob],
+              file.name.replace(/\.(png|gif|webp)$/i, '.jpg'),
+              { type: 'image/jpeg', lastModified: Date.now() }
+            )
+
+            const compressedSizeMB = compressedFile.size / 1024 / 1024
+            console.log(`[압축 완료] ${file.name}: ${fileSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB (${((1 - compressedFile.size / file.size) * 100).toFixed(1)}% 감소)`)
+
+            // 여전히 크면 품질을 더 낮춰서 재압축
+            if (compressedSizeMB > maxSizeMB && quality > 0.6) {
+              quality = Math.max(0.6, quality - 0.1)
+              canvas.toBlob(
+                (blob2) => {
+                  if (!blob2) {
+                    resolve(compressedFile)
+                    return
+                  }
+                  const finalFile = new File(
+                    [blob2],
+                    compressedFile.name,
+                    { type: 'image/jpeg', lastModified: Date.now() }
+                  )
+                  console.log(`[재압축 완료] ${file.name}: ${(finalFile.size / 1024 / 1024).toFixed(2)}MB`)
+                  resolve(finalFile)
+                },
+                'image/jpeg',
+                quality
+              )
+            } else {
+              resolve(compressedFile)
+            }
+          },
+          'image/jpeg',
+          quality
+        )
+      }
+      img.onerror = () => reject(new Error('이미지 로드 실패'))
+      img.src = e.target?.result as string
+    }
+    reader.onerror = () => reject(new Error('파일 읽기 실패'))
+    reader.readAsDataURL(file)
+  })
+}
+
 export default function AlbumsManage() {
   const [albums, setAlbums] = useState<AlbumWithCategory[]>([])
   const [isEditing, setIsEditing] = useState(false)
@@ -266,8 +373,6 @@ export default function AlbumsManage() {
 
   const handleFileUpload = async (files: File[]) => {
     if (!files.length) return
-    
-    // 파일 크기 제한 없음 (무제한)
 
     setIsUploading(true)
     const targetAlbumId = getActiveAlbumId()
@@ -280,12 +385,29 @@ export default function AlbumsManage() {
       // 파일을 하나씩 순차적으로 업로드 (Vercel 요청 본문 크기 제한 회피)
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+        
+        // 이미지 파일 압축 (Vercel 4.5MB 제한 대응)
+        let fileToUpload = file
+        try {
+          console.log(`[압축 시작] ${i + 1}/${files.length}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+          fileToUpload = await compressImage(file)
+        } catch (compressError) {
+          console.warn(`[압축 실패] ${file.name}, 원본 파일로 업로드 시도:`, compressError)
+          // 압축 실패 시 원본 파일로 업로드 시도
+        }
+        
         const body = new FormData()
         body.append('albumId', targetAlbumId)
-        body.append('files', file)
+        body.append('files', fileToUpload)
 
         try {
-          console.log(`[업로드 중] ${i + 1}/${files.length}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`)
+          const uploadSizeMB = fileToUpload.size / 1024 / 1024
+          console.log(`[업로드 중] ${i + 1}/${files.length}: ${file.name} (${uploadSizeMB.toFixed(2)}MB)`)
+          
+          // 여전히 크면 경고
+          if (uploadSizeMB > 4) {
+            console.warn(`[경고] 파일이 여전히 큽니다: ${uploadSizeMB.toFixed(2)}MB. Vercel 제한(4.5MB)에 가까울 수 있습니다.`)
+          }
           
           const response = await fetch('/api/upload', {
             method: 'POST',
@@ -296,23 +418,56 @@ export default function AlbumsManage() {
 
           if (!response.ok) {
             let errorMessage = `서버 오류 (${response.status})`
-            try {
-              const result = await response.json()
-              errorMessage = result.message || errorMessage
-              if (result.missingEnv) {
-                errorMessage += `\n\n누락된 환경 변수: ${result.missingEnv.join(', ')}\nVercel 환경 변수 설정을 확인해 주세요.`
-              }
-            } catch {
-              const text = await response.text().catch(() => '')
-              errorMessage = text || errorMessage
+            let errorDetails: any = null
+            
+            // 413 오류인 경우 특별 처리
+            if (response.status === 413) {
+              errorMessage = `파일 크기가 너무 큽니다 (${uploadSizeMB.toFixed(2)}MB).\n\nVercel의 요청 본문 크기 제한(약 4.5MB)을 초과했습니다.\n\n해결 방법:\n1. 이미지 파일을 더 작게 압축하거나\n2. 이미지 편집 프로그램으로 크기를 줄인 후 다시 시도해 주세요.\n\n원본 파일 크기: ${(file.size / 1024 / 1024).toFixed(2)}MB\n압축 후 크기: ${uploadSizeMB.toFixed(2)}MB`
             }
+            
+            try {
+              const contentType = response.headers.get('content-type')
+              if (contentType && contentType.includes('application/json')) {
+                const result = await response.json()
+                errorMessage = result.message || errorMessage
+                errorDetails = result
+                if (result.missingEnv) {
+                  errorMessage += `\n\n❌ 누락된 환경 변수: ${result.missingEnv.join(', ')}\n\nVercel 환경 변수 설정을 확인해 주세요:\n1. Vercel 대시보드 → 프로젝트 → Settings → Environment Variables\n2. 다음 변수들이 모두 설정되어 있는지 확인:\n   - NCP_ACCESS_KEY\n   - NCP_SECRET_KEY\n   - NCP_BUCKET\n   - NCP_CDN_DOMAIN`
+                }
+                if (result.error) {
+                  errorMessage += `\n\n상세 오류: ${result.error}`
+                }
+              } else {
+                const text = await response.text()
+                if (response.status !== 413) {
+                  errorMessage = text || errorMessage
+                }
+                console.error(`[업로드 실패 상세] ${file.name}:`, text)
+              }
+            } catch (parseError) {
+              console.error(`[응답 파싱 실패] ${file.name}:`, parseError)
+              if (response.status !== 413) {
+                const text = await response.text().catch(() => '')
+                errorMessage = text || errorMessage
+              }
+            }
+            
+            console.error(`[업로드 실패 상세] ${file.name}:`, {
+              status: response.status,
+              statusText: response.statusText,
+              errorMessage,
+              errorDetails,
+              originalSize: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+              compressedSize: `${uploadSizeMB.toFixed(2)}MB`
+            })
+            
             throw new Error(errorMessage)
           }
 
           const result = await response.json() as { uploads: { url: string; thumbnailUrl?: string; originalName: string }[] }
           
           if (!result.uploads || result.uploads.length === 0) {
-            throw new Error('업로드된 파일이 없습니다.')
+            throw new Error('업로드된 파일이 없습니다. 서버 응답에 uploads 배열이 비어있습니다.')
           }
 
           const uploaded = result.uploads[0]
@@ -327,7 +482,15 @@ export default function AlbumsManage() {
           // 중간 업데이트 제거 - 마지막에 한 번만 업데이트하여 중복 방지
         } catch (error) {
           console.error(`[업로드 실패] ${i + 1}/${files.length}: ${file.name}`, error)
-          failedFiles.push(file.name)
+          
+          // 네트워크 오류인 경우
+          if (error instanceof TypeError && error.message.includes('fetch')) {
+            console.error(`[네트워크 오류] ${file.name}:`, error)
+            failedFiles.push(`${file.name} (네트워크 오류: ${error.message})`)
+          } else {
+            const errorMsg = error instanceof Error ? error.message : String(error)
+            failedFiles.push(`${file.name} (${errorMsg})`)
+          }
           // 개별 파일 실패해도 계속 진행
         }
       }
@@ -380,14 +543,24 @@ export default function AlbumsManage() {
       console.log(`[업로드 완료] 성공: ${uploadedPhotos.length}개, 실패: ${failedFiles.length}개`)
 
       if (failedFiles.length > 0) {
-        alert(`${uploadedPhotos.length}개 이미지가 업로드되었습니다.\n\n다음 파일 업로드에 실패했습니다:\n${failedFiles.join('\n')}\n\n브라우저 개발자 도구(F12)의 Console을 확인해 주세요.`)
+        const errorSummary = failedFiles.length === files.length 
+          ? '❌ 모든 파일 업로드 실패\n\n가능한 원인:\n1. Vercel 환경 변수 미설정 (NCP_ACCESS_KEY, NCP_SECRET_KEY, NCP_BUCKET, NCP_CDN_DOMAIN)\n2. 네이버 클라우드 접근 권한 문제\n3. 버킷 이름 또는 CDN 도메인 오류\n\n'
+          : ''
+        
+        alert(`${errorSummary}${uploadedPhotos.length}개 이미지가 업로드되었습니다.\n\n다음 파일 업로드에 실패했습니다:\n${failedFiles.join('\n')}\n\n브라우저 개발자 도구(F12)의 Console과 Network 탭을 확인해 주세요.\n\n특히 Network 탭에서 /api/upload 요청의 Response를 확인하시면 상세 오류를 볼 수 있습니다.`)
       } else {
-        alert(`${uploadedPhotos.length}개 이미지가 성공적으로 업로드되었습니다.`)
+        alert(`✅ ${uploadedPhotos.length}개 이미지가 성공적으로 업로드되었습니다.`)
       }
     } catch (error) {
       console.error('[업로드 실패]', error)
       const errorMessage = error instanceof Error ? error.message : '이미지를 업로드하는 중 오류가 발생했습니다.'
-      alert(`이미지 업로드 실패:\n\n${errorMessage}\n\n브라우저 개발자 도구(F12)의 Console과 Network 탭을 확인해 주세요.`)
+      
+      // 네트워크 오류인 경우
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        alert(`❌ 네트워크 오류:\n\n${errorMessage}\n\n확인 사항:\n1. 인터넷 연결 상태 확인\n2. Vercel 서버 상태 확인\n3. 브라우저 개발자 도구(F12)의 Network 탭에서 /api/upload 요청 확인`)
+      } else {
+        alert(`❌ 이미지 업로드 실패:\n\n${errorMessage}\n\n브라우저 개발자 도구(F12)의 Console과 Network 탭을 확인해 주세요.\n\nNetwork 탭에서 /api/upload 요청을 클릭하여 Response를 확인하시면 상세 오류를 볼 수 있습니다.`)
+      }
     } finally {
       setIsUploading(false)
     }
