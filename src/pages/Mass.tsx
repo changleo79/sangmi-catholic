@@ -197,7 +197,7 @@ export default function Mass() {
                 </div>
                 <h2 className="text-3xl font-bold">{catechismInfo.title}</h2>
               </div>
-              <p className="text-blue-100 mb-6 text-lg leading-relaxed whitespace-pre-line line-clamp-3">
+              <p className="text-blue-100 mb-6 text-lg leading-relaxed whitespace-pre-line">
                 {catechismInfo.description}
               </p>
               <div className="flex items-center gap-2 text-blue-100">
