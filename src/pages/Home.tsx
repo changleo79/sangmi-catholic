@@ -318,7 +318,7 @@ export default function Home() {
       description: '본당의 주요 안내와 행정 소식',
       items: notices
         .filter((item): item is NoticeItem => item !== null && item !== undefined && item.title !== undefined)
-        .slice(0, 4)
+        .slice(0, 3)
         .map((item, idx) => ({
           id: `notice-${idx}-${item.title}`,
           title: item.title,
@@ -335,7 +335,7 @@ export default function Home() {
       description: '함께할 봉사와 단체 모집 안내',
       items: recruitments
         .filter((item): item is RecruitmentItem => item !== null && item !== undefined && item.title !== undefined)
-        .slice(0, 4)
+        .slice(0, 3)
         .map(item => ({
           id: item.id,
           title: item.title,
@@ -351,7 +351,7 @@ export default function Home() {
       description: '주일 주보 PDF를 내려받을 수 있습니다.',
       items: bulletins
         .filter((item): item is BulletinItem => item !== null && item !== undefined && item.title !== undefined)
-        .slice(0, 4)
+        .slice(0, 3)
         .map(item => ({
           id: item.id,
           title: item.title,
@@ -647,8 +647,8 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="grid lg:grid-cols-[2fr,1fr] gap-6">
-            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="grid lg:grid-cols-[2fr,1fr] gap-6 lg:items-stretch">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col">
               {activeNoticeContent.items.length > 0 ? (
                 activeNoticeContent.items
                   .filter(item => item !== null && item !== undefined && item.title !== undefined)
@@ -739,20 +739,22 @@ export default function Home() {
               )}
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 flex flex-col h-full">
               {/* 중요공지 배너 */}
               {(() => {
                 const importantNotices = notices.filter(n => n.isImportant).slice(0, 3)
                 if (importantNotices.length > 0) {
-                  return importantNotices.map((notice, idx) => {
-                    const noticeId = `${notice.date}-${encodeURIComponent(notice.title)}`
-                    return (
-                      <Link
-                        key={`important-${idx}-${notice.title}`}
-                        to={`/news/${noticeId}`}
-                        className="block rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 md:p-8 text-white group"
-                        style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}
-                      >
+                  return (
+                    <div className="flex flex-col gap-6 flex-1">
+                      {importantNotices.map((notice, idx) => {
+                        const noticeId = `${notice.date}-${encodeURIComponent(notice.title)}`
+                        return (
+                          <Link
+                            key={`important-${idx}-${notice.title}`}
+                            to={`/news/${noticeId}`}
+                            className="block rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 md:p-8 text-white group flex-1"
+                            style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}
+                          >
                         <div className="flex items-center gap-4 mb-4">
                           <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -775,13 +777,15 @@ export default function Home() {
                             {notice.summary}
                           </p>
                         )}
-                      </Link>
-                    )
-                  })
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )
                 } else {
                   // 중요공지가 없으면 예비신자 교리학교 배너 표시
                   return (
-                    <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 md:p-8 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
+                    <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 md:p-8 text-white flex-1 flex flex-col" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
                       <div className="flex items-center gap-4 mb-4">
                         <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-lg">
                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
