@@ -262,7 +262,7 @@ export default function Home() {
       accent: '#7B1F4B',
       background: 'linear-gradient(135deg, rgba(123, 31, 75, 0.14) 0%, rgba(123, 31, 75, 0.04) 100%)',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9.75L12 4l9 5.75M4.5 19.5h15M6 19.5V10.5m12 9v-9" />
         </svg>
       )
@@ -274,7 +274,7 @@ export default function Home() {
       accent: '#8B4A6B',
       background: 'linear-gradient(135deg, rgba(139, 74, 107, 0.14) 0%, rgba(139, 74, 107, 0.04) 100%)',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       )
@@ -286,7 +286,7 @@ export default function Home() {
       accent: '#4C9C84',
       background: 'linear-gradient(135deg, rgba(76, 156, 132, 0.14) 0%, rgba(76, 156, 132, 0.04) 100%)',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a2 2 0 012-2h4l2 2h6a2 2 0 012 2v3M4 19V5m0 14h16m-6-6l2 2 3-3m-9 1a2 2 0 110-4 2 2 0 010 4z" />
         </svg>
       )
@@ -298,7 +298,7 @@ export default function Home() {
       accent: '#D0864C',
       background: 'linear-gradient(135deg, rgba(208, 134, 76, 0.14) 0%, rgba(208, 134, 76, 0.04) 100%)',
       icon: (
-        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m1-11h3m-3 4h3M5 8h3m-3 4h3m2-9h2a2 2 0 012 2v14l-3-1-3 1V5a2 2 0 012-2z" />
         </svg>
       )
@@ -501,30 +501,32 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={quickSectionRef} className="mt-12 md:-mt-18 pb-20">
+      <section ref={quickSectionRef} className="mt-12 md:-mt-18 pb-12 md:pb-20">
         <div className="container mx-auto px-4">
-          <div className="bg-white/85 backdrop-blur rounded-3xl shadow-2xl border border-white/60 p-6 md:p-8">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+          <div className="bg-white/85 backdrop-blur rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl border border-white/60 p-4 md:p-6 lg:p-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3 lg:gap-5">
               {quickLinks.map(link => (
                 <Link
                   key={link.title}
                   to={link.to}
-                  className="group relative flex items-start gap-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-5 md:p-6"
+                  className="group relative flex flex-col items-center text-center gap-2 md:flex-row md:items-start md:text-left rounded-xl md:rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-3 md:p-5 lg:p-6"
                 >
                   <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-inner"
+                    className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg md:rounded-xl text-white shadow-inner flex-shrink-0"
                     style={{ background: link.background, color: link.accent }}
                   >
-                    {link.icon}
+                    <div className="w-5 h-5 md:w-6 md:h-6">
+                      {link.icon}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors">
+                  <div className="flex-1 min-w-0 space-y-0.5 md:space-y-1">
+                    <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors leading-tight">
                       {link.title}
                     </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">{link.description}</p>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-catholic-logo/80 group-hover:text-catholic-logo transition-colors">
+                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed hidden md:block">{link.description}</p>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-catholic-logo/80 group-hover:text-catholic-logo transition-colors hidden md:inline-flex">
                       자세히 보기
-                      <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 md:w-3.5 md:h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </span>
