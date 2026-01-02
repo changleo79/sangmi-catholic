@@ -802,69 +802,133 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-b from-white via-white to-gray-50">
+      <section className="py-12 md:py-20 bg-gradient-to-b from-white via-gray-50 to-white">
         <div className="container mx-auto px-4">
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-            <div className="grid lg:grid-cols-2">
-              <div className="p-8 md:p-12 space-y-6">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-catholic-logo/10 text-sm font-semibold text-catholic-logo">
-                  성당단체 조직도
-                </span>
-                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+          <div className="bg-white rounded-2xl md:rounded-3xl shadow-lg md:shadow-2xl border border-gray-100 overflow-hidden">
+            {/* 모바일: 세로 레이아웃 */}
+            <div className="lg:hidden">
+              <div className="p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-catholic-logo/10 text-xs font-semibold text-catholic-logo">
+                    성당단체 조직도
+                  </span>
+                  <div className="flex gap-2">
+                    {[
+                      { label: '위원회', value: '6개' },
+                      { label: '단체', value: '24개' }
+                    ].map(item => (
+                      <div key={item.label} className="rounded-lg bg-catholic-logo/5 px-3 py-1.5">
+                        <p className="text-xs text-gray-600">{item.label}</p>
+                        <p className="text-sm font-bold text-catholic-logo">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 leading-tight">
                   하나의 신앙, 다양한 사도직 활동
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed">
                   위원회·단체 소개와 조직도를 한눈에 확인하세요.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="grid grid-cols-2 gap-2 pt-2">
                   <Link
                     to="/organizations"
-                    className="group inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
+                    className="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:bg-catholic-logo/5 transition-all duration-300"
                   >
                     <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
                       </svg>
                     </span>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 group-hover:text-catholic-logo">성당단체 안내</p>
-                      <p className="text-xs text-gray-500">위원회와 단체 소개</p>
-                    </div>
+                    <p className="text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">성당단체<br />안내</p>
                   </Link>
                   <Link
                     to="/organizations/tree"
-                    className="group inline-flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:-translate-y-1 transition-all duration-300"
+                    className="group flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 hover:border-catholic-logo/30 hover:bg-catholic-logo/5 transition-all duration-300"
                   >
                     <span className="w-10 h-10 rounded-lg bg-catholic-logo/10 flex items-center justify-center text-catholic-logo">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
                       </svg>
                     </span>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900 group-hover:text-catholic-logo">조직도 보기</p>
-                      <p className="text-xs text-gray-500">주임신부님부터 위원회, 단체 정보</p>
-                    </div>
+                    <p className="text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">조직도<br />보기</p>
                   </Link>
                 </div>
               </div>
-              <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-catholic-logo/90 to-catholic-logo-dark"></div>
-                <div className="relative h-full p-8 md:p-12 text-white flex flex-col justify-between">
+            </div>
+
+            {/* PC: 가로 레이아웃 */}
+            <div className="hidden lg:grid lg:grid-cols-2">
+              <div className="p-8 lg:p-12 space-y-6">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-catholic-logo/10 text-sm font-semibold text-catholic-logo">
+                  성당단체 조직도
+                </span>
+                <h3 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+                  하나의 신앙, 다양한 사도직 활동
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  위원회·단체 소개와 조직도를 한눈에 확인하세요.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Link
+                    to="/organizations"
+                    className="group flex items-center gap-3 px-5 py-4 rounded-xl border-2 border-gray-200 hover:border-catholic-logo/50 hover:bg-catholic-logo/5 hover:-translate-y-1 transition-all duration-300 bg-white"
+                  >
+                    <span className="w-12 h-12 rounded-xl bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/10 flex items-center justify-center text-catholic-logo shadow-sm">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="text-base font-semibold text-gray-900 group-hover:text-catholic-logo">성당단체 안내</p>
+                      <p className="text-xs text-gray-500 mt-0.5">위원회와 단체 소개</p>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-catholic-logo group-hover:translate-x-1 transition-all ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  <Link
+                    to="/organizations/tree"
+                    className="group flex items-center gap-3 px-5 py-4 rounded-xl border-2 border-gray-200 hover:border-catholic-logo/50 hover:bg-catholic-logo/5 hover:-translate-y-1 transition-all duration-300 bg-white"
+                  >
+                    <span className="w-12 h-12 rounded-xl bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/10 flex items-center justify-center text-catholic-logo shadow-sm">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
+                      </svg>
+                    </span>
+                    <div>
+                      <p className="text-base font-semibold text-gray-900 group-hover:text-catholic-logo">조직도 보기</p>
+                      <p className="text-xs text-gray-500 mt-0.5">주임신부님부터 위원회, 단체 정보</p>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-catholic-logo group-hover:translate-x-1 transition-all ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+              <div className="relative overflow-hidden bg-gradient-to-br from-catholic-logo via-catholic-logo to-catholic-logo-dark">
+                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}></div>
+                <div className="relative h-full p-8 lg:p-12 text-white flex flex-col justify-between">
                   <div className="space-y-4">
-                    <h4 className="text-2xl font-semibold">성당단체 한 눈에</h4>
-                    <p className="text-sm text-white/80 leading-relaxed">
+                    <h4 className="text-2xl lg:text-3xl font-bold">성당단체 한 눈에</h4>
+                    <p className="text-sm lg:text-base text-white/90 leading-relaxed">
                       6개 위원회와 24개 단체가 신앙으로 함께합니다. 단체 소개와 활동 사진을 확인하세요.
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="grid grid-cols-3 gap-4 pt-6">
                     {[
-                      { label: '상임 위원회', value: '6개' },
-                      { label: '산하 단체', value: '24개' },
-                      { label: '최근 업데이트', value: formatDate(notices[0]?.date || bulletins[0]?.date) }
+                      { label: '상임 위원회', value: '6개', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z' },
+                      { label: '산하 단체', value: '24개', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+                      { label: '최근 업데이트', value: formatDate(notices[0]?.date || bulletins[0]?.date), icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' }
                     ].map(item => (
-                      <div key={item.label} className="rounded-2xl bg-white/10 backdrop-blur p-3">
-                        <p className="text-white/70 text-xs uppercase tracking-wide">{item.label}</p>
-                        <p className="text-lg font-semibold text-white mt-1">{item.value}</p>
+                      <div key={item.label} className="rounded-xl bg-white/15 backdrop-blur-md border border-white/20 p-4 hover:bg-white/20 transition-all duration-300">
+                        <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center mb-2">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                          </svg>
+                        </div>
+                        <p className="text-white/80 text-xs font-medium mb-1">{item.label}</p>
+                        <p className="text-xl font-bold text-white">{item.value}</p>
                       </div>
                     ))}
                   </div>
