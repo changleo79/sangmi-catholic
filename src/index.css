@@ -227,6 +227,27 @@
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Admin Header Link Styles */
+  .admin-header-link {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .admin-header-link:active {
+    color: #ffffff !important;
+    background-color: #7B1F4B !important;
+  }
+
+  .admin-header-link:focus {
+    outline: none;
+    color: #ffffff !important;
+    background-color: #7B1F4B !important;
+  }
+
+  .admin-header-link:focus-visible {
+    outline: 2px solid #7B1F4B;
+    outline-offset: 2px;
+  }
+
   /* Print styles */
   @media print {
     @page {

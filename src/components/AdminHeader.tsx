@@ -35,22 +35,31 @@ export default function AdminHeader() {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative text-base font-medium transition-colors whitespace-nowrap py-2 px-3 rounded-lg ${
+                  className={`admin-header-link relative text-base font-medium transition-colors whitespace-nowrap py-2 px-3 rounded-lg ${
                     isActive ? 'text-white' : 'text-gray-700'
                   }`}
                   style={{
                     backgroundColor: isActive ? '#7B1F4B' : 'transparent',
+                    color: isActive ? '#ffffff' : undefined,
                   }}
                   onMouseEnter={(e) => {
                     if (!isActive) {
                       e.currentTarget.style.color = '#7B1F4B'
                       e.currentTarget.style.backgroundColor = 'rgba(123, 31, 75, 0.1)'
+                    } else {
+                      // 활성 상태일 때도 흰색 유지
+                      e.currentTarget.style.color = '#ffffff'
+                      e.currentTarget.style.backgroundColor = '#7B1F4B'
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isActive) {
                       e.currentTarget.style.color = '#1f2937'
                       e.currentTarget.style.backgroundColor = 'transparent'
+                    } else {
+                      // 활성 상태일 때도 흰색 유지
+                      e.currentTarget.style.color = '#ffffff'
+                      e.currentTarget.style.backgroundColor = '#7B1F4B'
                     }
                   }}
                 >
