@@ -35,13 +35,25 @@
       font-size: 1.375rem;
     }
     
-    /* 작은 텍스트도 조금 더 키움 */
+    /* 작은 텍스트도 더 키움 */
     .text-sm {
-      font-size: 0.9375rem;
+      font-size: 1rem !important; /* 16px */
     }
     
     .text-xs {
-      font-size: 0.8125rem;
+      font-size: 0.875rem !important; /* 14px */
+    }
+    
+    /* 고정 크기 작은 텍스트도 키움 */
+    [class*="text-\[11px\]"],
+    [class*="text-\[12px\]"],
+    [class*="text-\[13px\]"] {
+      font-size: 0.875rem !important; /* 14px */
+    }
+    
+    /* 버튼 텍스트도 키움 */
+    button {
+      font-size: 16px !important;
     }
   }
   

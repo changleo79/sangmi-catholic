@@ -232,12 +232,12 @@ export default function Albums() {
                     {album.photos.some((photo) => photo.tags?.length) && (
                       <div className="flex flex-wrap gap-1 pt-1">
                         {Array.from(new Set(album.photos.flatMap((photo) => photo.tags || []))).slice(0, 6).map((tag) => (
-                          <span key={`${album.id}-${tag}`} className="px-2 py-1 text-[11px] rounded-full bg-gray-100 text-gray-600">
+                          <span key={`${album.id}-${tag}`} className="px-2 py-1 text-xs sm:text-[11px] rounded-full bg-gray-100 text-gray-600">
                             #{tag}
                           </span>
                         ))}
                         {Array.from(new Set(album.photos.flatMap((photo) => photo.tags || []))).length > 6 && (
-                          <span className="text-[11px] text-gray-400">+ 더보기</span>
+                          <span className="text-xs sm:text-[11px] text-gray-400">+ 더보기</span>
                         )}
                       </div>
                     )}

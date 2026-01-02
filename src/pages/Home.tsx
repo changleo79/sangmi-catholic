@@ -827,7 +827,7 @@ export default function Home() {
             <div className="lg:hidden">
               <div className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-catholic-logo/10 text-xs font-semibold text-catholic-logo">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-catholic-logo/10 text-sm sm:text-xs font-semibold text-catholic-logo">
                     성당단체 조직도
                   </span>
                   <div className="flex gap-2">
@@ -836,8 +836,8 @@ export default function Home() {
                       { label: '단체', value: '24개' }
                     ].map(item => (
                       <div key={item.label} className="rounded-lg bg-catholic-logo/5 px-3 py-1.5">
-                        <p className="text-xs text-gray-600">{item.label}</p>
-                        <p className="text-sm font-bold text-catholic-logo">{item.value}</p>
+                        <p className="text-sm sm:text-xs text-gray-600">{item.label}</p>
+                        <p className="text-base sm:text-sm font-bold text-catholic-logo">{item.value}</p>
                       </div>
                     ))}
                   </div>
@@ -845,7 +845,7 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-gray-900 leading-tight">
                   하나의 신앙, 다양한 사도직 활동
                 </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
                   위원회·단체 소개와 조직도를 한눈에 확인하세요.
                 </p>
                 <div className="grid grid-cols-2 gap-2 pt-2">
@@ -858,7 +858,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
                       </svg>
                     </span>
-                    <p className="text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">성당단체<br />안내</p>
+                    <p className="text-sm sm:text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">성당단체<br />안내</p>
                   </Link>
                   <Link
                     to="/organizations/tree"
@@ -869,7 +869,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6m-9 4h18" />
                       </svg>
                     </span>
-                    <p className="text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">조직도<br />보기</p>
+                    <p className="text-sm sm:text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">조직도<br />보기</p>
                   </Link>
                 </div>
               </div>
