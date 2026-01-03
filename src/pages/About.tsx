@@ -7,7 +7,7 @@ export default function About() {
         {/* Page Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-            성당소개
+            본당소개
           </h1>
           <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
@@ -156,7 +156,7 @@ export default function About() {
           <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
-              <h2 className="text-3xl font-bold text-gray-900">성당단체 안내</h2>
+              <h2 className="text-3xl font-bold text-gray-900">본당단체 안내</h2>
             </div>
             <p className="text-gray-700 mb-6 text-lg leading-relaxed">
               상미성당의 위원회와 단체 조직도를 확인하실 수 있습니다. 6개 위원회와 24개 단체의 정보를 한눈에 보실 수 있습니다.

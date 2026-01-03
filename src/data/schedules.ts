@@ -108,7 +108,7 @@ export const shuttleRoutes: ShuttleRoute[] = [
           { time: '09:25', location: '신일 마을버스 정류장' },
           { time: '09:26', location: '태영 · 대명 부동산 앞' },
           { time: '09:27', location: '효성 정문' },
-          { time: '09:35', location: '성당 도착' }
+          { time: '09:35', location: '본당 도착' }
         ]
       }
     ]

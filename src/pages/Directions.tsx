@@ -78,7 +78,7 @@ export default function Directions() {
                       <h3 className="font-semibold text-gray-900 text-base lg:text-lg">대중교통 및 주차</h3>
                     </div>
                     <p className="text-gray-600 ml-4 text-sm lg:text-base leading-relaxed">
-                      기흥역 지웰 정문 및 인근 정류장에서 도보 이동이 가능합니다. 성당 내·외부 주차장 이용 시 주일에는 혼잡할 수 있으니 안내에 따라 주차해 주세요.
+                      기흥역 지웰 정문 및 인근 정류장에서 도보 이동이 가능합니다. 본당 내·외부 주차장 이용 시 주일에는 혼잡할 수 있으니 안내에 따라 주차해 주세요.
                     </p>
                   </div>
                   <div>

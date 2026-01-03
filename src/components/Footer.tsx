@@ -3,11 +3,11 @@ import logo2 from '../../사진파일/상미성당 로고2.png'
 
 export default function Footer() {
   const quickLinks = [
-    { label: '성당 소개', path: '/about' },
+    { label: '본당 소개', path: '/about' },
     { label: '공지/소식', path: '/news' },
     { label: '미사와 성사', path: '/mass' },
-    { label: '성당 앨범', path: '/albums' },
-    { label: '성당 단체', path: '/organizations' },
+    { label: '본당 앨범', path: '/albums' },
+    { label: '본당 단체', path: '/organizations' },
     { label: '오시는 길', path: '/directions' },
   ]
 

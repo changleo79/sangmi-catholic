@@ -46,11 +46,11 @@ export default function Organizations() {
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-            성당단체 안내
+            본당단체 안내
           </h1>
           <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
           <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
-            상미성당의 위원회와 단체를 소개합니다. 각 단체의 역할과 활동을 확인하실 수 있습니다.
+            상미본당의 위원회와 단체를 소개합니다. 각 단체의 역할과 활동을 확인하실 수 있습니다.
           </p>
         </div>
 

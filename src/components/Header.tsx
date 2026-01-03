@@ -17,12 +17,12 @@ export default function Header() {
 
   const menuItems = [
     { path: '/', label: '홈' },
-    { path: '/about', label: '성당소개' },
+    { path: '/about', label: '본당소개' },
     { path: '/news', label: '공지/소식' },
     { path: '/mass', label: '미사와 성사' },
-    { path: '/albums', label: '성당앨범' },
-    { path: '/organizations', label: '성당단체' },
-    { path: '/office', label: '성당업무' },
+    { path: '/albums', label: '본당앨범' },
+    { path: '/organizations', label: '본당단체' },
+    { path: '/office', label: '본당업무' },
     { path: '/directions', label: '오시는 길' },
   ]
 

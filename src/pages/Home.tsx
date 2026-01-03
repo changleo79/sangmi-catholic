@@ -36,7 +36,7 @@ export default function Home() {
   const [catechismInfo, setCatechismInfo] = useState<CatechismInfo>({
     title: '예비신자 교리학교',
     description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
-    contact: '문의 : 성당 사무실 (031-282-9989)'
+    contact: '문의 : 본당 사무실 (031-282-9989)'
   })
   const [activeNoticeTab, setActiveNoticeTab] = useState<NoticeTabKey>('notice')
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -272,7 +272,7 @@ export default function Home() {
 
   const quickLinks = [
     {
-      title: '성당 소개',
+      title: '본당 소개',
       description: '본당 역사와 소개',
       to: '/about',
       accent: '#7B1F4B',
@@ -308,7 +308,7 @@ export default function Home() {
       )
     },
     {
-      title: '성당 업무 안내',
+      title: '본당 업무 안내',
       description: '사무실 · 행정 안내',
       to: '/office',
       accent: '#D0864C',
@@ -620,7 +620,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-catholic-logo">성당 소식 허브</p>
+                  <p className="text-sm font-semibold text-catholic-logo">본당 소식 허브</p>
                   <h2 className="text-3xl md:text-4xl font-bold text-gray-900">한눈에 보는 본당 소식</h2>
                 </div>
               </div>
@@ -828,7 +828,7 @@ export default function Home() {
               <div className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-catholic-logo/10 text-sm sm:text-xs font-semibold text-catholic-logo">
-                    성당단체 조직도
+                    본당단체 조직도
                   </span>
                   <div className="flex gap-2">
                     {[
@@ -858,7 +858,7 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
                       </svg>
                     </span>
-                    <p className="text-sm sm:text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">성당단체<br />안내</p>
+                    <p className="text-sm sm:text-xs font-semibold text-gray-900 group-hover:text-catholic-logo text-center">본당단체<br />안내</p>
                   </Link>
                   <Link
                     to="/organizations/tree"
@@ -898,7 +898,7 @@ export default function Home() {
                       </svg>
                     </span>
                     <div>
-                      <p className="text-base font-semibold text-gray-900 group-hover:text-catholic-logo">성당단체 안내</p>
+                      <p className="text-base font-semibold text-gray-900 group-hover:text-catholic-logo">본당단체 안내</p>
                       <p className="text-xs text-gray-500 mt-0.5">위원회와 단체 소개</p>
                     </div>
                     <svg className="w-5 h-5 text-gray-400 group-hover:text-catholic-logo group-hover:translate-x-1 transition-all ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -928,7 +928,7 @@ export default function Home() {
                 <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}></div>
                 <div className="relative h-full p-8 lg:p-12 text-white flex flex-col justify-between">
                   <div className="space-y-4">
-                    <h4 className="text-2xl lg:text-3xl font-bold">성당단체 한 눈에</h4>
+                    <h4 className="text-2xl lg:text-3xl font-bold">본당단체 한 눈에</h4>
                     <p className="text-sm lg:text-base text-white/90 leading-relaxed">
                       6개 위원회와 24개 단체가 신앙으로 함께합니다. 단체 소개와 활동 사진을 확인하세요.
                     </p>
@@ -963,7 +963,7 @@ export default function Home() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-catholic-logo/10 text-xs md:text-sm font-semibold text-catholic-logo">
-                  성당 앨범
+                  본당 앨범
                 </span>
               </div>
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-2">

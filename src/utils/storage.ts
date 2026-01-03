@@ -934,7 +934,7 @@ const datasetRegistry: Record<StorageDatasetKey, {
   notices: { label: '공지사항', getter: () => getNotices(), saver: saveNotices },
   recruitments: { label: '단체 소식', getter: () => getRecruitments(), saver: saveRecruitments },
   faqs: { label: '자주 묻는 질문', getter: () => getFAQs(), saver: saveFAQs },
-  albums: { label: '성당 앨범', getter: () => getAlbums(), saver: saveAlbums },
+  albums: { label: '본당 앨범', getter: () => getAlbums(), saver: saveAlbums },
   massSchedule: { label: '미사 시간표', getter: () => getMassSchedule(), saver: saveMassSchedule },
   sacraments: { label: '성사 안내', getter: () => getSacraments(), saver: saveSacraments },
   catechism: { label: '예비신자 교리', getter: () => getCatechismInfo(), saver: (data) => data ? saveCatechismInfo(data) : Promise.resolve() },

@@ -311,7 +311,7 @@ export default function Jurisdiction() {
             <div>
               <h3 className="font-bold text-gray-900 mb-2">안내사항</h3>
               <p className="text-gray-700 text-sm leading-relaxed">
-                관할구역 정보는 2025년 7월 6일 기준입니다. 정확한 관할구역 확인은 성당 사무실(031-282-9989)로 문의해 주세요.
+                관할구역 정보는 2025년 7월 6일 기준입니다. 정확한 관할구역 확인은 본당 사무실(031-282-9989)로 문의해 주세요.
               </p>
             </div>
           </div>

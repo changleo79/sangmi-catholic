@@ -13,7 +13,7 @@ const datasets: Array<{ key: StorageDatasetKey; description: string }> = [
   { key: 'notices', description: '공지사항 목록' },
   { key: 'recruitments', description: '단체 소식 게시글' },
   { key: 'faqs', description: '자주 묻는 질문' },
-  { key: 'albums', description: '성당 앨범 및 사진' },
+  { key: 'albums', description: '본당 앨범 및 사진' },
   { key: 'massSchedule', description: '미사 시간표 데이터' },
   { key: 'sacraments', description: '성사 안내' },
   { key: 'catechism', description: '예비신자 교리 안내' },

@@ -93,7 +93,7 @@ export default function MassManage() {
       const defaultCatechism: CatechismInfo = {
         title: '예비신자 교리학교',
         description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
-        contact: '문의 : 성당 사무실 (031-282-9989)'
+        contact: '문의 : 본당 사무실 (031-282-9989)'
       }
       setCatechismInfo(defaultCatechism)
       await saveCatechismInfo(defaultCatechism)
@@ -426,7 +426,7 @@ export default function MassManage() {
                   value={catechismInfo.contact}
                   onChange={(e) => setCatechismInfo({ ...catechismInfo, contact: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                  placeholder="예: 문의 : 성당 사무실 (031-282-9989)"
+                  placeholder="예: 문의 : 본당 사무실 (031-282-9989)"
                   required
                 />
               </div>

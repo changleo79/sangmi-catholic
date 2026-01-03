@@ -21,7 +21,7 @@ const navItems = [
   },
   {
     to: '/organizations',
-    label: '성당단체',
+    label: '본당단체',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
@@ -30,7 +30,7 @@ const navItems = [
   },
   {
     to: '/albums',
-    label: '성당 앨범',
+    label: '본당 앨범',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h9" />

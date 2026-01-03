@@ -54,7 +54,7 @@ export default function Mass() {
         setCatechismInfo({
           title: '예비신자 교리학교',
           description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
-          contact: '문의 : 성당 사무실 (031-282-9989)'
+          contact: '문의 : 본당 사무실 (031-282-9989)'
         })
       }
     }
@@ -213,7 +213,7 @@ export default function Mass() {
           <section className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">성당 오픈 · 미사 · 성물방 · 사무실 근무</h2>
+                <h2 className="text-2xl font-bold text-gray-900">본당 오픈 · 미사 · 성물방 · 사무실 근무</h2>
                 <p className="text-sm text-gray-500 mt-1">2025-10-01 기준</p>
               </div>
               <p className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2">
@@ -225,7 +225,7 @@ export default function Mass() {
                 <thead className="text-xs uppercase tracking-wider bg-gradient-to-r from-gray-50 to-white border-b border-gray-200">
                   <tr>
                     <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">요일</th>
-                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">성당 오픈</th>
+                    <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">본당 오픈</th>
                     <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">미사</th>
                     <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap">특별 미사</th>
                     <th scope="col" className="px-2 md:px-4 py-3 text-gray-900 whitespace-nowrap min-w-[80px] md:min-w-0">성물방</th>
