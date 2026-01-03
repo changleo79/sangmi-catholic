@@ -133,11 +133,13 @@ export default function About() {
               <div className="flex justify-center md:justify-start">
                 <div className="w-full max-w-[350px] aspect-[3/4] bg-white rounded-xl overflow-hidden border-2 border-gray-200 shadow-md">
                   <img
-                    src="/images/saint-francis.jpg"
+                    src={`/images/saint-francis.jpg?t=${Date.now()}`}
                     alt="아시시의 성 프란치스코와 새들"
                     className="w-full h-full object-cover"
                     style={{ objectPosition: 'center' }}
+                    loading="eager"
                     onError={(e) => {
+                      console.error('[About] 이미지 로드 실패:', e.currentTarget.src)
                       // 이미지 로드 실패 시 대체 표시
                       const target = e.currentTarget as HTMLImageElement
                       target.style.display = 'none'
@@ -155,6 +157,9 @@ export default function About() {
                           </div>
                         `
                       }
+                    }}
+                    onLoad={() => {
+                      console.log('[About] 성 프란치스코 이미지 로드 성공')
                     }}
                   />
                 </div>
