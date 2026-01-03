@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { getNotices } from '../utils/storage'
 import { notices as defaultNotices } from '../data/notices'
 import type { NoticeItem } from '../data/notices'
-import ShareButton from '../components/ShareButton'
+import SocialShareButton from '../components/SocialShareButton'
 
 export default function NoticeDetail() {
   const { id } = useParams<{ id: string }>()
@@ -122,7 +122,7 @@ export default function NoticeDetail() {
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">{notice.title}</h1>
               <div className="flex items-center gap-4 text-gray-600">
                 <span>{notice.date}</span>
-                <ShareButton url={`/news/${noticeId}`} title={notice.title} description={notice.summary || ''} />
+                <SocialShareButton url={`/news/${noticeId}`} title={notice.title} description={notice.summary || ''} />
               </div>
             </div>
           </div>

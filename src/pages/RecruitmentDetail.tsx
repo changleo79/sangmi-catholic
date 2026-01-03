@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getRecruitments, type RecruitmentItem } from '../utils/storage'
-import ShareButton from '../components/ShareButton'
+import SocialShareButton from '../components/SocialShareButton'
 
 export default function RecruitmentDetail() {
   const { id } = useParams<{ id: string }>()
@@ -54,7 +54,7 @@ export default function RecruitmentDetail() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">{recruitment.title}</h1>
-              <ShareButton url={`/recruitments/${recruitment.id}`} title={recruitment.title} description={recruitment.summary} />
+              <SocialShareButton url={`/recruitments/${recruitment.id}`} title={recruitment.title} description={recruitment.summary} />
             </div>
           </div>
         </div>
