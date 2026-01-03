@@ -39,7 +39,9 @@ export default function SearchBar() {
   const [filters, setFilters] = useState<SearchFilters>({
     categories: ['notice', 'album', 'recruitment', 'faq', 'bulletin']
   })
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const searchRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
 
   // 검색 기록 로드
@@ -265,12 +267,52 @@ export default function SearchBar() {
     navigate(url)
     setIsOpen(false)
     setQuery('')
+    setSelectedIndex(-1)
   }
 
   const handleHistoryClick = (historyQuery: string) => {
     setQuery(historyQuery)
     setIsOpen(true)
+    setSelectedIndex(-1)
   }
+
+  // 키보드 네비게이션
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex(prev => {
+          const maxIndex = results.length - 1
+          return prev < maxIndex ? prev + 1 : prev
+        })
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1)
+      } else if (e.key === 'Enter' && selectedIndex >= 0 && results[selectedIndex]) {
+        e.preventDefault()
+        handleResultClick(results[selectedIndex].url)
+      } else if (e.key === 'Escape') {
+        setIsOpen(false)
+        setSelectedIndex(-1)
+        inputRef.current?.blur()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, results, selectedIndex])
+
+  // 선택된 항목이 변경되면 스크롤
+  useEffect(() => {
+    if (selectedIndex >= 0 && searchRef.current) {
+      const selectedElement = searchRef.current.querySelector(`[data-index="${selectedIndex}"]`) as HTMLElement
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      }
+    }
+  }, [selectedIndex])
 
   return (
     <div ref={searchRef} className="relative w-full">
@@ -289,15 +331,29 @@ export default function SearchBar() {
       <div className="md:hidden">
         <div className="relative">
           <input
+            ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value)
               setIsOpen(true)
+              setSelectedIndex(-1)
             }}
             onFocus={() => setIsOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowDown' && results.length > 0) {
+                e.preventDefault()
+                setSelectedIndex(0)
+              } else if (e.key === 'Escape') {
+                setIsOpen(false)
+                setSelectedIndex(-1)
+              }
+            }}
             placeholder="전체 검색..."
             className="w-full px-4 py-2.5 pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+            aria-label="검색어 입력"
+            aria-expanded={isOpen}
+            aria-controls="search-results"
           />
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -313,11 +369,21 @@ export default function SearchBar() {
               </div>
             ) : results.length > 0 ? (
               <div className="py-2">
-                {results.map((result) => (
+                {results.map((result, index) => (
                   <button
                     key={result.id}
+                    data-index={index}
                     onClick={() => handleResultClick(result.url)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`w-full px-4 py-3 text-left transition-colors border-b border-gray-100 last:border-b-0 focus:outline-none focus:ring-2 focus:ring-catholic-logo ${
+                      selectedIndex === index ? 'bg-purple-50' : 'hover:bg-gray-50'
+                    }`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleResultClick(result.url)
+                      }
+                    }}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
@@ -435,12 +501,28 @@ export default function SearchBar() {
           <div className="p-4 border-b border-gray-200">
             <div className="relative mb-3">
               <input
+                ref={inputRef}
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value)
+                  setSelectedIndex(-1)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown' && results.length > 0) {
+                    e.preventDefault()
+                    setSelectedIndex(0)
+                  } else if (e.key === 'Escape') {
+                    setIsOpen(false)
+                    setSelectedIndex(-1)
+                  }
+                }}
                 placeholder="전체 검색..."
                 className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                 autoFocus
+                aria-label="검색어 입력"
+                aria-expanded={isOpen}
+                aria-controls="search-results"
               />
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -535,11 +617,21 @@ export default function SearchBar() {
               </div>
             ) : results.length > 0 ? (
               <div className="py-2">
-                {results.map((result) => (
+                {results.map((result, index) => (
                   <button
                     key={result.id}
+                    data-index={index}
                     onClick={() => handleResultClick(result.url)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`w-full px-4 py-3 text-left transition-colors border-b border-gray-100 last:border-b-0 focus:outline-none focus:ring-2 focus:ring-catholic-logo ${
+                      selectedIndex === index ? 'bg-purple-50' : 'hover:bg-gray-50'
+                    }`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleResultClick(result.url)
+                      }
+                    }}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
@@ -658,11 +750,21 @@ export default function SearchBar() {
               </div>
             ) : results.length > 0 ? (
               <div className="py-2">
-                {results.map((result) => (
+                {results.map((result, index) => (
                   <button
                     key={result.id}
+                    data-index={index}
                     onClick={() => handleResultClick(result.url)}
-                    className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`w-full px-4 py-3 text-left transition-colors border-b border-gray-100 last:border-b-0 focus:outline-none focus:ring-2 focus:ring-catholic-logo ${
+                      selectedIndex === index ? 'bg-purple-50' : 'hover:bg-gray-50'
+                    }`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleResultClick(result.url)
+                      }
+                    }}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${

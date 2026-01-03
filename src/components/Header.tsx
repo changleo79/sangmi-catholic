@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import logo2 from '../../사진파일/상미성당 로고2.png'
 import SearchBar from './SearchBar'
@@ -6,6 +6,8 @@ import SearchBar from './SearchBar'
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
+  const menuRef = useRef<HTMLDivElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -14,6 +16,34 @@ export default function Header() {
   const closeMenu = () => {
     setIsMenuOpen(false)
   }
+
+  // 키보드 네비게이션
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape 키로 메뉴 닫기
+      if (e.key === 'Escape' && isMenuOpen) {
+        closeMenu()
+        menuButtonRef.current?.focus()
+      }
+      
+      // Alt+M으로 메뉴 토글
+      if (e.altKey && e.key === 'm') {
+        e.preventDefault()
+        toggleMenu()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isMenuOpen])
+
+  // 메뉴가 열릴 때 첫 번째 링크에 포커스
+  useEffect(() => {
+    if (isMenuOpen && menuRef.current) {
+      const firstLink = menuRef.current.querySelector('a') as HTMLAnchorElement
+      firstLink?.focus()
+    }
+  }, [isMenuOpen])
 
   const menuItems = [
     { path: '/', label: '홈' },
@@ -39,19 +69,25 @@ export default function Header() {
               />
             </Link>
 
-            <nav className="hidden md:flex items-center gap-8 ml-4">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="relative text-lg font-medium text-gray-700 transition-colors whitespace-nowrap py-2 group"
-                  onMouseEnter={(e) => { e.currentTarget.style.color = '#7B1F4B' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = '' }}
-                >
-                  <span className="relative z-10">{item.label}</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 group-hover:w-full" style={{ backgroundColor: '#7B1F4B' }}></span>
-                </Link>
-              ))}
+            <nav className="hidden md:flex items-center gap-8 ml-4" role="navigation" aria-label="메인 네비게이션">
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path))
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`relative text-lg font-medium transition-colors whitespace-nowrap py-2 group focus:outline-none focus:ring-2 focus:ring-catholic-logo focus:ring-offset-2 rounded ${
+                      isActive ? 'text-catholic-logo' : 'text-gray-700'
+                    }`}
+                    onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.color = '#7B1F4B' }}
+                    onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = '' }}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <span className="relative z-10">{item.label}</span>
+                    <span className={`absolute bottom-0 left-0 h-0.5 transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} style={{ backgroundColor: '#7B1F4B' }}></span>
+                  </Link>
+                )
+              })}
             </nav>
 
             <div className="hidden md:flex items-center gap-4">
@@ -59,9 +95,12 @@ export default function Header() {
             </div>
 
             <button
-              className="md:hidden text-gray-700 ml-4 relative z-50 touch-manipulation p-2 -mr-2"
+              ref={menuButtonRef}
+              className="md:hidden text-gray-700 ml-4 relative z-50 touch-manipulation p-2 -mr-2 focus:outline-none focus:ring-2 focus:ring-catholic-logo focus:ring-offset-2 rounded"
               onClick={toggleMenu}
               aria-label={isMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
             >
               {isMenuOpen ? (
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
