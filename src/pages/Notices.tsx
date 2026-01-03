@@ -4,15 +4,12 @@ import { notices as defaultNotices } from '../data/notices'
 import { getNotices } from '../utils/storage'
 import type { NoticeItem } from '../data/notices'
 import InfiniteScroll from '../components/InfiniteScroll'
-import Pagination from '../components/Pagination'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
 
 const ITEMS_PER_PAGE = 20
 
 export default function Notices() {
   const [notices, setNotices] = useState<NoticeItem[]>([])
-  const [displayMode, setDisplayMode] = useState<'infinite' | 'pagination'>('infinite')
-  const [currentPage, setCurrentPage] = useState(1)
   const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
   const [filters, setFilters] = useState<FilterOptions>({})
 
@@ -84,21 +81,13 @@ export default function Notices() {
 
   // 표시할 항목들 계산
   const displayedNotices = useMemo(() => {
-    if (displayMode === 'infinite') {
-      return filteredNotices.slice(0, displayedCount)
-    } else {
-      const start = (currentPage - 1) * ITEMS_PER_PAGE
-      const end = start + ITEMS_PER_PAGE
-      return filteredNotices.slice(start, end)
-    }
-  }, [filteredNotices, displayMode, displayedCount, currentPage])
+    return filteredNotices.slice(0, displayedCount)
+  }, [filteredNotices, displayedCount])
 
-  const totalPages = Math.ceil(filteredNotices.length / ITEMS_PER_PAGE)
   const hasMore = displayedCount < filteredNotices.length
 
-  // 필터 변경 시 페이지/카운트 리셋
+  // 필터 변경 시 카운트 리셋
   useEffect(() => {
-    setCurrentPage(1)
     setDisplayedCount(ITEMS_PER_PAGE)
   }, [filters])
 
@@ -143,42 +132,13 @@ export default function Notices() {
             showYearFilter={true}
           />
           
-          {/* 표시 모드 선택 */}
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <button
-              onClick={() => {
-                setDisplayMode('infinite')
-                setDisplayedCount(ITEMS_PER_PAGE)
-              }}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                displayMode === 'infinite'
-                  ? 'bg-catholic-logo text-white border-catholic-logo'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              자동 로드
-            </button>
-            <button
-              onClick={() => {
-                setDisplayMode('pagination')
-                setCurrentPage(1)
-              }}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                displayMode === 'pagination'
-                  ? 'bg-catholic-logo text-white border-catholic-logo'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              페이지 번호
-            </button>
-          </div>
         </div>
 
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-gray-100">
             {displayedNotices.length > 0 ? (
               <InfiniteScroll
-                hasMore={displayMode === 'infinite' && hasMore}
+                hasMore={hasMore}
                 loadMore={loadMore}
                 loading={false}
               >
@@ -226,17 +186,6 @@ export default function Notices() {
               </div>
             )}
           </div>
-          
-          {/* 페이지네이션 */}
-          {displayMode === 'pagination' && filteredNotices.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              itemsPerPage={ITEMS_PER_PAGE}
-              totalItems={filteredNotices.length}
-            />
-          )}
         </div>
       </div>
     </div>

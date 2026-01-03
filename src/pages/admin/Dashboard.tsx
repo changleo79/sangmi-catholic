@@ -170,9 +170,9 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               {!loading && (
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-gray-900">{stats.notices.total}</div>
-                  <div className="text-xs text-gray-500">개</div>
+                <div className="text-right whitespace-nowrap">
+                  <span className="text-2xl font-bold text-gray-900">{stats.notices.total}</span>
+                  <span className="text-xs text-gray-500">개</span>
                 </div>
               )}
             </div>
@@ -206,9 +206,9 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               {!loading && (
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-gray-900">{stats.recruitments.total}</div>
-                  <div className="text-xs text-gray-500">개</div>
+                <div className="text-right whitespace-nowrap">
+                  <span className="text-2xl font-bold text-gray-900">{stats.recruitments.total}</span>
+                  <span className="text-xs text-gray-500">개</span>
                 </div>
               )}
             </div>
@@ -239,9 +239,9 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               {!loading && (
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-gray-900">{stats.faqs.total}</div>
-                  <div className="text-xs text-gray-500">개</div>
+                <div className="text-right whitespace-nowrap">
+                  <span className="text-2xl font-bold text-gray-900">{stats.faqs.total}</span>
+                  <span className="text-xs text-gray-500">개</span>
                 </div>
               )}
             </div>
@@ -260,9 +260,9 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               {!loading && (
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-gray-900">{stats.albums.total}</div>
-                  <div className="text-xs text-gray-500">개</div>
+                <div className="text-right whitespace-nowrap">
+                  <span className="text-2xl font-bold text-gray-900">{stats.albums.total}</span>
+                  <span className="text-xs text-gray-500">개</span>
                 </div>
               )}
             </div>
@@ -306,9 +306,9 @@ export default function AdminDashboard() {
                 </svg>
               </div>
               {!loading && (
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-gray-900">{stats.bulletins.total}</div>
-                  <div className="text-xs text-gray-500">개</div>
+                <div className="text-right whitespace-nowrap">
+                  <span className="text-2xl font-bold text-gray-900">{stats.bulletins.total}</span>
+                  <span className="text-xs text-gray-500">개</span>
                 </div>
               )}
             </div>
