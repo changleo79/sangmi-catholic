@@ -92,6 +92,88 @@ export default function About() {
             </div>
           </div>
 
+          {/* 주보성인 Section */}
+          <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 md:p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+              <h2 className="text-3xl font-bold text-gray-900">본당 주보성인</h2>
+            </div>
+            
+            {/* 이미지와 기본 정보 */}
+            <div className="mb-6">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                {/* 이미지 */}
+                <div className="w-full md:w-auto md:flex-shrink-0">
+                  <div className="bg-gray-50 rounded-xl overflow-hidden border-2 border-gray-200 shadow-sm p-3">
+                    <img
+                      src={`/images/saint-francis.jpg?t=${Date.now()}`}
+                      alt="아시시의 성 프란치스코와 새들"
+                      className="w-full h-auto max-w-[280px] md:max-w-[320px] mx-auto object-contain"
+                      style={{ 
+                        display: 'block',
+                        maxHeight: '500px'
+                      }}
+                      loading="eager"
+                      onError={(e) => {
+                        console.error('[About] 이미지 로드 실패:', e.currentTarget.src)
+                        const target = e.currentTarget as HTMLImageElement
+                        target.style.display = 'none'
+                        const parent = target.parentElement
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 min-h-[300px]">
+                              <div class="text-center p-6">
+                                <svg class="w-24 h-24 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <p class="text-sm text-gray-500 font-medium">성 프란치스코</p>
+                                <p class="text-xs text-gray-400 mt-1">이미지를 불러올 수 없습니다</p>
+                              </div>
+                            </div>
+                          `
+                        }
+                      }}
+                      onLoad={(e) => {
+                        console.log('[About] 성 프란치스코 이미지 로드 성공')
+                        const target = e.currentTarget as HTMLImageElement
+                        target.style.backgroundColor = 'transparent'
+                      }}
+                    />
+                  </div>
+                </div>
+                
+                {/* 기본 정보 */}
+                <div className="flex-1 w-full md:w-auto">
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-200">
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-start gap-3">
+                        <span className="font-semibold text-gray-900 min-w-[100px]">주보성인</span>
+                        <span className="text-gray-700">아시시의 성 프란치스코</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="font-semibold text-gray-900 min-w-[100px]">주보성인 축일</span>
+                        <span className="text-gray-700">10월 4일</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* 선정 사유 */}
+            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">주보성인 선정 사유</h3>
+              <div className="space-y-3 text-gray-700 leading-relaxed">
+                <p>
+                  아시시의 성 프란치스코는 자연 안에서 하느님을 찬미하며 겸손과 평화, 가난의 삶을 실천한 성인입니다. 모든 피조물을 형제자매로 여기며 자연과 이웃, 삶의 모든 영역에서 하느님을 찬미했습니다.
+                </p>
+                <p>
+                  그 영성에 공감한 본당 신자들의 투표로 상미성당의 주보성인으로 선정되었습니다.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* 로고 소개 Section */}
           <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
             <div className="flex items-center gap-3 mb-6">
@@ -119,79 +201,6 @@ export default function About() {
                 <p className="text-gray-800 font-medium">
                   이 로고의 의미는 상미(相美)라는 본당 명칭에 담긴 신앙적 해석과도 연결됩니다. 하느님 안에서 서로를 바라보고 비추며 완성되는 공동체의 아름다움을 시각적으로 표현한 것입니다.
                 </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 주보성인 Section */}
-          <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
-              <h2 className="text-3xl font-bold text-gray-900">본당 주보성인</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-              <div className="flex justify-center md:justify-start">
-                <div className="w-full max-w-[400px] bg-white rounded-xl overflow-hidden border-2 border-gray-200 shadow-md p-4">
-                  <div className="relative w-full" style={{ aspectRatio: 'auto', minHeight: '400px' }}>
-                    <img
-                      src={`/images/saint-francis.jpg?t=${Date.now()}`}
-                      alt="아시시의 성 프란치스코와 새들"
-                      className="w-full h-auto object-contain"
-                      style={{ 
-                        display: 'block',
-                        maxWidth: '100%',
-                        height: 'auto'
-                      }}
-                      loading="eager"
-                      onError={(e) => {
-                        console.error('[About] 이미지 로드 실패:', e.currentTarget.src)
-                        // 이미지 로드 실패 시 대체 표시
-                        const target = e.currentTarget as HTMLImageElement
-                        target.style.display = 'none'
-                        const parent = target.parentElement
-                        if (parent) {
-                          parent.innerHTML = `
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 min-h-[400px]">
-                              <div class="text-center p-6">
-                                <svg class="w-24 h-24 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <p class="text-sm text-gray-500 font-medium">성 프란치스코</p>
-                                <p class="text-xs text-gray-400 mt-1">이미지를 불러올 수 없습니다</p>
-                              </div>
-                            </div>
-                          `
-                        }
-                      }}
-                      onLoad={(e) => {
-                        console.log('[About] 성 프란치스코 이미지 로드 성공')
-                        const target = e.currentTarget as HTMLImageElement
-                        target.style.backgroundColor = 'transparent'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
-                <div className="space-y-2">
-                  <p>
-                    <span className="font-semibold text-gray-900">주보성인 : </span>
-                    <span>아시시의 성 프란치스코</span>
-                  </p>
-                  <p>
-                    <span className="font-semibold text-gray-900">주보성인 축일 : </span>
-                    <span>10월 4일</span>
-                  </p>
-                </div>
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="font-semibold text-gray-900 mb-3">주보성인 선정 사유</p>
-                  <p className="mb-3">
-                    아시시의 성 프란치스코는 자연 안에서 하느님을 찬미하며 겸손과 평화, 가난의 삶을 실천한 성인입니다. 모든 피조물을 형제자매로 여기며 자연과 이웃, 삶의 모든 영역에서 하느님을 찬미했습니다.
-                  </p>
-                  <p>
-                    그 영성에 공감한 본당 신자들의 투표로 상미성당의 주보성인으로 선정되었습니다.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
