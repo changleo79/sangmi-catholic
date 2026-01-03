@@ -4,6 +4,7 @@ import { NoticeItem } from '../../data/notices'
 import { getNotices, saveNotices, exportNotices, importJSON, initializeData } from '../../utils/storage'
 import { notices as defaultNotices } from '../../data/notices'
 import DraggableList from '../../components/DraggableList'
+import ImageUploader from '../../components/ImageUploader'
 
 export default function NoticesManage() {
   const navigate = useNavigate()
@@ -155,20 +156,19 @@ export default function NoticesManage() {
     setEditingIndex(null)
   }
 
-  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        alert('이미지 파일만 업로드 가능합니다.')
-        return
-      }
+  const handleImageUpload = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onloadend = () => {
         const base64 = reader.result as string
         setFormData({ ...formData, imageUrl: base64 })
+        resolve(base64)
+      }
+      reader.onerror = () => {
+        reject(new Error('파일 읽기 실패'))
       }
       reader.readAsDataURL(file)
-    }
+    })
   }
 
   const handleEdit = (index: number) => {
@@ -341,22 +341,14 @@ export default function NoticesManage() {
                 </div>
 
                 {imageInputType === 'upload' ? (
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageFileUpload}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      💡 이미지 파일을 선택하면 Base64로 변환되어 저장됩니다.
-                    </p>
-                    {formData.imageUrl && formData.imageUrl.startsWith('data:') && (
-                      <div className="mt-3 w-full max-w-md rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                        <img src={formData.imageUrl} alt="이미지 미리보기" className="w-full h-auto object-contain" />
-                      </div>
-                    )}
-                  </div>
+                  <ImageUploader
+                    onUpload={handleImageUpload}
+                    onUrlChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                    currentUrl={formData.imageUrl?.startsWith('data:') ? formData.imageUrl : undefined}
+                    accept="image/*"
+                    maxSizeMB={10}
+                    showProgress={true}
+                  />
                 ) : (
                   <div>
                     <input
