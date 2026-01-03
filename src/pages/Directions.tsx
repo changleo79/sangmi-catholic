@@ -104,9 +104,9 @@ export default function Directions() {
                                 )}
                                 <ul className="space-y-1">
                                   {course.stops.map((stop, stopIdx) => (
-                                    <li key={`${route.title}-${courseIdx}-${stopIdx}`} className="grid grid-cols-[auto_1fr] gap-3 items-start">
+                                    <li key={`${route.title}-${courseIdx}-${stopIdx}`} className="grid grid-cols-[auto_1fr] gap-2 md:gap-3 items-start">
                                       <span className="text-catholic-logo font-semibold whitespace-nowrap text-xs lg:text-sm">{stop.time}</span>
-                                      <span className="text-xs lg:text-sm leading-relaxed">{stop.location}</span>
+                                      <span className="text-xs lg:text-sm leading-relaxed break-words">{stop.location}</span>
                                     </li>
                                   ))}
                                 </ul>
