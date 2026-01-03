@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { NoticeItem } from '../../data/notices'
 import { getNotices, saveNotices, exportNotices, importJSON, initializeData } from '../../utils/storage'
 import { notices as defaultNotices } from '../../data/notices'
+import DraggableList from '../../components/DraggableList'
 
 export default function NoticesManage() {
   const navigate = useNavigate()
@@ -132,6 +133,11 @@ export default function NoticesManage() {
     setNotices(newNotices)
     await saveNotices(newNotices)
     setSelectedIndices(new Set())
+  }
+
+  const handleReorder = async (reorderedNotices: NoticeItem[]) => {
+    setNotices(reorderedNotices)
+    await saveNotices(reorderedNotices)
   }
 
   const resetForm = () => {
@@ -462,36 +468,39 @@ export default function NoticesManage() {
                 </div>
               )}
             </div>
-            <div className="space-y-4">
-              {notices.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">공지사항이 없습니다.</p>
-              ) : (
-                notices
-                  .filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)
-                  .map((notice, index) => {
-                    // 필터링 후 실제 인덱스 찾기
-                    const actualIndex = notices.findIndex(n => n === notice)
-                    // key는 title과 date 조합으로 고유성 보장
-                    const uniqueKey = `${notice.title}-${notice.date}-${index}`
-                    const isSelected = selectedIndices.has(actualIndex)
-                    return (
-                      <div
-                        key={uniqueKey}
-                        className={`p-4 rounded-lg border transition-all ${
-                          isSelected 
-                            ? 'border-catholic-logo bg-purple-50/30' 
-                            : 'border-gray-200 hover:border-catholic-logo/30'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3 flex-1">
+            {notices.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">공지사항이 없습니다.</p>
+            ) : (
+              <DraggableList
+                items={notices.filter((notice): notice is NoticeItem => notice !== null && notice !== undefined && notice.title !== undefined)}
+                onReorder={handleReorder}
+                keyExtractor={(notice, index) => `${notice.title}-${notice.date}-${index}`}
+                renderItem={(notice, index, isDragging) => {
+                  const actualIndex = notices.findIndex(n => n === notice)
+                  const isSelected = selectedIndices.has(actualIndex)
+                  return (
+                    <div
+                      className={`p-4 rounded-lg border transition-all ${
+                        isSelected 
+                          ? 'border-catholic-logo bg-purple-50/30' 
+                          : 'border-gray-200 hover:border-catholic-logo/30'
+                      } ${isDragging ? 'shadow-lg' : ''}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className="flex items-center gap-2 mt-1">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                            </svg>
                             <input
                               type="checkbox"
                               checked={isSelected}
                               onChange={() => handleToggleSelect(actualIndex)}
-                              className="mt-1 w-4 h-4 rounded border-gray-300 text-catholic-logo focus:ring-catholic-logo"
+                              className="w-4 h-4 rounded border-gray-300 text-catholic-logo focus:ring-catholic-logo"
+                              onClick={(e) => e.stopPropagation()}
                             />
-                            <div className="flex-1">
+                          </div>
+                          <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-semibold text-gray-900">{notice.title || '(제목 없음)'}</h3>
                               {notice.isImportant && (
@@ -504,31 +513,31 @@ export default function NoticesManage() {
                             {notice.summary && (
                               <p className="text-sm text-gray-500">{notice.summary}</p>
                             )}
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleEdit(actualIndex)}
-                              className="px-3 py-1 rounded text-sm text-white font-medium transition-all duration-300 hover:scale-105 active:scale-95"
-                              style={{ backgroundColor: '#7B1F4B' }}
-                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
-                            >
-                              수정
-                            </button>
-                            <button
-                              onClick={() => handleDelete(actualIndex)}
-                              className="px-3 py-1 rounded text-sm bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
-                            >
-                              삭제
-                            </button>
                           </div>
                         </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(actualIndex)}
+                            className="px-3 py-1 rounded text-sm text-white font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+                            style={{ backgroundColor: '#7B1F4B' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                          >
+                            수정
+                          </button>
+                          <button
+                            onClick={() => handleDelete(actualIndex)}
+                            className="px-3 py-1 rounded text-sm bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
+                          >
+                            삭제
+                          </button>
+                        </div>
                       </div>
-                    )
-                  })
-              )}
-            </div>
+                    </div>
+                  )
+                }}
+              />
+            )}
           </div>
           </div>
         </div>
