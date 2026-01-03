@@ -48,9 +48,40 @@ export const subscribeToPush = async (registration: ServiceWorkerRegistration, v
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(vapidKey)
     })
+    
+    // 구독 정보를 서버에 전송 (나중에 구현)
+    console.log('[Push] 구독 성공:', subscription)
+    
     return subscription
   } catch (error) {
     console.error('[Push] 구독 실패:', error)
+    return null
+  }
+}
+
+// 푸시 알림 구독 해제
+export const unsubscribeFromPush = async (registration: ServiceWorkerRegistration): Promise<boolean> => {
+  try {
+    const subscription = await registration.pushManager.getSubscription()
+    if (subscription) {
+      await subscription.unsubscribe()
+      console.log('[Push] 구독 해제 성공')
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('[Push] 구독 해제 실패:', error)
+    return false
+  }
+}
+
+// 현재 푸시 구독 상태 확인
+export const getPushSubscription = async (registration: ServiceWorkerRegistration): Promise<PushSubscription | null> => {
+  try {
+    const subscription = await registration.pushManager.getSubscription()
+    return subscription
+  } catch (error) {
+    console.error('[Push] 구독 상태 확인 실패:', error)
     return null
   }
 }
