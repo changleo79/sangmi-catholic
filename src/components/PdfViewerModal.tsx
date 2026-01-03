@@ -226,7 +226,7 @@ export default function PdfViewerModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-start sm:items-center justify-center p-0 sm:p-2 sm:p-4 animate-fade-in overflow-y-auto"
+      className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-start justify-center p-0 animate-fade-in overflow-y-auto"
       onClick={(e) => {
         // 배경 클릭 시 닫기
         if (e.target === e.currentTarget) {
@@ -234,8 +234,8 @@ export default function PdfViewerModal({
         }
       }}
     >
-      <div className="relative w-full h-auto sm:w-[90%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col mt-4 sm:mt-8 mb-4 sm:mb-8" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
-        <header id="pdf-modal-header" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
+      <div className="relative w-full h-auto sm:w-[95%] sm:max-w-5xl sm:h-auto bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col mt-0 mb-0 sm:my-2" style={{ maxHeight: '100vh' }}>
+        <header id="pdf-modal-header" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 bg-white flex-shrink-0 sticky top-0 z-20" style={{ backgroundColor: '#ffffff' }}>
           <div className="flex-1 min-w-0">
             <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900 truncate">{title}</h2>
             {description && <p className="text-xs sm:text-sm text-gray-500 mt-1 leading-relaxed line-clamp-2">{description}</p>}
@@ -278,7 +278,7 @@ export default function PdfViewerModal({
         <div 
           ref={modalContentRef}
           data-pdf-modal-content
-          className="px-2 sm:px-4 md:px-6 pb-4 sm:pb-6 pt-3 sm:pt-4 flex-1 min-h-0 overflow-y-auto overflow-x-hidden" 
+          className="px-1 sm:px-2 md:px-3 pb-2 sm:pb-3 pt-1 sm:pt-2 flex-1 min-h-0 overflow-y-auto overflow-x-hidden" 
           style={{ 
             scrollBehavior: 'auto',
             WebkitOverflowScrolling: 'touch',
@@ -300,7 +300,7 @@ export default function PdfViewerModal({
             return isImage ? (
                 <div className={`w-full space-y-4 ${hasSecondImage ? '' : ''}`}>
                   {/* 첫 번째 이미지 */}
-                  <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
+                  <div className="relative w-full rounded-xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-1 sm:p-2" style={{ minHeight: '400px' }}>
                     {imageError ? (
                       <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
                         <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,7 +367,7 @@ export default function PdfViewerModal({
                   
                   {/* 두 번째 이미지 */}
                   {hasSecondImage && (
-                    <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
+                    <div className="relative w-full rounded-xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-1 sm:p-2" style={{ minHeight: '400px' }}>
                       {imageError2 ? (
                         <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
                           <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,7 +429,7 @@ export default function PdfViewerModal({
                   )}
                 </div>
               ) : (
-                <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: '600px', height: '80vh' }}>
+                <div className="relative w-full rounded-xl overflow-hidden border border-gray-100 shadow-inner" style={{ minHeight: '600px', height: 'calc(100vh - 120px)' }}>
                   <iframe
                     key={`iframe-${fileUrl}`}
                     src={`${fileUrl}#toolbar=0&zoom=page-fit&view=FitV&page=1`}
