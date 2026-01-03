@@ -20,19 +20,50 @@ export default function About() {
               <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
               <h2 className="text-3xl font-bold text-gray-900">상미성당</h2>
             </div>
-            <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
-              <p>
-                아시시의 성 프란치스코 상미성당은 2018년 6월 18일 경기도 용인시 기흥구 상미 지역에 설립된 가톨릭 본당입니다.
-              </p>
-              <p>
-                우리 성당은 성 프란치스코의 정신을 이어받아 하느님의 사랑을 실천하고, 모든 이웃과 함께 평화와 화합을 만들어가는 작은 공동체입니다.
-              </p>
-              <p>
-                매일 드리는 미사를 통해 하느님께 영광을 드리고, 말씀과 성사를 통해 신앙을 성장시켜 나가며, 서로를 돌보고 나누는 사랑의 실천을 통해 하느님 나라를 건설해 나가고 있습니다.
-              </p>
-              <p>
-                상미성당은 모든 신자들이 한 가족으로 모여 기도하고, 함께 성장하며, 주변 이웃들에게 복음을 전하는 따뜻한 공동체가 되고자 합니다.
-              </p>
+            <div className="space-y-6 text-gray-700 leading-relaxed text-lg">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">상미(相美)의 의미</h3>
+                <p>
+                  상미(相美)는 하느님 안에서 서로 바라보고 비추어 함께 아름다워지는 공동체를 의미합니다. 상미 공동체는 개인의 차이를 넘어 관계 속에서 하느님의 사랑이 드러난다고 믿으며 살아갑니다.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">로고 상징</h3>
+                <p>
+                  교회의 로고는 종탑이 십자가를 품고 세상으로 열린 문을 형상화한 것으로, 상미 공동체의 신앙과 사명을 담고 있습니다. 하느님께 향해 굳건히 서면서도 모든 이를 환하게 맞이하는 열린 교회가 되고자 합니다.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">수호성인 - 아시시의 성 프란치스코</h3>
+                <p>
+                  상미 본당의 수호성인인 아시시의 성 프란치스코는 가난과 겸손, 평화의 삶으로 세상에 하느님의 사랑을 증거한 성인입니다. 모든 피조물을 형제자매로 여기며 자연과 이웃, 삶의 모든 영역에서 하느님을 찬미했습니다.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">상미 공동체의 영성</h3>
+                <p>
+                  성 프란치스코의 영성을 따르는 상미 공동체는 닫힌 공동체가 아닌 세상으로 향하는 신앙을 선택합니다. 고립된 삶이 아닌 함께 살아가는 공동체의 길을 선택합니다.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">핵심 사명</h3>
+                <p>
+                  상미 공동체는 하느님 안에서 서로를 형제자매로 받아들이고, 사랑 속에 거하며, 그 사랑을 세상에 전파하는 공동체가 되고자 합니다.
+                </p>
+              </div>
+              
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <p className="text-center text-lg italic text-gray-600">
+                  "하느님은 사랑이십니다. 사랑 안에 머무는 이는 하느님 안에 머무르고, 하느님도 그 안에 머무르십니다."
+                </p>
+                <p className="text-center text-sm text-gray-500 mt-2">
+                  요한 1서 4장 16절
+                </p>
+              </div>
               <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
                 <p className="text-base">
                   <span className="font-semibold text-gray-900">설립일 : </span>
