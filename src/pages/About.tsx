@@ -105,11 +105,12 @@ export default function About() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div className="flex justify-center md:justify-start">
-                <div className="w-full max-w-[300px] aspect-square bg-gray-50 rounded-xl p-6 flex items-center justify-center border border-gray-200">
+                <div className="w-full max-w-[300px] aspect-square bg-white rounded-xl p-6 flex items-center justify-center border-2 border-gray-200 shadow-sm">
                   <img
                     src="/images/상미성당 로고2.png"
                     alt="상미성당 로고"
                     className="w-full h-full object-contain"
+                    style={{ maxWidth: '100%', maxHeight: '100%' }}
                     onError={(e) => {
                       // 로고 이미지가 없을 경우 대체 표시
                       const target = e.currentTarget as HTMLImageElement
@@ -153,11 +154,12 @@ export default function About() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div className="flex justify-center md:justify-start">
-                <div className="w-full max-w-[300px] aspect-[4/5] bg-gray-50 rounded-xl overflow-hidden border border-gray-200 shadow-md">
+                <div className="w-full max-w-[350px] aspect-[3/4] bg-white rounded-xl overflow-hidden border-2 border-gray-200 shadow-md">
                   <img
                     src="/images/saint-francis.jpg"
-                    alt="아시시의 성 프란치스코"
+                    alt="아시시의 성 프란치스코와 새들"
                     className="w-full h-full object-cover"
+                    style={{ objectPosition: 'center' }}
                     onError={(e) => {
                       // 이미지가 없을 경우 대체 표시
                       const target = e.currentTarget as HTMLImageElement
