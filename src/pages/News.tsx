@@ -495,6 +495,7 @@ export default function News() {
           title={selectedBulletin.title}
           description={selectedBulletin.description}
           fileUrl={selectedBulletin.fileUrl}
+          fileUrl2={selectedBulletin.fileUrl2}
           onClose={() => {
             setIsPdfModalOpen(false)
             setTimeout(() => setSelectedBulletin(null), 300)

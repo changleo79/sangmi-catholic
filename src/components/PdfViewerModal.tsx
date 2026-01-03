@@ -6,6 +6,7 @@ interface PdfViewerModalProps {
   title: string
   description?: string
   fileUrl: string
+  fileUrl2?: string // 두 번째 이미지 URL (선택)
   onClose: () => void
 }
 
@@ -29,13 +30,17 @@ export default function PdfViewerModal({
   title,
   description,
   fileUrl,
+  fileUrl2,
   onClose
 }: PdfViewerModalProps) {
   const scrollPositionRef = useRef<number>(0)
   const modalContentRef = useRef<HTMLDivElement>(null)
   const [imageError, setImageError] = useState(false)
+  const [imageError2, setImageError2] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [retryCount2, setRetryCount2] = useState(0)
   const [imageSrc, setImageSrc] = useState<string>(fileUrl)
+  const [imageSrc2, setImageSrc2] = useState<string>(fileUrl2 || '')
 
   useEffect(() => {
     if (!isOpen) {
@@ -107,6 +112,28 @@ export default function PdfViewerModal({
       setImageSrc(fileUrl)
     }
   }, [fileUrl])
+
+  // fileUrl2가 변경되면 에러 상태 초기화 및 이미지 소스 업데이트
+  useEffect(() => {
+    if (!fileUrl2) {
+      setImageSrc2('')
+      return
+    }
+    
+    setImageError2(false)
+    setRetryCount2(0)
+    
+    // 이미지 파일인 경우 프록시 URL 사용
+    const isImage2 = fileUrl2.startsWith('data:image/') || 
+                    fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ||
+                    (fileUrl2.startsWith('http') && fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
+    
+    if (isImage2) {
+      setImageSrc2(getProxiedImageUrl(fileUrl2))
+    } else {
+      setImageSrc2(fileUrl2)
+    }
+  }, [fileUrl2])
 
 
 
@@ -264,72 +291,141 @@ export default function PdfViewerModal({
                            fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
                            (fileUrl.startsWith('http') && fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
             
+            const hasSecondImage = fileUrl2 && (
+              fileUrl2.startsWith('data:image/') || 
+              fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ||
+              (fileUrl2.startsWith('http') && fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i))
+            )
+            
             return isImage ? (
-                <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
-                  {imageError ? (
-                    <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
-                      <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-center mb-2">이미지를 불러올 수 없습니다.</p>
-                      <p className="text-xs text-gray-400 mb-4 break-all text-center px-4">
-                        URL: {fileUrl.length > 80 ? `${fileUrl.substring(0, 80)}...` : fileUrl}
-                      </p>
-                      {retryCount < 2 && (
-                        <button
-                          onClick={() => {
-                            setImageError(false)
+                <div className={`w-full space-y-4 ${hasSecondImage ? '' : ''}`}>
+                  {/* 첫 번째 이미지 */}
+                  <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
+                    {imageError ? (
+                      <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
+                        <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-center mb-2">이미지를 불러올 수 없습니다.</p>
+                        <p className="text-xs text-gray-400 mb-4 break-all text-center px-4">
+                          URL: {fileUrl.length > 80 ? `${fileUrl.substring(0, 80)}...` : fileUrl}
+                        </p>
+                        {retryCount < 2 && (
+                          <button
+                            onClick={() => {
+                              setImageError(false)
+                              setRetryCount(prev => prev + 1)
+                            }}
+                            className="px-4 py-2 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-sm"
+                          >
+                            다시 시도
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <img
+                        key={`img-${imageSrc}-${retryCount}`}
+                        src={imageSrc}
+                        alt={`${title} - 이미지 1`}
+                        className="w-full h-auto object-contain"
+                        style={{ 
+                          maxWidth: '100%', 
+                          display: 'block',
+                          backgroundColor: '#f3f4f6',
+                          minHeight: '400px'
+                        }}
+                        loading="eager"
+                        decoding="async"
+                        onError={(e) => {
+                          console.error('[PdfViewerModal] 이미지 로드 실패:', imageSrc, fileUrl)
+                          if (imageSrc.includes('/api/proxy-image') && retryCount < 2 && !imageSrc.includes('_retry=')) {
+                            console.log('[PdfViewerModal] 프록시 실패, 프록시 URL 재시도:', fileUrl)
+                            const proxiedUrl = getProxiedImageUrl(fileUrl)
+                            setImageSrc(`${proxiedUrl}&_retry=${Date.now()}`)
                             setRetryCount(prev => prev + 1)
+                          } else {
+                            setImageError(true)
+                          }
+                        }}
+                        onLoad={(e) => {
+                          const target = e.currentTarget
+                          target.style.backgroundColor = 'transparent'
+                          setImageError(false)
+                          console.log('[PdfViewerModal] 이미지 로드 성공:', imageSrc)
+                          setTimeout(() => {
+                            if (modalContentRef.current) {
+                              modalContentRef.current.scrollTop = 0
+                            }
+                          }, 100)
+                        }}
+                        onLoadStart={() => {
+                          console.log('[PdfViewerModal] 이미지 로드 시작:', imageSrc)
+                        }}
+                      />
+                    )}
+                  </div>
+                  
+                  {/* 두 번째 이미지 */}
+                  {hasSecondImage && (
+                    <div className="relative w-full rounded-2xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-2 sm:p-4" style={{ minHeight: '400px' }}>
+                      {imageError2 ? (
+                        <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
+                          <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-center mb-2">두 번째 이미지를 불러올 수 없습니다.</p>
+                          <p className="text-xs text-gray-400 mb-4 break-all text-center px-4">
+                            URL: {fileUrl2 && fileUrl2.length > 80 ? `${fileUrl2.substring(0, 80)}...` : fileUrl2}
+                          </p>
+                          {retryCount2 < 2 && (
+                            <button
+                              onClick={() => {
+                                setImageError2(false)
+                                setRetryCount2(prev => prev + 1)
+                              }}
+                              className="px-4 py-2 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-sm"
+                            >
+                              다시 시도
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <img
+                          key={`img2-${imageSrc2}-${retryCount2}`}
+                          src={imageSrc2}
+                          alt={`${title} - 이미지 2`}
+                          className="w-full h-auto object-contain"
+                          style={{ 
+                            maxWidth: '100%', 
+                            display: 'block',
+                            backgroundColor: '#f3f4f6',
+                            minHeight: '400px'
                           }}
-                          className="px-4 py-2 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-sm"
-                        >
-                          다시 시도
-                        </button>
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            console.error('[PdfViewerModal] 두 번째 이미지 로드 실패:', imageSrc2, fileUrl2)
+                            if (imageSrc2.includes('/api/proxy-image') && retryCount2 < 2 && !imageSrc2.includes('_retry=')) {
+                              console.log('[PdfViewerModal] 프록시 실패, 프록시 URL 재시도:', fileUrl2)
+                              const proxiedUrl = fileUrl2 ? getProxiedImageUrl(fileUrl2) : ''
+                              setImageSrc2(`${proxiedUrl}&_retry=${Date.now()}`)
+                              setRetryCount2(prev => prev + 1)
+                            } else {
+                              setImageError2(true)
+                            }
+                          }}
+                          onLoad={(e) => {
+                            const target = e.currentTarget
+                            target.style.backgroundColor = 'transparent'
+                            setImageError2(false)
+                            console.log('[PdfViewerModal] 두 번째 이미지 로드 성공:', imageSrc2)
+                          }}
+                          onLoadStart={() => {
+                            console.log('[PdfViewerModal] 두 번째 이미지 로드 시작:', imageSrc2)
+                          }}
+                        />
                       )}
                     </div>
-                  ) : (
-                    <img
-                      key={`img-${imageSrc}-${retryCount}`}
-                      src={imageSrc}
-                      alt={title}
-                      className="w-full h-auto object-contain"
-                      style={{ 
-                        maxWidth: '100%', 
-                        display: 'block',
-                        backgroundColor: '#f3f4f6', // 로딩 중 배경색
-                        minHeight: '400px'
-                      }}
-                      loading="eager"
-                      decoding="async"
-                      onError={(e) => {
-                        console.error('[PdfViewerModal] 이미지 로드 실패:', imageSrc, fileUrl)
-                        // 프록시를 통해 로드했는데 실패하면 프록시 URL에 타임스탬프 추가하여 재시도 (원본 URL로 재시도하지 않음)
-                        if (imageSrc.includes('/api/proxy-image') && retryCount < 2 && !imageSrc.includes('_retry=')) {
-                          console.log('[PdfViewerModal] 프록시 실패, 프록시 URL 재시도:', fileUrl)
-                          const proxiedUrl = getProxiedImageUrl(fileUrl)
-                          setImageSrc(`${proxiedUrl}&_retry=${Date.now()}`)
-                          setRetryCount(prev => prev + 1)
-                        } else {
-                          setImageError(true)
-                        }
-                      }}
-                      onLoad={(e) => {
-                        // 로드 성공 시 배경색 제거
-                        const target = e.currentTarget
-                        target.style.backgroundColor = 'transparent'
-                        setImageError(false)
-                        console.log('[PdfViewerModal] 이미지 로드 성공:', imageSrc)
-                        // 이미지 로드 후 모달 컨텐츠 스크롤을 맨 위로 이동
-                        setTimeout(() => {
-                          if (modalContentRef.current) {
-                            modalContentRef.current.scrollTop = 0
-                          }
-                        }, 100)
-                      }}
-                      onLoadStart={() => {
-                        console.log('[PdfViewerModal] 이미지 로드 시작:', imageSrc)
-                      }}
-                    />
                   )}
                 </div>
               ) : (

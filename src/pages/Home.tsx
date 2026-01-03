@@ -1069,6 +1069,7 @@ export default function Home() {
           title={selectedBulletin.title}
           description={selectedBulletin.description}
           fileUrl={selectedBulletin.fileUrl}
+          fileUrl2={selectedBulletin.fileUrl2}
           onClose={() => {
             setIsPdfModalOpen(false)
             setSelectedBulletin(null)
