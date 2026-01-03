@@ -59,20 +59,6 @@ export default function About() {
               </div>
               
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">로고 상징</h3>
-                <p>
-                  교회의 로고는 종탑이 십자가를 품고 세상으로 열린 문을 형상화한 것으로, 상미 공동체의 신앙과 사명을 담고 있습니다. 하느님께 향해 굳건히 서면서도 모든 이를 환하게 맞이하는 열린 교회가 되고자 합니다.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">수호성인 - 아시시의 성 프란치스코</h3>
-                <p>
-                  상미 본당의 수호성인인 아시시의 성 프란치스코는 가난과 겸손, 평화의 삶으로 세상에 하느님의 사랑을 증거한 성인입니다. 모든 피조물을 형제자매로 여기며 자연과 이웃, 삶의 모든 영역에서 하느님을 찬미했습니다.
-                </p>
-              </div>
-              
-              <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">상미 공동체의 영성</h3>
                 <p>
                   성 프란치스코의 영성을 따르는 상미 공동체는 닫힌 공동체가 아닌 세상으로 향하는 신앙을 선택합니다. 고립된 삶이 아닌 함께 살아가는 공동체의 길을 선택합니다.
@@ -106,6 +92,54 @@ export default function About() {
                 <p className="text-base">
                   <span className="font-semibold text-gray-900">입당 미사 : </span>
                   <span className="text-gray-700">2025년 3월 22일</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 로고 소개 Section */}
+          <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+              <h2 className="text-3xl font-bold text-gray-900">상미성당 로고</h2>
+            </div>
+            <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
+              <p>
+                상미성당 로고는 교회의 상징인 십자가와 종탑을 단순화하여 재해석한 것입니다. 종탑이 십자가를 품고 있는 형태는 하느님을 향한 공동체의 지향을 드러냅니다. 전통적인 신앙의 상징을 현대적 감각으로 표현하여 과거와 현재가 연결되는 신앙의 공간을 보여줍니다.
+              </p>
+              <p>
+                로고 하단의 열린 구조는 열린 교회를 상징합니다. 누구나 초대받아 주님의 빛 안에 거할 수 있음을 의미하며, 닫힌 건물이 아닌 세상으로 열린 교회, 이웃을 환대와 포용으로 맞이하는 공동체를 나타냅니다.
+              </p>
+              <p className="text-gray-800 font-medium">
+                이 로고의 의미는 상미(相美)라는 본당 명칭에 담긴 신앙적 해석과도 연결됩니다. 하느님 안에서 서로를 바라보고 비추며 완성되는 공동체의 아름다움을 시각적으로 표현한 것입니다.
+              </p>
+            </div>
+          </div>
+
+          {/* 주보성인 Section */}
+          <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-10 border border-gray-100 hover:border-catholic-logo/20 hover:-translate-y-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
+              <h2 className="text-3xl font-bold text-gray-900">본당 주보성인</h2>
+            </div>
+            <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
+              <div className="space-y-2">
+                <p>
+                  <span className="font-semibold text-gray-900">주보성인 : </span>
+                  <span>아시시의 성 프란치스코</span>
+                </p>
+                <p>
+                  <span className="font-semibold text-gray-900">주보성인 축일 : </span>
+                  <span>10월 4일</span>
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-200">
+                <p className="font-semibold text-gray-900 mb-3">주보성인 선정 사유</p>
+                <p className="mb-3">
+                  아시시의 성 프란치스코는 자연 안에서 하느님을 찬미하며 겸손과 평화, 가난의 삶을 실천한 성인입니다. 모든 피조물을 형제자매로 여기며 자연과 이웃, 삶의 모든 영역에서 하느님을 찬미했습니다.
+                </p>
+                <p>
+                  그 영성에 공감한 본당 신자들의 투표로 상미성당의 주보성인으로 선정되었습니다.
                 </p>
               </div>
             </div>
