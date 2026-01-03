@@ -76,7 +76,7 @@ export default function Header() {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`relative text-lg font-medium transition-colors whitespace-nowrap py-2 group focus:outline-none focus:ring-2 focus:ring-catholic-logo focus:ring-offset-2 rounded ${
+                    className={`relative text-lg font-medium transition-colors whitespace-nowrap py-2 group focus:outline-none rounded ${
                       isActive ? 'text-catholic-logo' : 'text-gray-700'
                     }`}
                     onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.color = '#7B1F4B' }}

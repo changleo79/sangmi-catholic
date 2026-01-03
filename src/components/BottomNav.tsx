@@ -105,7 +105,7 @@ export default function BottomNav() {
       aria-label="하단 네비게이션"
     >
       <div className="mx-auto max-w-md px-2.5 pb-1.5">
-        <div className="grid grid-cols-4 gap-1.5 rounded-[22px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white dark:border-gray-700 shadow-2xl p-1">
+        <div className="grid grid-cols-4 gap-1.5 rounded-[22px] bg-white/90 backdrop-blur-xl border border-white shadow-2xl p-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to))
             const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey as keyof typeof badgeCounts] : 0
@@ -115,8 +115,8 @@ export default function BottomNav() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`relative flex flex-col items-center gap-0.5 py-1 rounded-xl text-[10px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-catholic-logo focus:ring-offset-2 ${
-                  isActive ? 'bg-catholic-logo text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                className={`relative flex flex-col items-center gap-0.5 py-1 rounded-xl text-[10px] font-semibold transition-all duration-200 focus:outline-none ${
+                  isActive ? 'bg-catholic-logo text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100'
                 }`}
                 aria-label={`${item.label} 페이지로 이동${showBadge ? ` (새 항목 ${badgeCount}개)` : ''}`}
                 aria-current={isActive ? 'page' : undefined}

@@ -520,16 +520,16 @@ export default function Home() {
 
       <section ref={quickSectionRef} className="mt-12 md:-mt-18 pb-12 md:pb-20">
         <div className="container mx-auto px-4">
-          <div className="bg-white/85 dark:bg-gray-800/85 backdrop-blur rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl border border-white/60 dark:border-gray-700/60 p-4 md:p-6 lg:p-8">
+          <div className="bg-white/85 backdrop-blur rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl border border-white/60 p-4 md:p-6 lg:p-8">
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3 lg:gap-5">
               {quickLinks.map(link => (
                 <Link
                   key={link.title}
                   to={link.to}
-                  className="group relative flex flex-col items-center text-center gap-2 md:flex-row md:items-start md:text-left rounded-xl md:rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-3 md:p-5 lg:p-6"
+                  className="group relative flex flex-col items-center text-center gap-2 md:flex-row md:items-start md:text-left rounded-xl md:rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 p-3 md:p-5 lg:p-6"
                 >
                   <div
-                    className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg md:rounded-xl text-white shadow-inner flex-shrink-0"
+                    className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg md:rounded-xl shadow-inner flex-shrink-0"
                     style={{ background: link.background, color: link.accent }}
                   >
                     <div className="w-5 h-5 md:w-6 md:h-6">
@@ -537,10 +537,10 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0 space-y-0.5 md:space-y-1">
-                    <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-catholic-logo transition-colors leading-tight">
+                    <h3 className="text-sm md:text-base lg:text-lg font-semibold text-gray-900 group-hover:text-catholic-logo transition-colors leading-tight">
                       {link.title}
                     </h3>
-                    <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed hidden md:block">{link.description}</p>
+                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed hidden md:block">{link.description}</p>
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-catholic-logo/80 group-hover:text-catholic-logo transition-colors hidden md:inline-flex">
                       자세히 보기
                       <svg className="w-3 h-3 md:w-3.5 md:h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
