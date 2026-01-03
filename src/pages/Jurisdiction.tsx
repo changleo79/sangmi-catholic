@@ -186,17 +186,17 @@ export default function Jurisdiction() {
                               key={`${result.region.name}-${result.district.alias}-${index}`}
                               className="bg-gradient-to-r from-catholic-logo/5 to-transparent rounded-lg p-4 border border-catholic-logo/20"
                             >
-                              <div className="flex items-center gap-2 mb-1">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <span 
-                                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white font-bold text-sm shadow-md"
+                                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white font-bold text-sm shadow-md whitespace-nowrap flex-shrink-0"
                                   style={{ backgroundColor: '#7B1F4B' }}
                                 >
                                   {result.region.name}
                                 </span>
-                                <span className="font-bold text-gray-900">
+                                <span className="font-bold text-gray-900 whitespace-nowrap">
                                   {result.district.alias}구역
                                 </span>
-                                <span className="text-sm text-gray-500">
+                                <span className="text-sm text-gray-500 whitespace-nowrap">
                                   ({result.matchType === 'alias' ? '구역명 일치' : '주소 일치'})
                                 </span>
                               </div>
