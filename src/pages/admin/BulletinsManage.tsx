@@ -512,23 +512,83 @@ export default function BulletinsManage() {
                     {(formData.fileUrl || formData.fileUrl2) && (
                       <div className="mt-4 grid grid-cols-2 gap-4">
                         {formData.fileUrl && (
-                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                            <p className="text-xs text-green-700 mb-2">✓ 첫 번째 이미지 업로드 완료</p>
+                          <div className="relative p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs text-green-700 font-semibold">✓ 첫 번째 이미지</p>
+                              <button
+                                type="button"
+                              onClick={() => {
+                                setFormData({ 
+                                  ...formData, 
+                                  fileUrl: '', 
+                                  thumbnailUrl: (formData.fileUrl2 && formData.fileUrl2.trim() !== '') ? formData.fileUrl2 : ''
+                                })
+                              }}
+                                className="text-red-500 hover:text-red-700 text-xs font-medium"
+                              >
+                                삭제
+                              </button>
+                            </div>
                             {formData.fileUrl.startsWith('data:image/') || formData.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
                               <div className="w-full aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
                                 <img src={formData.fileUrl} alt="첫 번째 이미지 미리보기" className="w-full h-full object-cover" />
                               </div>
                             ) : null}
+                            {formData.fileUrl2 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  // 첫 번째와 두 번째 이미지 교체
+                                  setFormData({
+                                    ...formData,
+                                    fileUrl: formData.fileUrl2 || '',
+                                    fileUrl2: formData.fileUrl,
+                                    thumbnailUrl: formData.fileUrl2 || ''
+                                  })
+                                }}
+                                className="mt-2 w-full px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                              >
+                                두 번째로 이동
+                              </button>
+                            )}
                           </div>
                         )}
                         {formData.fileUrl2 && (
-                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                            <p className="text-xs text-green-700 mb-2">✓ 두 번째 이미지 업로드 완료</p>
+                          <div className="relative p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs text-green-700 font-semibold">✓ 두 번째 이미지</p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, fileUrl2: '' })
+                                }}
+                                className="text-red-500 hover:text-red-700 text-xs font-medium"
+                              >
+                                삭제
+                              </button>
+                            </div>
                             {formData.fileUrl2.startsWith('data:image/') || formData.fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
                               <div className="w-full aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
                                 <img src={formData.fileUrl2} alt="두 번째 이미지 미리보기" className="w-full h-full object-cover" />
                               </div>
                             ) : null}
+                            {formData.fileUrl && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  // 두 번째와 첫 번째 이미지 교체
+                                  setFormData({
+                                    ...formData,
+                                    fileUrl: formData.fileUrl2 || '',
+                                    fileUrl2: formData.fileUrl,
+                                    thumbnailUrl: formData.fileUrl2 || ''
+                                  })
+                                }}
+                                className="mt-2 w-full px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                              >
+                                첫 번째로 이동
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -537,7 +597,24 @@ export default function BulletinsManage() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">첫 번째 이미지 URL</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-medium text-gray-600">첫 번째 이미지 URL</label>
+                        {formData.fileUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({ 
+                                ...formData, 
+                                fileUrl: '',
+                                thumbnailUrl: (formData.fileUrl2 && formData.fileUrl2.trim() !== '') ? formData.fileUrl2 : ''
+                              })
+                            }}
+                            className="text-red-500 hover:text-red-700 text-xs font-medium"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="url"
                         value={formData.fileUrl && formData.fileUrl.startsWith('data:') ? '' : (formData.fileUrl || '')}
@@ -556,9 +633,43 @@ export default function BulletinsManage() {
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                         placeholder="예: https://..."
                       />
+                      {formData.fileUrl && (formData.fileUrl.startsWith('data:image/') || formData.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)) && (
+                        <div className="mt-2 w-full max-w-[200px] aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                          <img src={formData.fileUrl} alt="첫 번째 이미지 미리보기" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      {formData.fileUrl && formData.fileUrl2 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              fileUrl: formData.fileUrl2 || '',
+                              fileUrl2: formData.fileUrl,
+                              thumbnailUrl: formData.fileUrl2 || ''
+                            })
+                          }}
+                          className="mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        >
+                          두 번째로 이동
+                        </button>
+                      )}
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">두 번째 이미지 URL (선택)</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-medium text-gray-600">두 번째 이미지 URL (선택)</label>
+                        {formData.fileUrl2 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, fileUrl2: '' })
+                            }}
+                            className="text-red-500 hover:text-red-700 text-xs font-medium"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="url"
                         value={formData.fileUrl2 && formData.fileUrl2.startsWith('data:') ? '' : (formData.fileUrl2 || '')}
@@ -572,6 +683,27 @@ export default function BulletinsManage() {
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                         placeholder="예: https://..."
                       />
+                      {formData.fileUrl2 && (formData.fileUrl2.startsWith('data:image/') || formData.fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)) && (
+                        <div className="mt-2 w-full max-w-[200px] aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                          <img src={formData.fileUrl2} alt="두 번째 이미지 미리보기" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      {formData.fileUrl && formData.fileUrl2 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              fileUrl: formData.fileUrl2 || '',
+                              fileUrl2: formData.fileUrl,
+                              thumbnailUrl: formData.fileUrl2 || ''
+                            })
+                          }}
+                          className="mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        >
+                          첫 번째로 이동
+                        </button>
+                      )}
                     </div>
                     <p className="mt-1 text-xs text-gray-500">
                       💡 이미지 파일 URL을 입력하세요. 첫 번째 이미지가 자동으로 썸네일로 설정됩니다.
