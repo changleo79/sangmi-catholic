@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { getBulletins, type BulletinItem } from '../utils/storage'
 import PdfViewerModal from '../components/PdfViewerModal'
+import InfiniteScroll from '../components/InfiniteScroll'
+import Pagination from '../components/Pagination'
+import FilterBar, { FilterOptions } from '../components/FilterBar'
+
+const ITEMS_PER_PAGE = 12
 
 // 이미지 URL을 프록시를 통해 로드하는 함수
 const getProxiedImageUrl = (url: string): string => {
@@ -28,6 +33,43 @@ export default function Bulletins() {
   const [bulletins, setBulletins] = useState<BulletinItem[]>([])
   const [selectedBulletin, setSelectedBulletin] = useState<BulletinItem | null>(null)
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
+  const [displayMode, setDisplayMode] = useState<'infinite' | 'pagination'>('infinite')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE)
+  const [filters, setFilters] = useState<FilterOptions>({})
+
+  // 필터링된 주보
+  const filteredBulletins = useMemo(() => {
+    return bulletins.filter((bulletin) => {
+      // 연도 필터
+      if (filters.year) {
+        const bulletinYear = new Date(bulletin.date).getFullYear().toString()
+        if (bulletinYear !== filters.year) {
+          return false
+        }
+      }
+
+      // 날짜 범위 필터
+      if (filters.startDate) {
+        const bulletinDate = new Date(bulletin.date)
+        const startDate = new Date(filters.startDate)
+        if (bulletinDate < startDate) {
+          return false
+        }
+      }
+
+      if (filters.endDate) {
+        const bulletinDate = new Date(bulletin.date)
+        const endDate = new Date(filters.endDate)
+        endDate.setHours(23, 59, 59, 999)
+        if (bulletinDate > endDate) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }, [bulletins, filters])
 
   const loadBulletins = async (forceRefresh = false) => {
     // 초기 로드 시에만 서버에서 강제 로드, 이후에는 캐시 활용
@@ -74,6 +116,30 @@ export default function Bulletins() {
     }
   }
 
+  // 표시할 항목들 계산
+  const displayedBulletins = useMemo(() => {
+    if (displayMode === 'infinite') {
+      return filteredBulletins.slice(0, displayedCount)
+    } else {
+      const start = (currentPage - 1) * ITEMS_PER_PAGE
+      const end = start + ITEMS_PER_PAGE
+      return filteredBulletins.slice(start, end)
+    }
+  }, [filteredBulletins, displayMode, displayedCount, currentPage])
+
+  const totalPages = Math.ceil(filteredBulletins.length / ITEMS_PER_PAGE)
+  const hasMore = displayedCount < filteredBulletins.length
+
+  const loadMore = () => {
+    setDisplayedCount(prev => Math.min(prev + ITEMS_PER_PAGE, filteredBulletins.length))
+  }
+
+  // 필터 변경 시 페이지/카운트 리셋
+  useEffect(() => {
+    setCurrentPage(1)
+    setDisplayedCount(ITEMS_PER_PAGE)
+  }, [filters])
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8 md:py-16">
@@ -83,15 +149,62 @@ export default function Bulletins() {
             주보 안내
           </h1>
           <div className="w-24 h-1.5 mx-auto rounded-full mb-4" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
-          <p className="text-gray-600 text-lg">
-            {bulletins.length > 0 ? `총 ${bulletins.length}개의 주보가 있습니다.` : '등록된 주보가 없습니다.'}
+          <p className="text-gray-600 text-lg mb-6">
+            {filteredBulletins.length > 0 ? `총 ${filteredBulletins.length}개의 주보가 있습니다.` : '등록된 주보가 없습니다.'}
+            {filters.year || filters.startDate || filters.endDate ? ` (필터 적용: ${bulletins.length}개 중)` : bulletins.length > 0 ? ` (전체 ${bulletins.length}개)` : ''}
           </p>
+          
+          {/* 필터 바 */}
+          {bulletins.length > 0 && (
+            <FilterBar
+              onFilterChange={setFilters}
+              showYearFilter={true}
+              showDateRange={true}
+            />
+          )}
+          
+          {/* 표시 모드 선택 */}
+          {bulletins.length > 0 && (
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <button
+                onClick={() => {
+                  setDisplayMode('infinite')
+                  setDisplayedCount(ITEMS_PER_PAGE)
+                }}
+                className={`px-4 py-2 rounded-lg border transition-colors ${
+                  displayMode === 'infinite'
+                    ? 'bg-catholic-logo text-white border-catholic-logo'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                자동 로드
+              </button>
+              <button
+                onClick={() => {
+                  setDisplayMode('pagination')
+                  setCurrentPage(1)
+                }}
+                className={`px-4 py-2 rounded-lg border transition-colors ${
+                  displayMode === 'pagination'
+                    ? 'bg-catholic-logo text-white border-catholic-logo'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                페이지 번호
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Bulletins Grid */}
-        {bulletins.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {bulletins.map((bulletin) => {
+        {displayedBulletins.length > 0 ? (
+          <InfiniteScroll
+            hasMore={displayMode === 'infinite' && hasMore}
+            loadMore={loadMore}
+            loading={false}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {displayedBulletins.map((bulletin) => {
               // 썸네일 URL 우선, 없거나 빈 문자열이면 fileUrl이 이미지인 경우 사용
               const isImageFile = bulletin.fileUrl && (
                 bulletin.fileUrl.startsWith('data:image/') || 
@@ -224,7 +337,8 @@ export default function Bulletins() {
                 </div>
               )
             })}
-          </div>
+            </div>
+          </InfiniteScroll>
         ) : (
           <div className="text-center py-16">
             <svg className="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,6 +346,17 @@ export default function Bulletins() {
             </svg>
             <p className="text-gray-500 text-lg">등록된 주보가 없습니다.</p>
           </div>
+        )}
+        
+        {/* 페이지네이션 */}
+        {displayMode === 'pagination' && filteredBulletins.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            itemsPerPage={ITEMS_PER_PAGE}
+            totalItems={filteredBulletins.length}
+          />
         )}
       </div>
       {/* PDF Viewer Modal - News 페이지와 동일한 위치로 이동 */}
