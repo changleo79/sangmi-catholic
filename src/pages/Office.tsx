@@ -120,7 +120,12 @@ export default function Office() {
                     </div>
                     <h3 className="text-lg font-bold">{catechismInfo.title}</h3>
                   </div>
-                  <p className="text-blue-100 text-sm">{catechismInfo.contact || '등록 문의는 사무실로 연락 바랍니다.'}</p>
+                  {catechismInfo.description && (
+                    <p className="text-blue-100 text-sm mb-3 leading-relaxed whitespace-pre-line">{catechismInfo.description}</p>
+                  )}
+                  {catechismInfo.contact && (
+                    <p className="text-blue-100 text-sm">{catechismInfo.contact}</p>
+                  )}
                 </section>
               )}
               
