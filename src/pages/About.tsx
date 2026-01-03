@@ -67,27 +67,67 @@ export default function About() {
                 </p>
               </div>
               
+              {/* 성경구절 섹션 */}
               <div className="mt-8 pt-6 border-t border-gray-200">
-                <p className="text-center text-lg italic text-gray-600">
-                  "하느님은 사랑이십니다. 사랑 안에 머무는 이는 하느님 안에 머무르고, 하느님도 그 안에 머무르십니다."
-                </p>
-                <p className="text-center text-sm text-gray-500 mt-2">
-                  1요한 4,16
-                </p>
+                <div className="bg-gradient-to-br from-catholic-logo/5 via-catholic-logo/3 to-transparent rounded-2xl p-8 border border-catholic-logo/10">
+                  <div className="text-center">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-catholic-logo/30" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <p className="text-xl md:text-2xl italic text-gray-800 leading-relaxed font-medium mb-3">
+                      "하느님은 사랑이십니다. 사랑 안에 머무는 이는 하느님 안에 머무르고, 하느님도 그 안에 머무르십니다."
+                    </p>
+                    <p className="text-sm text-gray-600 font-semibold">
+                      1요한 4,16
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
-                <p className="text-base">
-                  <span className="font-semibold text-gray-900">설립일 : </span>
-                  <span className="text-gray-700">2019년 6월 18일</span>
-                </p>
-                <p className="text-base">
-                  <span className="font-semibold text-gray-900">기공식 미사 : </span>
-                  <span className="text-gray-700">2023년 11월 18일</span>
-                </p>
-                <p className="text-base">
-                  <span className="font-semibold text-gray-900">입당 미사 : </span>
-                  <span className="text-gray-700">2025년 3월 22일</span>
-                </p>
+              
+              {/* 주요 일정 섹션 */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">주요 일정</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-md">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-500 mb-1">설립일</p>
+                        <p className="text-base font-bold text-gray-900">2019년 6월 18일</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-md">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-500 mb-1">기공식 미사</p>
+                        <p className="text-base font-bold text-gray-900">2023년 11월 18일</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 hover:border-catholic-logo/30 transition-all duration-300 hover:shadow-md">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-500 mb-1">입당 미사</p>
+                        <p className="text-base font-bold text-gray-900">2025년 3월 22일</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -182,13 +222,16 @@ export default function About() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div className="flex justify-center md:justify-start">
-                <div className="w-full max-w-[300px] aspect-square bg-white rounded-xl p-6 flex items-center justify-center border-2 border-gray-200 shadow-sm">
-                  <img
-                    src="/images/상미성당 소개용 로고.jpg"
-                    alt="상미성당 로고"
-                    className="w-full h-full object-contain"
-                    style={{ maxWidth: '100%', maxHeight: '100%' }}
-                  />
+                <div className="relative w-full max-w-[300px] aspect-square group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-catholic-logo/10 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                  <div className="relative w-full h-full bg-white rounded-2xl p-8 flex items-center justify-center border-2 border-gray-200 shadow-lg group-hover:shadow-xl group-hover:border-catholic-logo/30 transition-all duration-300">
+                    <img
+                      src="/images/상미성당 소개용 로고.jpg"
+                      alt="상미성당 로고"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                      style={{ maxWidth: '100%', maxHeight: '100%' }}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
@@ -258,50 +301,57 @@ export default function About() {
               <div className="w-1 h-8 rounded-full" style={{ background: 'linear-gradient(to bottom, #7B1F4B, #5a1538)' }}></div>
               <h2 className="text-3xl font-bold text-gray-900">연락처</h2>
             </div>
-            <div className="space-y-4 text-gray-700">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-start gap-3 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-200">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-900">전화</p>
-                  <a href="tel:031-282-9989" className="text-gray-600 hover:text-catholic-logo transition-colors">031-282-9989</a>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 mb-1">전화</p>
+                  <a href="tel:031-282-9989" className="text-gray-700 hover:text-catholic-logo transition-colors font-medium">031-282-9989</a>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+              <div className="flex items-start gap-3 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-200">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-900">이메일</p>
-                <p className="text-gray-600">sangmi@casuwon.or.kr</p>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 mb-1">이메일</p>
+                  <a href="mailto:sangmi@casuwon.or.kr" className="text-gray-700 hover:text-catholic-logo transition-colors font-medium break-all">sangmi@casuwon.or.kr</a>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+              <div className="flex items-start gap-3 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-200">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-900">팩스</p>
-                  <p className="text-gray-600">031-282-9985</p>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 mb-1">팩스</p>
+                  <p className="text-gray-700 font-medium">031-282-9985</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+              <div className="flex items-start gap-3 p-4 rounded-xl hover:bg-gray-50 transition-colors duration-200">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-900">주소</p>
-                  <p className="text-gray-600">경기도 용인시 기흥구 상미로 29</p>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900 mb-1">주소</p>
+                  <a 
+                    href="https://map.naver.com/v5/search/경기도 용인시 기흥구 상미로 29" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-gray-700 hover:text-catholic-logo transition-colors font-medium inline-block"
+                  >
+                    경기도 용인시 기흥구 상미로 29
+                  </a>
                 </div>
               </div>
             </div>
@@ -354,21 +404,24 @@ export default function About() {
           </div>
 
           {/* Directions Link */}
-          <div className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-10 text-white" style={{ background: 'linear-gradient(to right, #7B1F4B, #5a1538)' }}>
-            <h2 className="text-3xl font-bold mb-4">오시는 길</h2>
-            <p className="text-blue-100 mb-6 text-lg leading-relaxed">
-              상세한 교통 안내와 지도를 확인하실 수 있습니다.
-            </p>
-            <Link
-              to="/directions"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
-              style={{ color: '#7B1F4B' }}
-            >
-              지도 보기
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+          <div className="rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-10 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #7B1F4B 0%, #5a1538 100%)' }}>
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl font-bold mb-4">오시는 길</h2>
+              <p className="text-white/90 mb-6 text-lg leading-relaxed">
+                상세한 교통 안내와 지도를 확인하실 수 있습니다.
+              </p>
+              <Link
+                to="/directions"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white font-semibold rounded-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"
+                style={{ color: '#7B1F4B' }}
+              >
+                지도 보기
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
