@@ -35,9 +35,9 @@ export default function Directions() {
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 text-sm lg:text-base"
-                    style={{ backgroundColor: '#7B1F4B' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#5a1538' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7B1F4B' }}
+                    style={{ backgroundColor: '#03C75A' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#02B350' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#03C75A' }}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -46,10 +46,10 @@ export default function Directions() {
                   </a>
                   <a
                     href="kakaomap://route?ep=37.247936,127.105992&by=CAR"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 text-sm lg:text-base"
-                    style={{ backgroundColor: '#4C9C84' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#397863' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#4C9C84' }}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 text-sm lg:text-base"
+                    style={{ backgroundColor: '#FEE500', color: '#000000' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FDD835' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FEE500' }}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a4 4 0 106 0 4 4 0 00-6 0zm0 0H5a2 2 0 01-2-2v-6a2 2 0 012-2h.586a1 1 0 00.707-.293l1.414-1.414A1 1 0 018.414 5H15a2 2 0 012 2v3" />
