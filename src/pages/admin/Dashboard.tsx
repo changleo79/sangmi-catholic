@@ -1,9 +1,103 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { logout } from '../../utils/auth'
+import { getNotices, getRecruitments, getFAQs, getAlbums, getBulletins } from '../../utils/storage'
+import type { NoticeItem } from '../../data/notices'
+
+interface DashboardStats {
+  notices: {
+    total: number
+    important: number
+    recent: NoticeItem[]
+  }
+  recruitments: {
+    total: number
+    recent: any[]
+  }
+  faqs: {
+    total: number
+  }
+  albums: {
+    total: number
+    recent: any[]
+  }
+  bulletins: {
+    total: number
+    recent: any[]
+  }
+}
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  const [stats, setStats] = useState<DashboardStats>({
+    notices: { total: 0, important: 0, recent: [] },
+    recruitments: { total: 0, recent: [] },
+    faqs: { total: 0 },
+    albums: { total: 0, recent: [] },
+    bulletins: { total: 0, recent: [] }
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadStats()
+  }, [])
+
+  const loadStats = async () => {
+    try {
+      const [notices, recruitments, faqs, albums, bulletins] = await Promise.all([
+        getNotices(false),
+        getRecruitments(false),
+        getFAQs(false),
+        getAlbums(false),
+        getBulletins(false)
+      ])
+
+      const importantNotices = notices.filter((n: NoticeItem) => n.isImportant)
+      const recentNotices = notices
+        .sort((a: NoticeItem, b: NoticeItem) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 3)
+
+      const recentRecruitments = recruitments
+        .sort((a: any, b: any) => new Date(b.date || b.id).getTime() - new Date(a.date || a.id).getTime())
+        .slice(0, 3)
+
+      const recentAlbums = albums
+        .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 3)
+
+      const recentBulletins = bulletins
+        .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 3)
+
+      setStats({
+        notices: {
+          total: notices.length,
+          important: importantNotices.length,
+          recent: recentNotices
+        },
+        recruitments: {
+          total: recruitments.length,
+          recent: recentRecruitments
+        },
+        faqs: {
+          total: faqs.length
+        },
+        albums: {
+          total: albums.length,
+          recent: recentAlbums
+        },
+        bulletins: {
+          total: bulletins.length,
+          recent: recentBulletins
+        }
+      })
+      setLoading(false)
+    } catch (error) {
+      console.error('[Dashboard] 통계 로드 오류:', error)
+      setLoading(false)
+    }
+  }
 
   const handleLogout = () => {
     logout()
@@ -32,42 +126,124 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Statistics Overview */}
+        {!loading && (
+          <div className="mb-12 grid grid-cols-2 md:grid-cols-5 gap-4 max-w-7xl mx-auto">
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+              <div className="text-3xl font-bold text-gray-900 mb-1">{stats.notices.total}</div>
+              <div className="text-sm text-gray-600">공지사항</div>
+              {stats.notices.important > 0 && (
+                <div className="mt-2 text-xs text-catholic-logo font-semibold">
+                  중요 {stats.notices.important}개
+                </div>
+              )}
+            </div>
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+              <div className="text-3xl font-bold text-gray-900 mb-1">{stats.recruitments.total}</div>
+              <div className="text-sm text-gray-600">단체 소식</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+              <div className="text-3xl font-bold text-gray-900 mb-1">{stats.faqs.total}</div>
+              <div className="text-sm text-gray-600">FAQ</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+              <div className="text-3xl font-bold text-gray-900 mb-1">{stats.albums.total}</div>
+              <div className="text-sm text-gray-600">앨범</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+              <div className="text-3xl font-bold text-gray-900 mb-1">{stats.bulletins.total}</div>
+              <div className="text-sm text-gray-600">주보</div>
+            </div>
+          </div>
+        )}
+
         {/* Management Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
           <Link
             to="/admin/notices"
             className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </div>
+              {!loading && (
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900">{stats.notices.total}</div>
+                  <div className="text-xs text-gray-500">개</div>
+                </div>
+              )}
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">공지사항 관리</h2>
-            <p className="text-gray-600">공지사항을 추가, 수정, 삭제할 수 있습니다.</p>
+            <p className="text-gray-600 mb-4">공지사항을 추가, 수정, 삭제할 수 있습니다.</p>
+            {!loading && stats.notices.recent.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="text-xs font-semibold text-gray-500 mb-2">최근 업데이트</div>
+                <div className="space-y-2">
+                  {stats.notices.recent.map((notice, idx) => (
+                    <div key={idx} className="text-sm text-gray-600 truncate">
+                      {notice.isImportant && (
+                        <span className="inline-block w-2 h-2 rounded-full mr-2" style={{ backgroundColor: '#7B1F4B' }}></span>
+                      )}
+                      {notice.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Link>
 
           <Link
             to="/admin/recruitments"
             className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              {!loading && (
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900">{stats.recruitments.total}</div>
+                  <div className="text-xs text-gray-500">개</div>
+                </div>
+              )}
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">단체 소식 관리</h2>
-            <p className="text-gray-600">단체 소식 정보를 관리할 수 있습니다.</p>
+            <p className="text-gray-600 mb-4">단체 소식 정보를 관리할 수 있습니다.</p>
+            {!loading && stats.recruitments.recent.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="text-xs font-semibold text-gray-500 mb-2">최근 업데이트</div>
+                <div className="space-y-2">
+                  {stats.recruitments.recent.map((recruitment, idx) => (
+                    <div key={idx} className="text-sm text-gray-600 truncate">
+                      {recruitment.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Link>
 
           <Link
             to="/admin/faqs"
             className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              {!loading && (
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900">{stats.faqs.total}</div>
+                  <div className="text-xs text-gray-500">개</div>
+                </div>
+              )}
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">FAQ 관리</h2>
             <p className="text-gray-600">자주 묻는 질문을 관리할 수 있습니다.</p>
@@ -77,13 +253,33 @@ export default function AdminDashboard() {
             to="/admin/albums"
             className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              {!loading && (
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900">{stats.albums.total}</div>
+                  <div className="text-xs text-gray-500">개</div>
+                </div>
+              )}
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">본당앨범 관리</h2>
-            <p className="text-gray-600">본당앨범을 추가, 수정, 삭제할 수 있습니다.</p>
+            <p className="text-gray-600 mb-4">본당앨범을 추가, 수정, 삭제할 수 있습니다.</p>
+            {!loading && stats.albums.recent.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="text-xs font-semibold text-gray-500 mb-2">최근 업데이트</div>
+                <div className="space-y-2">
+                  {stats.albums.recent.map((album, idx) => (
+                    <div key={idx} className="text-sm text-gray-600 truncate">
+                      {album.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Link>
 
           <Link
@@ -103,13 +299,33 @@ export default function AdminDashboard() {
             to="/admin/bulletins"
             className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border border-gray-100 hover:border-catholic-logo/30 hover:-translate-y-2"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              {!loading && (
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900">{stats.bulletins.total}</div>
+                  <div className="text-xs text-gray-500">개</div>
+                </div>
+              )}
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-catholic-logo transition-colors">주보 안내 관리</h2>
-            <p className="text-gray-600">주보를 추가, 수정, 삭제할 수 있습니다.</p>
+            <p className="text-gray-600 mb-4">주보를 추가, 수정, 삭제할 수 있습니다.</p>
+            {!loading && stats.bulletins.recent.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="text-xs font-semibold text-gray-500 mb-2">최근 업데이트</div>
+                <div className="space-y-2">
+                  {stats.bulletins.recent.map((bulletin, idx) => (
+                    <div key={idx} className="text-sm text-gray-600 truncate">
+                      {bulletin.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Link>
 
           <Link
