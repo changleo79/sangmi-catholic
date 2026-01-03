@@ -131,37 +131,45 @@ export default function About() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <div className="flex justify-center md:justify-start">
-                <div className="w-full max-w-[350px] aspect-[3/4] bg-white rounded-xl overflow-hidden border-2 border-gray-200 shadow-md">
-                  <img
-                    src={`/images/saint-francis.jpg?t=${Date.now()}`}
-                    alt="아시시의 성 프란치스코와 새들"
-                    className="w-full h-full object-cover"
-                    style={{ objectPosition: 'center' }}
-                    loading="eager"
-                    onError={(e) => {
-                      console.error('[About] 이미지 로드 실패:', e.currentTarget.src)
-                      // 이미지 로드 실패 시 대체 표시
-                      const target = e.currentTarget as HTMLImageElement
-                      target.style.display = 'none'
-                      const parent = target.parentElement
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                            <div class="text-center p-6">
-                              <svg class="w-24 h-24 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              <p class="text-sm text-gray-500 font-medium">성 프란치스코</p>
-                              <p class="text-xs text-gray-400 mt-1">이미지를 불러올 수 없습니다</p>
+                <div className="w-full max-w-[400px] bg-white rounded-xl overflow-hidden border-2 border-gray-200 shadow-md p-4">
+                  <div className="relative w-full" style={{ aspectRatio: 'auto', minHeight: '400px' }}>
+                    <img
+                      src={`/images/saint-francis.jpg?t=${Date.now()}`}
+                      alt="아시시의 성 프란치스코와 새들"
+                      className="w-full h-auto object-contain"
+                      style={{ 
+                        display: 'block',
+                        maxWidth: '100%',
+                        height: 'auto'
+                      }}
+                      loading="eager"
+                      onError={(e) => {
+                        console.error('[About] 이미지 로드 실패:', e.currentTarget.src)
+                        // 이미지 로드 실패 시 대체 표시
+                        const target = e.currentTarget as HTMLImageElement
+                        target.style.display = 'none'
+                        const parent = target.parentElement
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 min-h-[400px]">
+                              <div class="text-center p-6">
+                                <svg class="w-24 h-24 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <p class="text-sm text-gray-500 font-medium">성 프란치스코</p>
+                                <p class="text-xs text-gray-400 mt-1">이미지를 불러올 수 없습니다</p>
+                              </div>
                             </div>
-                          </div>
-                        `
-                      }
-                    }}
-                    onLoad={() => {
-                      console.log('[About] 성 프란치스코 이미지 로드 성공')
-                    }}
-                  />
+                          `
+                        }
+                      }}
+                      onLoad={(e) => {
+                        console.log('[About] 성 프란치스코 이미지 로드 성공')
+                        const target = e.currentTarget as HTMLImageElement
+                        target.style.backgroundColor = 'transparent'
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="space-y-4 text-gray-700 leading-relaxed text-lg">
