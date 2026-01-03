@@ -134,6 +134,7 @@ export default function BulletinsManage() {
     title: '',
     date: new Date().toISOString().split('T')[0],
     fileUrl: '',
+    fileUrl2: '',
     thumbnailUrl: '',
     description: ''
   })
@@ -174,7 +175,7 @@ export default function BulletinsManage() {
     
     // 파일 URL이 필수인지 확인
     if (!formData.fileUrl) {
-      alert('주보 파일(PDF 또는 JPG)을 업로드하거나 URL을 입력해주세요.')
+      alert('주보 이미지 파일을 최소 1개 이상 업로드하거나 URL을 입력해주세요.')
       return
     }
     
@@ -265,6 +266,7 @@ export default function BulletinsManage() {
       title: bulletin.title,
       date: bulletin.date,
       fileUrl: bulletin.fileUrl,
+      fileUrl2: bulletin.fileUrl2 || '',
       thumbnailUrl: thumbnailUrl,
       description: bulletin.description || ''
     })
@@ -304,6 +306,7 @@ export default function BulletinsManage() {
       title: '',
       date: new Date().toISOString().split('T')[0],
       fileUrl: '',
+      fileUrl2: '',
       thumbnailUrl: '',
       description: ''
     })
@@ -313,81 +316,105 @@ export default function BulletinsManage() {
   }
 
   const handlePdfFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
 
-    // PDF 또는 이미지 파일 허용
-    const isPdf = file.type === 'application/pdf'
-    const isImage = file.type.startsWith('image/')
-    
-    if (!isPdf && !isImage) {
-      alert('PDF 또는 이미지 파일(JPG, PNG 등)만 업로드 가능합니다.')
+    // 2개만 허용
+    if (files.length > 2) {
+      alert('이미지 파일은 최대 2개까지 업로드 가능합니다.')
+      e.target.value = ''
+      return
+    }
+
+    // 이미지 파일만 허용
+    const imageFiles = files.filter(file => file.type.startsWith('image/'))
+    if (imageFiles.length !== files.length) {
+      alert('이미지 파일(JPG, PNG 등)만 업로드 가능합니다.')
+      e.target.value = ''
       return
     }
 
     try {
-      // 이미지 파일인 경우 압축 (Vercel 4.5MB 제한 대응)
-      let fileToUpload = file
-      if (isImage) {
+      // 첫 번째 파일 업로드
+      const file1 = imageFiles[0]
+      let fileToUpload1 = file1
+      if (file1.type.startsWith('image/')) {
         try {
-          console.log(`[주보 압축 시작] ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`)
-          fileToUpload = await compressImage(file)
+          console.log(`[주보 압축 시작] ${file1.name} (${(file1.size / 1024 / 1024).toFixed(2)}MB)`)
+          fileToUpload1 = await compressImage(file1)
         } catch (compressError) {
-          console.warn(`[주보 압축 실패] ${file.name}, 원본 파일로 업로드 시도:`, compressError)
-          // 압축 실패 시 원본 파일로 업로드 시도
+          console.warn(`[주보 압축 실패] ${file1.name}, 원본 파일로 업로드 시도:`, compressError)
         }
       }
 
-      // 파일을 서버에 업로드 (Base64 대신 서버에 저장)
-      const uploadFormData = new FormData()
-      uploadFormData.append('files', fileToUpload)
-      uploadFormData.append('albumId', 'bulletins') // 주보는 bulletins 폴더에 저장
+      const uploadFormData1 = new FormData()
+      uploadFormData1.append('files', fileToUpload1)
+      uploadFormData1.append('albumId', 'bulletins')
 
-      const uploadSizeMB = fileToUpload.size / 1024 / 1024
-      console.log(`[주보 업로드 중] ${file.name} (${uploadSizeMB.toFixed(2)}MB)`)
-
-      // 여전히 크면 경고
-      if (uploadSizeMB > 4) {
-        console.warn(`[경고] 주보 파일이 여전히 큽니다: ${uploadSizeMB.toFixed(2)}MB. Vercel 제한(4.5MB)에 가까울 수 있습니다.`)
-      }
-
-      const response = await fetch('/api/upload', {
+      const response1 = await fetch('/api/upload', {
         method: 'POST',
-        body: uploadFormData
+        body: uploadFormData1
       })
 
-      if (!response.ok) {
-        let errorMessage = '파일 업로드 실패'
-        
-        // 413 오류인 경우 특별 처리
-        if (response.status === 413) {
-          errorMessage = `파일 크기가 너무 큽니다 (${uploadSizeMB.toFixed(2)}MB).\n\nVercel의 요청 본문 크기 제한(약 4.5MB)을 초과했습니다.\n\n해결 방법:\n1. 이미지 파일을 더 작게 압축하거나\n2. 이미지 편집 프로그램으로 크기를 줄인 후 다시 시도해 주세요.\n\n원본 파일 크기: ${(file.size / 1024 / 1024).toFixed(2)}MB\n압축 후 크기: ${uploadSizeMB.toFixed(2)}MB`
-        }
-        
-        const errorText = await response.text()
-        console.error('[BulletinsManage] 파일 업로드 실패:', response.status, errorText)
-        throw new Error(errorMessage)
+      if (!response1.ok) {
+        throw new Error('첫 번째 파일 업로드 실패')
       }
 
-      const result = await response.json()
-      if (result.uploads && result.uploads.length > 0) {
-        const uploadedFile = result.uploads[0]
-        const fileUrl = uploadedFile.url
-        // 이미지 파일인 경우 원본 URL을 썸네일로 사용 (별도 썸네일 생성 불필요)
-        const thumbnailUrl = isImage ? fileUrl : (uploadedFile.thumbnailUrl || undefined)
-
-        // 이미지 파일인 경우 자동으로 원본을 썸네일로 설정
-        if (isImage) {
-          setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl: fileUrl }))
-        } else {
-          setFormData(prev => ({ ...prev, fileUrl, thumbnailUrl: thumbnailUrl || prev.thumbnailUrl }))
-        }
-      } else {
-        throw new Error('업로드 응답에 파일이 없습니다.')
+      const result1 = await response1.json()
+      const uploadedFile1 = result1.uploads?.[0]
+      if (!uploadedFile1) {
+        throw new Error('첫 번째 파일 업로드 응답 오류')
       }
+
+      const fileUrl1 = uploadedFile1.url
+      const thumbnailUrl = fileUrl1 // 첫 번째 이미지를 썸네일로 사용
+
+      // 두 번째 파일이 있으면 업로드
+      let fileUrl2 = ''
+      if (imageFiles.length === 2) {
+        const file2 = imageFiles[1]
+        let fileToUpload2 = file2
+        if (file2.type.startsWith('image/')) {
+          try {
+            console.log(`[주보 압축 시작] ${file2.name} (${(file2.size / 1024 / 1024).toFixed(2)}MB)`)
+            fileToUpload2 = await compressImage(file2)
+          } catch (compressError) {
+            console.warn(`[주보 압축 실패] ${file2.name}, 원본 파일로 업로드 시도:`, compressError)
+          }
+        }
+
+        const uploadFormData2 = new FormData()
+        uploadFormData2.append('files', fileToUpload2)
+        uploadFormData2.append('albumId', 'bulletins')
+
+        const response2 = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData2
+        })
+
+        if (!response2.ok) {
+          throw new Error('두 번째 파일 업로드 실패')
+        }
+
+        const result2 = await response2.json()
+        const uploadedFile2 = result2.uploads?.[0]
+        if (uploadedFile2) {
+          fileUrl2 = uploadedFile2.url
+        }
+      }
+
+      setFormData(prev => ({ 
+        ...prev, 
+        fileUrl: fileUrl1, 
+        fileUrl2: fileUrl2 || prev.fileUrl2,
+        thumbnailUrl: thumbnailUrl 
+      }))
+
+      e.target.value = ''
     } catch (error) {
       console.error('[BulletinsManage] 파일 업로드 실패:', error)
       alert('파일 업로드 중 오류가 발생했습니다. 다시 시도해 주세요.')
+      e.target.value = ''
     }
   }
 
@@ -440,7 +467,8 @@ export default function BulletinsManage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">주보 파일 (PDF 또는 JPG) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">주보 이미지 파일 (JPG) *</label>
+                <p className="text-xs text-gray-500 mb-3">주보는 이미지 파일 2개를 업로드해주세요.</p>
                 
                 {/* 입력 방식 선택 */}
                 <div className="flex gap-4 mb-3">
@@ -472,65 +500,82 @@ export default function BulletinsManage() {
                   <div>
                     <input
                       type="file"
-                      accept="application/pdf,image/jpeg,image/jpg,image/png"
+                      accept="image/jpeg,image/jpg,image/png"
+                      multiple
                       onChange={handlePdfFileUpload}
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
                       required={!formData.fileUrl}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      💡 PDF 또는 이미지 파일(JPG, PNG)을 선택하면 Base64로 변환되어 저장됩니다. (브라우저에 저장됨)
+                      💡 이미지 파일(JPG, PNG)을 최대 2개까지 선택할 수 있습니다. 선택한 파일은 서버에 업로드됩니다.
                     </p>
-                    {formData.fileUrl && formData.fileUrl.startsWith('data:') && (
-                      <div className="mt-2 p-2 bg-green-50 rounded-lg border border-green-200">
-                        <p className="text-xs text-green-700">
-                          ✓ {formData.fileUrl.startsWith('data:application/pdf') ? 'PDF' : '이미지'} 파일이 업로드되었습니다.
-                        </p>
-                        {formData.fileUrl.startsWith('data:image/') && (
-                          <div className="mt-2 w-32 h-40 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                            <img src={formData.fileUrl} alt="파일 미리보기" className="w-full h-full object-cover" />
+                    {(formData.fileUrl || formData.fileUrl2) && (
+                      <div className="mt-4 grid grid-cols-2 gap-4">
+                        {formData.fileUrl && (
+                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                            <p className="text-xs text-green-700 mb-2">✓ 첫 번째 이미지 업로드 완료</p>
+                            {formData.fileUrl.startsWith('data:image/') || formData.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
+                              <div className="w-full aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                <img src={formData.fileUrl} alt="첫 번째 이미지 미리보기" className="w-full h-full object-cover" />
+                              </div>
+                            ) : null}
+                          </div>
+                        )}
+                        {formData.fileUrl2 && (
+                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                            <p className="text-xs text-green-700 mb-2">✓ 두 번째 이미지 업로드 완료</p>
+                            {formData.fileUrl2.startsWith('data:image/') || formData.fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) ? (
+                              <div className="w-full aspect-[3/4] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                <img src={formData.fileUrl2} alt="두 번째 이미지 미리보기" className="w-full h-full object-cover" />
+                              </div>
+                            ) : null}
                           </div>
                         )}
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div>
-                    <input
-                      type="url"
-                      value={formData.fileUrl && formData.fileUrl.startsWith('data:') ? '' : (formData.fileUrl || '')}
-                      onChange={(e) => {
-                        const url = e.target.value
-                        // 이미지 파일인 경우 자동으로 썸네일로 설정
-                        const isImageUrl = url && (
-                          url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) || 
-                          url.startsWith('data:image/')
-                        )
-                        setFormData({ 
-                          ...formData, 
-                          fileUrl: url,
-                          // 이미지 파일이면 원본 URL을 썸네일로 사용, 아니면 빈 문자열
-                          thumbnailUrl: isImageUrl ? url : ''
-                        })
-                        console.log('[BulletinsManage] URL 입력 - 썸네일 자동 설정:', {
-                          url: url.substring(0, 50),
-                          isImageUrl,
-                          thumbnailUrl: isImageUrl ? url.substring(0, 50) : ''
-                        })
-                      }}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
-                      placeholder="예: /files/bulletin-2025-11.pdf 또는 https://..."
-                      required={!formData.fileUrl || !formData.fileUrl.startsWith('data:')}
-                    />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">첫 번째 이미지 URL</label>
+                      <input
+                        type="url"
+                        value={formData.fileUrl && formData.fileUrl.startsWith('data:') ? '' : (formData.fileUrl || '')}
+                        onChange={(e) => {
+                          const url = e.target.value
+                          const isImageUrl = url && (
+                            url.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) || 
+                            url.startsWith('data:image/')
+                          )
+                          setFormData({ 
+                            ...formData, 
+                            fileUrl: url,
+                            thumbnailUrl: isImageUrl ? url : (formData.thumbnailUrl || '')
+                          })
+                        }}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                        placeholder="예: https://..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">두 번째 이미지 URL (선택)</label>
+                      <input
+                        type="url"
+                        value={formData.fileUrl2 && formData.fileUrl2.startsWith('data:') ? '' : (formData.fileUrl2 || '')}
+                        onChange={(e) => {
+                          const url = e.target.value
+                          setFormData({ 
+                            ...formData, 
+                            fileUrl2: url
+                          })
+                        }}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-catholic-logo focus:border-transparent"
+                        placeholder="예: https://..."
+                      />
+                    </div>
                     <p className="mt-1 text-xs text-gray-500">
-                      💡 PDF 또는 이미지 파일 URL을 입력하세요. 이미지 파일인 경우 자동으로 썸네일로 설정됩니다.
+                      💡 이미지 파일 URL을 입력하세요. 첫 번째 이미지가 자동으로 썸네일로 설정됩니다.
                     </p>
-                    {formData.fileUrl && formData.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) && (
-                      <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-xs text-blue-700">
-                          ✓ 이미지 파일이 감지되었습니다. 썸네일이 자동으로 설정됩니다.
-                        </p>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -580,66 +625,108 @@ export default function BulletinsManage() {
                     className="p-4 rounded-lg border border-gray-200 hover:border-catholic-logo/30 transition-all"
                   >
                     <div className="flex items-start gap-4">
-                      {(() => {
-                        // 썸네일 URL이 없으면 이미지 파일인지 확인하여 자동 설정
-                        const isImageFile = bulletin.fileUrl && (
-                          bulletin.fileUrl.startsWith('data:image/') ||
-                          bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
-                        )
-                        const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile ? bulletin.fileUrl : null)
-                        
-                        return thumbnailUrl ? (
-                          <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
-                            <img 
-                              src={thumbnailUrl} 
-                              alt={bulletin.title} 
-                              className="w-full h-full object-cover"
-                              loading={bulletins.indexOf(bulletin) < 10 ? "eager" : "lazy"}
-                              decoding="async"
-                              fetchPriority={bulletins.indexOf(bulletin) < 10 ? "high" : "auto"}
-                              referrerPolicy="no-referrer"
-                              onError={(e) => {
-                                console.error('[BulletinsManage] 썸네일 로드 실패:', thumbnailUrl)
-                                const target = e.currentTarget as HTMLImageElement
-                                target.style.display = 'none'
-                                const parent = target.parentElement
-                                if (parent) {
-                                  parent.innerHTML = `
-                                    <div class="w-20 h-28 rounded-lg bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center">
-                                      <svg class="w-8 h-8 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                      </svg>
-                                    </div>
-                                  `
-                                }
-                              }}
-                              onLoad={(e) => {
-                                (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-20 h-28 rounded-lg bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-8 h-8 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </div>
-                        )
-                      })()}
+                      <div className="flex gap-2 flex-shrink-0">
+                        {(() => {
+                          // 첫 번째 이미지
+                          const isImageFile1 = bulletin.fileUrl && (
+                            bulletin.fileUrl.startsWith('data:image/') ||
+                            bulletin.fileUrl.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
+                          )
+                          const thumbnailUrl = bulletin.thumbnailUrl || (isImageFile1 ? bulletin.fileUrl : null)
+                          
+                          return (
+                            <>
+                              {thumbnailUrl ? (
+                                <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-200">
+                                  <img 
+                                    src={thumbnailUrl} 
+                                    alt={`${bulletin.title} - 이미지 1`} 
+                                    className="w-full h-full object-cover"
+                                    loading={bulletins.indexOf(bulletin) < 10 ? "eager" : "lazy"}
+                                    decoding="async"
+                                    fetchPriority={bulletins.indexOf(bulletin) < 10 ? "high" : "auto"}
+                                    referrerPolicy="no-referrer"
+                                    onError={(e) => {
+                                      console.error('[BulletinsManage] 썸네일 로드 실패:', thumbnailUrl)
+                                      const target = e.currentTarget as HTMLImageElement
+                                      target.style.display = 'none'
+                                      const parent = target.parentElement
+                                      if (parent) {
+                                        parent.innerHTML = `
+                                          <div class="w-20 h-28 rounded-lg bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                          </div>
+                                        `
+                                      }
+                                    }}
+                                    onLoad={(e) => {
+                                      (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
+                                    }}
+                                  />
+                                </div>
+                              ) : (
+                                <div className="w-20 h-28 rounded-lg bg-gradient-to-br from-catholic-logo/20 to-catholic-logo/5 flex items-center justify-center">
+                                  <svg className="w-8 h-8 text-catholic-logo opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                </div>
+                              )}
+                              {/* 두 번째 이미지 */}
+                              {bulletin.fileUrl2 && (() => {
+                                const isImageFile2 = bulletin.fileUrl2.startsWith('data:image/') ||
+                                  bulletin.fileUrl2.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i)
+                                return isImageFile2 ? (
+                                  <div className="w-20 h-28 rounded-lg overflow-hidden bg-gray-200">
+                                    <img 
+                                      src={bulletin.fileUrl2} 
+                                      alt={`${bulletin.title} - 이미지 2`} 
+                                      className="w-full h-full object-cover"
+                                      loading="lazy"
+                                      decoding="async"
+                                      referrerPolicy="no-referrer"
+                                      onError={(e) => {
+                                        const target = e.currentTarget as HTMLImageElement
+                                        target.style.display = 'none'
+                                      }}
+                                      onLoad={(e) => {
+                                        (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
+                                      }}
+                                    />
+                                  </div>
+                                ) : null
+                              })()}
+                            </>
+                          )
+                        })()}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-gray-900 mb-1">{bulletin.title}</h3>
                         <p className="text-sm text-gray-600 mb-1">{bulletin.date}</p>
                         {bulletin.description && (
                           <p className="text-xs text-gray-500 mb-2">{bulletin.description}</p>
                         )}
-                        <a
-                          href={bulletin.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-500 hover:underline"
-                        >
-                          {bulletin.fileUrl}
-                        </a>
+                        <div className="space-y-1">
+                          <a
+                            href={bulletin.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-500 hover:underline block"
+                          >
+                            이미지 1: {bulletin.fileUrl.substring(0, 50)}...
+                          </a>
+                          {bulletin.fileUrl2 && (
+                            <a
+                              href={bulletin.fileUrl2}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-500 hover:underline block"
+                            >
+                              이미지 2: {bulletin.fileUrl2.substring(0, 50)}...
+                            </a>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <button

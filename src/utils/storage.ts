@@ -50,7 +50,8 @@ export type BulletinItem = {
   id: string
   title: string // 예: "2025년 11월 주보"
   date: string // YYYY-MM-DD
-  fileUrl: string // PDF 파일 URL
+  fileUrl: string // 첫 번째 이미지 파일 URL (기존 호환성 유지)
+  fileUrl2?: string // 두 번째 이미지 파일 URL (선택)
   thumbnailUrl?: string // 썸네일 이미지 URL (선택)
   description?: string // 설명 (선택)
 }
