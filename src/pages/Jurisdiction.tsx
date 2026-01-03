@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 interface District {
   alias: string
@@ -8,6 +8,12 @@ interface District {
 interface Region {
   name: string
   districts: District[]
+}
+
+interface SearchResult {
+  region: Region
+  district: District
+  matchType: 'alias' | 'area'
 }
 
 const jurisdictionData: Region[] = [
@@ -80,10 +86,43 @@ const jurisdictionData: Region[] = [
 
 export default function Jurisdiction() {
   const [expandedRegion, setExpandedRegion] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState<string>('')
 
   const toggleRegion = (regionName: string) => {
     setExpandedRegion(expandedRegion === regionName ? null : regionName)
   }
+
+  // 검색 기능
+  const searchResults = useMemo<SearchResult[]>(() => {
+    if (!searchQuery.trim()) return []
+    
+    const query = searchQuery.trim().toLowerCase()
+    const results: SearchResult[] = []
+    
+    jurisdictionData.forEach(region => {
+      region.districts.forEach(district => {
+        const aliasMatch = district.alias.toLowerCase().includes(query)
+        const areaMatch = district.area.toLowerCase().includes(query)
+        
+        if (aliasMatch || areaMatch) {
+          results.push({
+            region,
+            district,
+            matchType: aliasMatch ? 'alias' : 'area'
+          })
+        }
+      })
+    })
+    
+    return results
+  }, [searchQuery])
+
+  // 검색 결과가 있으면 해당 지역 자동 펼치기
+  useEffect(() => {
+    if (searchResults.length > 0 && searchResults[0].region.name !== expandedRegion) {
+      setExpandedRegion(searchResults[0].region.name)
+    }
+  }, [searchResults])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -94,7 +133,100 @@ export default function Jurisdiction() {
             관할구역 안내
           </h1>
           <div className="w-24 h-1.5 mx-auto rounded-full mb-4" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
-          <p className="text-gray-600 text-lg">2025. 07.06 현재</p>
+          <p className="text-gray-600 text-lg mb-8">2025. 07.06 현재</p>
+          
+          {/* Search Box */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="아파트명, 동 이름, 주소 등으로 검색하세요 (예: 롯데캐슬, 지웰, 101동)"
+                className="w-full px-6 py-4 pl-14 rounded-2xl border-2 border-gray-200 focus:border-catholic-logo focus:ring-2 focus:ring-catholic-logo/20 text-base transition-all duration-300 shadow-sm"
+              />
+              <svg 
+                className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                >
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            
+            {/* Search Results */}
+            {searchQuery.trim() && (
+              <div className="mt-4">
+                {searchResults.length > 0 ? (
+                  <div className="bg-white rounded-xl shadow-lg border-2 border-catholic-logo/30 p-6">
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(123, 31, 75, 0.1)' }}>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#7B1F4B' }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          검색 결과: {searchResults.length}개 구역 발견
+                        </h3>
+                        <div className="space-y-3">
+                          {searchResults.map((result, index) => (
+                            <div 
+                              key={`${result.region.name}-${result.district.alias}-${index}`}
+                              className="bg-gradient-to-r from-catholic-logo/5 to-transparent rounded-lg p-4 border border-catholic-logo/20"
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <span 
+                                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white font-bold text-sm shadow-md"
+                                  style={{ backgroundColor: '#7B1F4B' }}
+                                >
+                                  {result.region.name}
+                                </span>
+                                <span className="font-bold text-gray-900">
+                                  {result.district.alias}구역
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  ({result.matchType === 'alias' ? '구역명 일치' : '주소 일치'})
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600 ml-10 mt-1">{result.district.area}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <p className="text-base font-semibold text-catholic-logo">
+                            해당 구역은 <span className="text-xl">{searchResults[0]?.region.name}</span>에 속합니다.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-gray-600">
+                        &quot;{searchQuery}&quot;에 대한 검색 결과가 없습니다. 다른 검색어로 시도해보세요.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Regions Grid */}
@@ -132,19 +264,35 @@ export default function Jurisdiction() {
               {expandedRegion === region.name && (
                 <div className="px-6 pb-6 pt-2 border-t border-gray-100">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                    {region.districts.map((district, index) => (
-                      <div
-                        key={`${region.name}-${index}`}
-                        className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-200 hover:border-catholic-logo/30 hover:shadow-md transition-all duration-300"
-                      >
-                        <div className="mb-3">
-                          <h3 className="font-bold text-gray-900 text-lg mb-1">{district.alias}구역</h3>
+                    {region.districts.map((district, index) => {
+                      const isHighlighted = searchQuery.trim() && searchResults.some(
+                        r => r.region.name === region.name && r.district.alias === district.alias
+                      )
+                      return (
+                        <div
+                          key={`${region.name}-${index}`}
+                          className={`bg-gradient-to-br rounded-xl p-5 border transition-all duration-300 ${
+                            isHighlighted
+                              ? 'from-catholic-logo/10 to-white border-2 border-catholic-logo shadow-lg scale-105'
+                              : 'from-gray-50 to-white border-gray-200 hover:border-catholic-logo/30 hover:shadow-md'
+                          }`}
+                        >
+                          <div className="mb-3">
+                            <h3 className={`font-bold text-lg mb-1 ${
+                              isHighlighted ? 'text-catholic-logo' : 'text-gray-900'
+                            }`}>
+                              {district.alias}구역
+                              {isHighlighted && (
+                                <span className="ml-2 text-sm text-catholic-logo">✓ 검색 결과</span>
+                              )}
+                            </h3>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{district.area}</p>
+                          </div>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{district.area}</p>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               )}
