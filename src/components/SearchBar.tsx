@@ -15,6 +15,13 @@ interface SearchResult {
   title: string
   subtitle?: string
   url: string
+  date?: string
+}
+
+interface SearchFilters {
+  categories: ('notice' | 'album' | 'recruitment' | 'faq' | 'bulletin')[]
+  startDate?: string
+  endDate?: string
 }
 
 export default function SearchBar() {
@@ -22,8 +29,26 @@ export default function SearchBar() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [filters, setFilters] = useState<SearchFilters>({
+    categories: ['notice', 'album', 'recruitment', 'faq', 'bulletin']
+  })
   const searchRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+
+  // 검색어 하이라이트 함수
+  const highlightText = (text: string, searchQuery: string): React.ReactNode => {
+    if (!searchQuery.trim()) return text
+    
+    const parts = text.split(new RegExp(`(${searchQuery})`, 'gi'))
+    return parts.map((part, index) => 
+      part.toLowerCase() === searchQuery.toLowerCase() ? (
+        <mark key={index} className="bg-yellow-200 px-1 rounded">{part}</mark>
+      ) : (
+        part
+      )
+    )
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -49,88 +74,132 @@ export default function SearchBar() {
         const queryLower = query.toLowerCase()
 
         // 공지사항 검색
-        const notices = await getNotices()
-        notices.forEach((notice: NoticeItem) => {
-          if (
-            notice.title.toLowerCase().includes(queryLower) ||
-            notice.summary?.toLowerCase().includes(queryLower) ||
-            notice.content?.toLowerCase().includes(queryLower)
-          ) {
-            searchResults.push({
-              type: 'notice',
-              id: notice.date + notice.title,
-              title: notice.title,
-              subtitle: `공지사항 · ${notice.date}`,
-              url: `/news/${encodeURIComponent(notice.date + '-' + notice.title)}`
-            })
-          }
-        })
+        if (filters.categories.includes('notice')) {
+          const notices = await getNotices()
+          notices.forEach((notice: NoticeItem) => {
+            // 날짜 필터 확인
+            if (filters.startDate || filters.endDate) {
+              const noticeDate = new Date(notice.date)
+              if (filters.startDate && noticeDate < new Date(filters.startDate)) return
+              if (filters.endDate) {
+                const endDate = new Date(filters.endDate)
+                endDate.setHours(23, 59, 59, 999)
+                if (noticeDate > endDate) return
+              }
+            }
+            
+            if (
+              notice.title.toLowerCase().includes(queryLower) ||
+              notice.summary?.toLowerCase().includes(queryLower) ||
+              notice.content?.toLowerCase().includes(queryLower)
+            ) {
+              searchResults.push({
+                type: 'notice',
+                id: notice.date + notice.title,
+                title: notice.title,
+                subtitle: `공지사항 · ${notice.date}`,
+                url: `/news/${encodeURIComponent(notice.date + '-' + notice.title)}`,
+                date: notice.date
+              })
+            }
+          })
+        }
 
         // 앨범 검색
-        const albums = await getAlbums()
-        albums.forEach((album) => {
-          if (album.title.toLowerCase().includes(queryLower)) {
-            searchResults.push({
-              type: 'album',
-              id: album.id,
-              title: album.title,
-              subtitle: `앨범 · ${album.date}`,
-              url: `/albums/${album.id}`
-            })
-          }
-        })
+        if (filters.categories.includes('album')) {
+          const albums = await getAlbums()
+          albums.forEach((album) => {
+            if (filters.startDate || filters.endDate) {
+              const albumDate = new Date(album.date)
+              if (filters.startDate && albumDate < new Date(filters.startDate)) return
+              if (filters.endDate) {
+                const endDate = new Date(filters.endDate)
+                endDate.setHours(23, 59, 59, 999)
+                if (albumDate > endDate) return
+              }
+            }
+            
+            if (album.title.toLowerCase().includes(queryLower)) {
+              searchResults.push({
+                type: 'album',
+                id: album.id,
+                title: album.title,
+                subtitle: `앨범 · ${album.date}`,
+                url: `/albums/${album.id}`,
+                date: album.date
+              })
+            }
+          })
+        }
 
         // 단체 소식 검색
-        const recruitments = await getRecruitments()
-        recruitments.forEach((recruitment) => {
-          if (
-            recruitment.title.toLowerCase().includes(queryLower) ||
-            recruitment.summary?.toLowerCase().includes(queryLower) ||
-            recruitment.content?.toLowerCase().includes(queryLower)
-          ) {
-            searchResults.push({
-              type: 'recruitment',
-              id: recruitment.id,
-              title: recruitment.title,
-              subtitle: `단체 소식`,
-              url: `/recruitments/${recruitment.id}`
-            })
-          }
-        })
+        if (filters.categories.includes('recruitment')) {
+          const recruitments = await getRecruitments()
+          recruitments.forEach((recruitment) => {
+            if (
+              recruitment.title.toLowerCase().includes(queryLower) ||
+              recruitment.summary?.toLowerCase().includes(queryLower) ||
+              recruitment.content?.toLowerCase().includes(queryLower)
+            ) {
+              searchResults.push({
+                type: 'recruitment',
+                id: recruitment.id,
+                title: recruitment.title,
+                subtitle: `단체 소식`,
+                url: `/recruitments/${recruitment.id}`
+              })
+            }
+          })
+        }
 
         // FAQ 검색
-        const faqs = await getFAQs()
-        faqs.forEach((faq) => {
-          if (
-            faq.question.toLowerCase().includes(queryLower) ||
-            faq.answer.toLowerCase().includes(queryLower)
-          ) {
-            searchResults.push({
-              type: 'faq',
-              id: faq.id,
-              title: faq.question,
-              subtitle: `자주 묻는 질문`,
-              url: '/office'
-            })
-          }
-        })
+        if (filters.categories.includes('faq')) {
+          const faqs = await getFAQs()
+          faqs.forEach((faq) => {
+            if (
+              faq.question.toLowerCase().includes(queryLower) ||
+              faq.answer.toLowerCase().includes(queryLower)
+            ) {
+              searchResults.push({
+                type: 'faq',
+                id: faq.id,
+                title: faq.question,
+                subtitle: `자주 묻는 질문`,
+                url: '/office'
+              })
+            }
+          })
+        }
 
         // 주보 안내 검색
-        const bulletins = await getBulletins()
-        bulletins.forEach((bulletin) => {
-          if (
-            bulletin.title.toLowerCase().includes(queryLower) ||
-            bulletin.description?.toLowerCase().includes(queryLower)
-          ) {
-            searchResults.push({
-              type: 'bulletin',
-              id: bulletin.id,
-              title: bulletin.title,
-              subtitle: `주보 안내 · ${bulletin.date}`,
-              url: '/news'
-            })
-          }
-        })
+        if (filters.categories.includes('bulletin')) {
+          const bulletins = await getBulletins()
+          bulletins.forEach((bulletin) => {
+            if (filters.startDate || filters.endDate) {
+              const bulletinDate = new Date(bulletin.date)
+              if (filters.startDate && bulletinDate < new Date(filters.startDate)) return
+              if (filters.endDate) {
+                const endDate = new Date(filters.endDate)
+                endDate.setHours(23, 59, 59, 999)
+                if (bulletinDate > endDate) return
+              }
+            }
+            
+            if (
+              bulletin.title.toLowerCase().includes(queryLower) ||
+              bulletin.description?.toLowerCase().includes(queryLower)
+            ) {
+              searchResults.push({
+                type: 'bulletin',
+                id: bulletin.id,
+                title: bulletin.title,
+                subtitle: `주보 안내 · ${bulletin.date}`,
+                url: '/news',
+                date: bulletin.date
+              })
+            }
+          })
+        }
 
         setResults(searchResults.slice(0, 10)) // 최대 10개 결과
         setIsSearching(false)
@@ -139,7 +208,7 @@ export default function SearchBar() {
       }
     }
     performSearch()
-  }, [query])
+  }, [query, filters])
 
   const handleResultClick = (url: string) => {
     navigate(url)
@@ -229,7 +298,9 @@ export default function SearchBar() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{result.title}</p>
+                        <p className="font-medium text-gray-900 truncate">
+                          {highlightText(result.title, query)}
+                        </p>
                         {result.subtitle && (
                           <p className="text-sm text-gray-500">{result.subtitle}</p>
                         )}
@@ -251,7 +322,7 @@ export default function SearchBar() {
       {isOpen && (
         <div className="hidden md:block absolute right-0 top-full mt-2 w-80 lg:w-96 max-w-sm bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
           <div className="p-4 border-b border-gray-200">
-            <div className="relative">
+            <div className="relative mb-3">
               <input
                 type="text"
                 value={query}
@@ -264,6 +335,84 @@ export default function SearchBar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
+            
+            {/* 고급 검색 토글 */}
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full flex items-center justify-between px-2 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <span>고급 검색</span>
+              <svg
+                className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {/* 고급 검색 옵션 */}
+            {showAdvanced && (
+              <div className="mt-3 pt-3 border-t border-gray-200 space-y-3">
+                {/* 카테고리 필터 */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-2">검색 범위</label>
+                  <div className="flex flex-wrap gap-2">
+                    {(['notice', 'album', 'recruitment', 'faq', 'bulletin'] as const).map((category) => (
+                      <label key={category} className="flex items-center gap-1 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={filters.categories.includes(category)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFilters({
+                                ...filters,
+                                categories: [...filters.categories, category]
+                              })
+                            } else {
+                              setFilters({
+                                ...filters,
+                                categories: filters.categories.filter(c => c !== category)
+                              })
+                            }
+                          }}
+                          className="w-3 h-3 rounded border-gray-300 text-catholic-logo focus:ring-catholic-logo"
+                        />
+                        <span className="text-xs text-gray-700">
+                          {category === 'notice' ? '공지사항' :
+                           category === 'album' ? '앨범' :
+                           category === 'recruitment' ? '단체소식' :
+                           category === 'faq' ? 'FAQ' : '주보'}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* 날짜 범위 */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">시작일</label>
+                    <input
+                      type="date"
+                      value={filters.startDate || ''}
+                      onChange={(e) => setFilters({ ...filters, startDate: e.target.value || undefined })}
+                      className="w-full px-2 py-1 text-xs rounded border border-gray-300 focus:ring-1 focus:ring-catholic-logo"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">종료일</label>
+                    <input
+                      type="date"
+                      value={filters.endDate || ''}
+                      onChange={(e) => setFilters({ ...filters, endDate: e.target.value || undefined })}
+                      className="w-full px-2 py-1 text-xs rounded border border-gray-300 focus:ring-1 focus:ring-catholic-logo"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Mobile Results - 메뉴 안에 표시 */}
@@ -316,7 +465,9 @@ export default function SearchBar() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{result.title}</p>
+                        <p className="font-medium text-gray-900 truncate">
+                          {highlightText(result.title, query)}
+                        </p>
                         {result.subtitle && (
                           <p className="text-sm text-gray-500">{result.subtitle}</p>
                         )}
@@ -382,7 +533,9 @@ export default function SearchBar() {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{result.title}</p>
+                        <p className="font-medium text-gray-900 truncate">
+                          {highlightText(result.title, query)}
+                        </p>
                         {result.subtitle && (
                           <p className="text-sm text-gray-500">{result.subtitle}</p>
                         )}
