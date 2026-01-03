@@ -41,12 +41,6 @@ export default function About() {
                     <p className="text-gray-800">
                       → 상미(相美)는 하느님 안에서 서로를 바라보고 비추며 완성되는 공동체의 아름다움을 의미합니다.
                     </p>
-                    <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-catholic-logo mt-4">
-                      <p className="text-gray-700 italic mb-1">
-                        "하느님은 사랑이십니다. 사랑 안에 머무르는 사람은 하느님 안에 머무르고 하느님께서도 그 사람 안에 머무르십니다."
-                      </p>
-                      <p className="text-sm text-gray-600">(1요한 4,16)</p>
-                    </div>
                   </div>
                 </div>
                 
