@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { getFAQs, type FAQItem } from '../utils/storage'
+import { getFAQs, getCatechismInfo, type FAQItem, type CatechismInfo } from '../utils/storage'
 
 export default function Office() {
   const [faqs, setFaqs] = useState<FAQItem[]>([])
+  const [catechismInfo, setCatechismInfo] = useState<CatechismInfo | null>(null)
 
   useEffect(() => {
     // JSON 파일에서 데이터 로드 (initializeData가 이미 호출됨)
@@ -19,6 +20,17 @@ export default function Office() {
           { id: '2', question: '혼인성사 준비는 어떻게 하나요?', answer: '사무실로 연락하셔서 사제와 상담 일정을 잡아주세요.' },
           { id: '3', question: '주보는 어디서 볼 수 있나요?', answer: '공지/소식 페이지에 주보 PDF가 업로드될 예정입니다.' }
         ])
+      }
+
+      const catechism = await getCatechismInfo()
+      if (catechism) {
+        setCatechismInfo(catechism)
+      } else {
+        setCatechismInfo({
+          title: '예비신자 교리학교',
+          description: '천주교 신자가 되시려면 세례를 받아야 합니다. 예비신자 교리학교를 통해 신앙을 배우실 수 있습니다.',
+          contact: '문의 : 본당 사무실 (031-282-9989)'
+        })
       }
     }
     loadData()
@@ -98,17 +110,19 @@ export default function Office() {
 
             {/* Sidebar */}
             <aside className="space-y-6">
-              <section className="rounded-2xl shadow-lg p-6 text-white" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
+              {catechismInfo && (
+                <section className="rounded-2xl shadow-lg p-6 text-white" style={{ background: 'linear-gradient(to bottom right, #7B1F4B, #5a1538)' }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold">{catechismInfo.title}</h3>
                   </div>
-                  <h3 className="text-lg font-bold">예비신자 교리학교</h3>
-                </div>
-                <p className="text-blue-100 text-sm">등록 문의는 사무실로 연락 바랍니다.</p>
-              </section>
+                  <p className="text-blue-100 text-sm">{catechismInfo.contact || '등록 문의는 사무실로 연락 바랍니다.'}</p>
+                </section>
+              )}
               
               <section className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <div className="flex items-center gap-3 mb-3">
