@@ -74,8 +74,8 @@ export default function About() {
                     <svg className="w-12 h-12 mx-auto mb-4 text-catholic-logo/30" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                     </svg>
-                    <p className="text-xl md:text-2xl italic text-gray-800 leading-relaxed font-medium mb-3">
-                      "하느님은 사랑이십니다. 사랑 안에 머무는 이는 하느님 안에 머무르고, 하느님도 그 안에 머무르십니다."
+                    <p className="text-xl md:text-2xl italic text-gray-800 leading-relaxed font-medium mb-3 whitespace-pre-line">
+                      "하느님은 사랑이십니다. 사랑 안에 머무는 이는 하느님 안에 머무르고,{'\n'}하느님도 그 안에 머무르십니다."
                     </p>
                     <p className="text-sm text-gray-600 font-semibold">
                       1요한 4,16
