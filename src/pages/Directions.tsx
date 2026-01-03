@@ -102,11 +102,11 @@ export default function Directions() {
                                 {course.label && (
                                   <p className="font-semibold text-gray-800 mb-1.5 text-xs lg:text-sm">{course.label}</p>
                                 )}
-                                <ul className="space-y-1 ml-1">
+                                <ul className="space-y-1">
                                   {course.stops.map((stop, stopIdx) => (
                                     <li key={`${route.title}-${courseIdx}-${stopIdx}`} className="flex items-start gap-2 md:gap-3">
-                                      <span className="text-catholic-logo font-semibold whitespace-nowrap text-xs lg:text-sm flex-shrink-0 w-[52px] md:w-auto md:min-w-[45px] text-right">{stop.time}</span>
-                                      <span className="flex-1 text-xs lg:text-sm leading-relaxed break-words">{stop.location}</span>
+                                      <span className="text-catholic-logo font-semibold whitespace-nowrap text-xs lg:text-sm flex-shrink-0 w-[55px] md:w-auto md:min-w-[45px]">{stop.time}</span>
+                                      <span className="flex-1 text-xs lg:text-sm leading-relaxed">{stop.location}</span>
                                     </li>
                                   ))}
                                 </ul>
