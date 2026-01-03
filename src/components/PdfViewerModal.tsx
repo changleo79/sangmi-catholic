@@ -298,22 +298,25 @@ export default function PdfViewerModal({
             )
             
             return isImage ? (
-                <div className={`w-full flex ${hasSecondImage ? 'flex-row gap-2 sm:gap-3' : 'flex-col justify-center items-center'}`}>
+                <div className={`w-full space-y-4 ${hasSecondImage ? '' : ''}`}>
                   {/* 첫 번째 이미지 */}
-                  <div className={`relative rounded-lg border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-1 ${hasSecondImage ? 'flex-1' : 'w-full max-w-2xl'}`}>
+                  <div className="relative w-full rounded-xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-1 sm:p-2" style={{ minHeight: '400px' }}>
                     {imageError ? (
-                      <div className="flex flex-col items-center justify-center min-h-[300px] p-4 text-gray-500">
-                        <svg className="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
+                        <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <p className="text-center mb-2 text-sm">이미지를 불러올 수 없습니다.</p>
+                        <p className="text-center mb-2">이미지를 불러올 수 없습니다.</p>
+                        <p className="text-xs text-gray-400 mb-4 break-all text-center px-4">
+                          URL: {fileUrl.length > 80 ? `${fileUrl.substring(0, 80)}...` : fileUrl}
+                        </p>
                         {retryCount < 2 && (
                           <button
                             onClick={() => {
                               setImageError(false)
                               setRetryCount(prev => prev + 1)
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-xs"
+                            className="px-4 py-2 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-sm"
                           >
                             다시 시도
                           </button>
@@ -329,7 +332,7 @@ export default function PdfViewerModal({
                           maxWidth: '100%', 
                           display: 'block',
                           backgroundColor: '#f3f4f6',
-                          maxHeight: hasSecondImage ? '70vh' : '85vh'
+                          minHeight: '400px'
                         }}
                         loading="eager"
                         decoding="async"
@@ -364,20 +367,23 @@ export default function PdfViewerModal({
                   
                   {/* 두 번째 이미지 */}
                   {hasSecondImage && (
-                    <div className="relative flex-1 rounded-lg border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-1">
+                    <div className="relative w-full rounded-xl border border-gray-100 shadow-inner bg-gray-50 flex items-start justify-center p-1 sm:p-2" style={{ minHeight: '400px' }}>
                       {imageError2 ? (
-                        <div className="flex flex-col items-center justify-center min-h-[300px] p-4 text-gray-500">
-                          <svg className="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-gray-500">
+                          <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <p className="text-center mb-2 text-sm">두 번째 이미지를 불러올 수 없습니다.</p>
+                          <p className="text-center mb-2">두 번째 이미지를 불러올 수 없습니다.</p>
+                          <p className="text-xs text-gray-400 mb-4 break-all text-center px-4">
+                            URL: {fileUrl2 && fileUrl2.length > 80 ? `${fileUrl2.substring(0, 80)}...` : fileUrl2}
+                          </p>
                           {retryCount2 < 2 && (
                             <button
                               onClick={() => {
                                 setImageError2(false)
                                 setRetryCount2(prev => prev + 1)
                               }}
-                              className="px-3 py-1.5 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-xs"
+                              className="px-4 py-2 rounded-lg bg-catholic-logo text-white hover:bg-catholic-logo-dark transition-colors text-sm"
                             >
                               다시 시도
                             </button>
@@ -393,7 +399,7 @@ export default function PdfViewerModal({
                             maxWidth: '100%', 
                             display: 'block',
                             backgroundColor: '#f3f4f6',
-                            maxHeight: '70vh'
+                            minHeight: '400px'
                           }}
                           loading="lazy"
                           decoding="async"
