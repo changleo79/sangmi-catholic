@@ -41,6 +41,12 @@ export default function PdfViewerModal({
   const [retryCount2, setRetryCount2] = useState(0)
   const [imageSrc, setImageSrc] = useState<string>(fileUrl)
   const [imageSrc2, setImageSrc2] = useState<string>(fileUrl2 || '')
+  const touchStartX = useRef<number>(0)
+  const touchEndX = useRef<number>(0)
+  const touchStartY = useRef<number>(0)
+  const touchEndY = useRef<number>(0)
+  const [imageOffset, setImageOffset] = useState(0)
+  const imageContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!isOpen) {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface ImageLightboxProps {
   isOpen: boolean
@@ -31,6 +31,12 @@ export default function ImageLightbox({
   isAutoPlaying = false,
   tags
 }: ImageLightboxProps) {
+  const touchStartX = useRef<number>(0)
+  const touchEndX = useRef<number>(0)
+  const touchStartY = useRef<number>(0)
+  const touchEndY = useRef<number>(0)
+  const [imageOffset, setImageOffset] = useState(0)
+  const imageContainerRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -61,6 +67,53 @@ export default function ImageLightbox({
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [isOpen, hasPrevious, hasNext, onClose, onPrevious, onNext])
+
+  // 스와이프 제스처 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!imageContainerRef.current) return
+    
+    const currentX = e.touches[0].clientX
+    const currentY = e.touches[0].clientY
+    const deltaX = currentX - touchStartX.current
+    const deltaY = currentY - touchStartY.current
+    
+    // 수평 스와이프가 수직 스와이프보다 크면 이미지 이동
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      setImageOffset(deltaX)
+      e.preventDefault() // 스크롤 방지
+    }
+  }
+
+  const handleTouchEnd = () => {
+    const deltaX = touchEndX.current - touchStartX.current
+    const minSwipeDistance = 50 // 최소 스와이프 거리
+    
+    // 이미지 오프셋 초기화
+    setImageOffset(0)
+    
+    if (Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0 && hasPrevious && onPrevious) {
+        // 오른쪽으로 스와이프 -> 이전 이미지
+        onPrevious()
+      } else if (deltaX < 0 && hasNext && onNext) {
+        // 왼쪽으로 스와이프 -> 다음 이미지
+        onNext()
+      }
+    }
+    
+    touchStartX.current = 0
+    touchEndX.current = 0
+  }
+
+  const handleTouchEndUpdate = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].clientX
+    touchEndY.current = e.changedTouches[0].clientY
+  }
 
   if (!isOpen) return null
 
@@ -162,20 +215,29 @@ export default function ImageLightbox({
 
       {/* Image Container - 화면을 꽉 채우도록 */}
       <div
-        className="absolute inset-0 flex items-center justify-center"
+        ref={imageContainerRef}
+        className="absolute inset-0 flex items-center justify-center touch-pan-y"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={(e) => {
+          handleTouchEndUpdate(e)
+          handleTouchEnd()
+        }}
         style={{ top: 0, left: 0, right: 0, bottom: 0, overflow: 'auto' }}
       >
         <img
           src={imageSrc}
           alt={imageAlt}
-          className="object-contain"
+          className="object-contain transition-transform duration-200"
           style={{ 
             maxWidth: '100vw', 
             maxHeight: '100vh',
             width: 'auto',
             height: 'auto',
-            display: 'block'
+            display: 'block',
+            transform: `translateX(${imageOffset}px)`,
+            touchAction: 'pan-y'
           }}
         />
       </div>
