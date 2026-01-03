@@ -72,13 +72,13 @@ export default function About() {
                   "하느님은 사랑이십니다. 사랑 안에 머무는 이는 하느님 안에 머무르고, 하느님도 그 안에 머무르십니다."
                 </p>
                 <p className="text-center text-sm text-gray-500 mt-2">
-                  요한 1서 4장 16절
+                  1요한 4,16
                 </p>
               </div>
               <div className="mt-6 pt-6 border-t border-gray-200 space-y-2">
                 <p className="text-base">
                   <span className="font-semibold text-gray-900">설립일 : </span>
-                  <span className="text-gray-700">2018년 6월 18일</span>
+                  <span className="text-gray-700">2019년 6월 18일</span>
                 </p>
                 <p className="text-base">
                   <span className="font-semibold text-gray-900">기공식 미사 : </span>
@@ -184,7 +184,7 @@ export default function About() {
               <div className="flex justify-center md:justify-start">
                 <div className="w-full max-w-[300px] aspect-square bg-white rounded-xl p-6 flex items-center justify-center border-2 border-gray-200 shadow-sm">
                   <img
-                    src={logo2}
+                    src="/images/상미성당 소개용 로고.jpg"
                     alt="상미성당 로고"
                     className="w-full h-full object-contain"
                     style={{ maxWidth: '100%', maxHeight: '100%' }}
