@@ -22,7 +22,7 @@ export default function Header() {
     { path: '/mass', label: '미사와 성사' },
     { path: '/albums', label: '본당앨범' },
     { path: '/organizations', label: '본당단체' },
-    { path: '/office', label: '본당업무' },
+    { path: '/office', label: '자주 묻는 질문' },
     { path: '/directions', label: '오시는 길' },
   ]
 

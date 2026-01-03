@@ -30,7 +30,7 @@ export default function Office() {
         {/* Page Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-            본당업무
+            자주 묻는 질문
           </h1>
           <div className="w-24 h-1.5 mx-auto rounded-full" style={{ background: 'linear-gradient(to right, #7B1F4B, rgba(123, 31, 75, 0.3))' }}></div>
         </div>
@@ -70,22 +70,6 @@ export default function Office() {
                     <div>
                       <p className="font-semibold text-gray-900">이메일</p>
                       <a href="mailto:sangmi@casuwon.or.kr" className="text-gray-600 hover:text-catholic-logo transition-colors">sangmi@casuwon.or.kr</a>
-                    </div>
-                  </div>
-                  <div className="pt-4 border-t border-gray-100">
-                    <p className="font-semibold text-gray-900 mb-4">운영시간</p>
-                    <div className="space-y-2">
-                      {[
-                        '화–금 : 오전 9시부터 오후 6시 (점심 오후12시~오후1시)',
-                        '토요일 : 오전 9시부터 오후 5시',
-                        '주일 : 오전 9시부터 오후 4시 30분',
-                        '월요일 : 휴무'
-                      ].map((time, i) => (
-                        <div key={i} className="flex items-center gap-2 text-gray-700">
-                          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#7B1F4B' }}></div>
-                          <p>{time}</p>
-                        </div>
-                      ))}
                     </div>
                   </div>
                 </div>
@@ -135,7 +119,7 @@ export default function Office() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-900">고해성사</h3>
                 </div>
-                <p className="text-gray-600 text-sm">미사 30분 전부터 가능</p>
+                <p className="text-gray-600 text-sm">미사 20분 전부터 가능</p>
               </section>
 
               <section className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -145,11 +129,11 @@ export default function Office() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">미사예물 안내</h3>
+                  <h3 className="text-lg font-bold text-gray-900">미사봉헌 접수 안내</h3>
                 </div>
                 <div className="space-y-2 text-gray-600 text-sm">
-                  <p>미사예물 신청은 사무실로 연락하시거나 미사 전후에 사무실을 방문하여 신청하실 수 있습니다.</p>
-                  <p className="pt-2 text-xs text-gray-500">※ 미사예물은 봉헌일 하루 전 오후 5시까지 사무실에 제출해 주세요.</p>
+                  <p>미사예물은 봉헌일 전날 오후5시까지 사무실로 접수해 주세요.</p>
+                  <p className="pt-2 text-xs text-gray-500">(참고 : 당일 접수, 전화접수, 계좌이체는 안됩니다.)</p>
                 </div>
               </section>
             </aside>
