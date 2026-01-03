@@ -24,17 +24,65 @@ interface SearchFilters {
   endDate?: string
 }
 
+const SEARCH_HISTORY_KEY = 'search_history'
+const MAX_HISTORY = 10
+const POPULAR_SEARCHES_KEY = 'popular_searches'
+
 export default function SearchBar() {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [searchHistory, setSearchHistory] = useState<string[]>([])
+  const [popularSearches, setPopularSearches] = useState<{ query: string; count: number }[]>([])
   const [filters, setFilters] = useState<SearchFilters>({
     categories: ['notice', 'album', 'recruitment', 'faq', 'bulletin']
   })
   const searchRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+
+  // 검색 기록 로드
+  useEffect(() => {
+    const history = localStorage.getItem(SEARCH_HISTORY_KEY)
+    if (history) {
+      try {
+        setSearchHistory(JSON.parse(history))
+      } catch (e) {
+        console.error('검색 기록 로드 실패:', e)
+      }
+    }
+
+    const popular = localStorage.getItem(POPULAR_SEARCHES_KEY)
+    if (popular) {
+      try {
+        const parsed = JSON.parse(popular)
+        setPopularSearches(parsed.sort((a: any, b: any) => b.count - a.count).slice(0, 5))
+      } catch (e) {
+        console.error('인기 검색어 로드 실패:', e)
+      }
+    }
+  }, [])
+
+  // 검색 기록 저장
+  const saveSearchHistory = (searchQuery: string) => {
+    if (!searchQuery.trim()) return
+    
+    const newHistory = [searchQuery, ...searchHistory.filter(h => h !== searchQuery)].slice(0, MAX_HISTORY)
+    setSearchHistory(newHistory)
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory))
+
+    // 인기 검색어 업데이트
+    const popular = JSON.parse(localStorage.getItem(POPULAR_SEARCHES_KEY) || '[]')
+    const existing = popular.find((p: any) => p.query === searchQuery)
+    if (existing) {
+      existing.count++
+    } else {
+      popular.push({ query: searchQuery, count: 1 })
+    }
+    localStorage.setItem(POPULAR_SEARCHES_KEY, JSON.stringify(popular))
+    setPopularSearches(popular.sort((a: any, b: any) => b.count - a.count).slice(0, 5))
+  }
 
   // 검색어 하이라이트 함수
   const highlightText = (text: string, searchQuery: string): React.ReactNode => {
@@ -211,9 +259,17 @@ export default function SearchBar() {
   }, [query, filters])
 
   const handleResultClick = (url: string) => {
+    if (query.trim()) {
+      saveSearchHistory(query.trim())
+    }
     navigate(url)
     setIsOpen(false)
     setQuery('')
+  }
+
+  const handleHistoryClick = (historyQuery: string) => {
+    setQuery(historyQuery)
+    setIsOpen(true)
   }
 
   return (
@@ -309,9 +365,64 @@ export default function SearchBar() {
                   </button>
                 ))}
               </div>
-            ) : (
+            ) : query.trim().length > 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <p className="text-sm">검색 결과가 없습니다.</p>
+              </div>
+            ) : (
+              <div className="p-4">
+                {/* 검색 기록 */}
+                {searchHistory.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-semibold text-gray-700">최근 검색</h3>
+                      <button
+                        onClick={() => {
+                          setSearchHistory([])
+                          localStorage.removeItem(SEARCH_HISTORY_KEY)
+                        }}
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        전체 삭제
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {searchHistory.map((history, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleHistoryClick(history)}
+                          className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                        >
+                          {history}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* 인기 검색어 */}
+                {popularSearches.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-700 mb-2">인기 검색어</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {popularSearches.map((popular, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleHistoryClick(popular.query)}
+                          className="px-3 py-1.5 text-xs bg-catholic-logo/10 text-catholic-logo rounded-full hover:bg-catholic-logo/20 transition-colors font-medium"
+                        >
+                          {popular.query} ({popular.count})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {searchHistory.length === 0 && popularSearches.length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    <p className="text-sm">검색어를 입력하세요.</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -480,7 +591,62 @@ export default function SearchBar() {
               <div className="p-8 text-center text-gray-500">
                 <p className="text-sm">검색 결과가 없습니다.</p>
               </div>
-            ) : null}
+            ) : (
+              <div className="p-4">
+                {/* 검색 기록 */}
+                {searchHistory.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-semibold text-gray-700">최근 검색</h3>
+                      <button
+                        onClick={() => {
+                          setSearchHistory([])
+                          localStorage.removeItem(SEARCH_HISTORY_KEY)
+                        }}
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        전체 삭제
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {searchHistory.map((history, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleHistoryClick(history)}
+                          className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                        >
+                          {history}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* 인기 검색어 */}
+                {popularSearches.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-700 mb-2">인기 검색어</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {popularSearches.map((popular, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleHistoryClick(popular.query)}
+                          className="px-3 py-1.5 text-xs bg-catholic-logo/10 text-catholic-logo rounded-full hover:bg-catholic-logo/20 transition-colors font-medium"
+                        >
+                          {popular.query} ({popular.count})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {searchHistory.length === 0 && popularSearches.length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    <p className="text-sm">검색어를 입력하세요.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Desktop Results */}
@@ -549,8 +715,59 @@ export default function SearchBar() {
                 <p className="text-sm">검색 결과가 없습니다.</p>
               </div>
             ) : (
-              <div className="p-8 text-center text-gray-500">
-                <p className="text-sm">검색어를 입력하세요.</p>
+              <div className="p-4">
+                {/* 검색 기록 */}
+                {searchHistory.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-semibold text-gray-700">최근 검색</h3>
+                      <button
+                        onClick={() => {
+                          setSearchHistory([])
+                          localStorage.removeItem(SEARCH_HISTORY_KEY)
+                        }}
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        전체 삭제
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {searchHistory.map((history, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleHistoryClick(history)}
+                          className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
+                        >
+                          {history}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* 인기 검색어 */}
+                {popularSearches.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-gray-700 mb-2">인기 검색어</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {popularSearches.map((popular, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleHistoryClick(popular.query)}
+                          className="px-3 py-1.5 text-xs bg-catholic-logo/10 text-catholic-logo rounded-full hover:bg-catholic-logo/20 transition-colors font-medium"
+                        >
+                          {popular.query} ({popular.count})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {searchHistory.length === 0 && popularSearches.length === 0 && (
+                  <div className="p-8 text-center text-gray-500">
+                    <p className="text-sm">검색어를 입력하세요.</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
