@@ -22,10 +22,40 @@ export default function About() {
             </div>
             <div className="space-y-6 text-gray-700 leading-relaxed text-lg">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">상미(相美)의 의미</h3>
-                <p>
-                  상미(相美)는 하느님 안에서 서로 바라보고 비추어 함께 아름다워지는 공동체를 의미합니다. 상미 공동체는 개인의 차이를 넘어 관계 속에서 하느님의 사랑이 드러난다고 믿으며 살아갑니다.
-                </p>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">본당 명칭</h3>
+                
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">(1) 신앙적 의미 : 相(서로 상) + 美(아름다울 미)로 해석</h4>
+                  <div className="space-y-3 ml-4">
+                    <div>
+                      <p className="font-semibold text-gray-900 mb-2">한자 뜻 풀이</p>
+                      <ul className="space-y-2 ml-4">
+                        <li>
+                          <span className="font-semibold">相(상):</span> 서로, 마주 보다, 어울리다, 함께하다
+                        </li>
+                        <li>
+                          <span className="font-semibold">美(미):</span> 아름다움, 선함, 조화로움
+                        </li>
+                      </ul>
+                    </div>
+                    <p className="text-gray-800">
+                      → 상미(相美)는 하느님 안에서 서로를 바라보고 비추며 완성되는 공동체의 아름다움을 의미합니다.
+                    </p>
+                    <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-catholic-logo mt-4">
+                      <p className="text-gray-700 italic mb-1">
+                        "하느님은 사랑이십니다. 사랑 안에 머무르는 사람은 하느님 안에 머무르고 하느님께서도 그 사람 안에 머무르십니다."
+                      </p>
+                      <p className="text-sm text-gray-600">(1요한 4,16)</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">(2) 지역적 의미 : 상미(桑美)</h4>
+                  <p>
+                    상미는 1914년 행정구역 개편으로 상촌과 미동이 합쳐지며 만들어진 이름으로, 뽕나무가 많던 상촌과 풍요로움을 상징하던 미동의 의미를 함께 담고 있습니다.
+                  </p>
+                </div>
               </div>
               
               <div>
