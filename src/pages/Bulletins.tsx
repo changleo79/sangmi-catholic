@@ -4,6 +4,7 @@ import PdfViewerModal from '../components/PdfViewerModal'
 import InfiniteScroll from '../components/InfiniteScroll'
 import Pagination from '../components/Pagination'
 import FilterBar, { FilterOptions } from '../components/FilterBar'
+import LazyImage from '../components/LazyImage'
 
 const ITEMS_PER_PAGE = 12
 
@@ -261,10 +262,11 @@ export default function Bulletins() {
                 >
                   <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
                     {thumbnailUrl ? (
-                      <img
-                        src={getProxiedImageUrl(thumbnailUrl)}
+                      <LazyImage
+                        src={getProxiedImageUrl(bulletin.fileUrl || '')}
+                        thumbnailUrl={getProxiedImageUrl(thumbnailUrl)}
                         alt={bulletin.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="group-hover:scale-105 transition-transform duration-500"
                         loading={bulletins.indexOf(bulletin) < 6 ? "eager" : "lazy"}
                         decoding="async"
                         fetchPriority={bulletins.indexOf(bulletin) === 0 ? "high" : bulletins.indexOf(bulletin) < 6 ? "auto" : "low"}
@@ -275,21 +277,10 @@ export default function Bulletins() {
                           backgroundColor: '#f3f4f6', 
                           pointerEvents: 'none'
                         }}
-                        onLoad={(e) => {
-                          (e.target as HTMLImageElement).style.backgroundColor = 'transparent'
-                        }}
                         onError={(e) => {
-                          console.error('[Bulletins] 썸네일 로드 실패:', thumbnailUrl, '프록시 URL:', (e.target as HTMLImageElement).src)
-                          const target = e.target as HTMLImageElement
-                          // 프록시 실패 시 프록시 URL에 타임스탬프 추가하여 재시도 (원본 URL로 재시도하지 않음)
-                          if (target.src.includes('/api/proxy-image') && !target.src.includes('_retry=')) {
-                            console.log('[Bulletins] 프록시 실패, 프록시 URL 재시도:', thumbnailUrl)
-                            const proxiedUrl = getProxiedImageUrl(thumbnailUrl)
-                            target.src = `${proxiedUrl}&_retry=${Date.now()}`
-                            return
-                          }
-                          target.style.display = 'none'
-                          const parent = target.parentElement
+                          console.error('[Bulletins] 썸네일 로드 실패:', thumbnailUrl)
+                          const target = e.currentTarget as HTMLImageElement
+                          const parent = target.parentElement?.parentElement
                           if (parent) {
                             parent.innerHTML = `
                               <div class="w-full h-full flex items-center justify-center bg-gray-200">
@@ -303,7 +294,6 @@ export default function Bulletins() {
                             `
                           }
                         }}
-                        draggable={false}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">

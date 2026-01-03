@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { getAlbums, getAlbumCategories, type AlbumWithCategory } from '../utils/storage'
 import InfiniteScroll from '../components/InfiniteScroll'
 import Pagination from '../components/Pagination'
+import LazyImage from '../components/LazyImage'
 
 const ITEMS_PER_PAGE = 12
 
@@ -241,38 +242,18 @@ export default function Albums() {
                       )
                     }
                     
-                    // 썸네일이 있으면 썸네일을 먼저 표시하고, 로드 완료 후 원본으로 교체
                     return (
-                      <img
-                        src={thumbnailUrl || coverUrl}
+                      <LazyImage
+                        src={coverUrl}
+                        thumbnailUrl={thumbnailUrl}
                         alt={album.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
-                        decoding="async"
+                        className="transition-transform duration-500 group-hover:scale-110"
                         width="400"
                         height="300"
                         style={{ backgroundColor: '#f3f4f6' }}
-                        onLoad={(e) => {
-                          const img = e.currentTarget
-                          img.style.backgroundColor = 'transparent'
-                          
-                          // 썸네일이 로드되었고 원본이 있으면 백그라운드에서 원본 로드 후 교체
-                          if (thumbnailUrl && coverUrl && img.src === thumbnailUrl) {
-                            const originalImg = new Image()
-                            originalImg.onload = () => {
-                              img.src = coverUrl
-                            }
-                            originalImg.src = coverUrl
-                          }
-                        }}
                         onError={(e) => {
-                          // 썸네일 로드 실패 시 원본 시도
-                          if (coverUrl && e.currentTarget.src !== coverUrl) {
-                            e.currentTarget.src = coverUrl
-                          } else {
-                            // 둘 다 실패 시 대체 이미지
-                            e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect fill="%23ddd" width="128" height="128"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3E이미지 없음%3C/text%3E%3C/svg%3E'
-                          }
+                          const target = e.currentTarget as HTMLImageElement
+                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="128"%3E%3Crect fill="%23ddd" width="128" height="128"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3E이미지 없음%3C/text%3E%3C/svg%3E'
                         }}
                       />
                     )
