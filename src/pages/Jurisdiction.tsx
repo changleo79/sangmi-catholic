@@ -188,7 +188,7 @@ export default function Jurisdiction() {
                             >
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <span 
-                                  className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-white font-bold text-sm shadow-md whitespace-nowrap flex-shrink-0"
+                                  className="inline-flex items-center justify-center min-w-[3rem] h-8 px-2 rounded-lg text-white font-bold text-sm shadow-md whitespace-nowrap flex-shrink-0"
                                   style={{ backgroundColor: '#7B1F4B' }}
                                 >
                                   {result.region.name}
@@ -242,7 +242,7 @@ export default function Jurisdiction() {
                 className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors duration-200"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-md" style={{ backgroundColor: '#7B1F4B' }}>
+                  <div className="min-w-[3.5rem] h-12 rounded-xl flex items-center justify-center font-bold text-white text-lg shadow-md px-3" style={{ backgroundColor: '#7B1F4B' }}>
                     {region.name}
                   </div>
                   <div>
