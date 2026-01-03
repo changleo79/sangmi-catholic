@@ -48,7 +48,11 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[200] md:hidden">
+    <nav 
+      className="fixed bottom-0 left-0 right-0 z-[200] md:hidden"
+      role="navigation"
+      aria-label="하단 네비게이션"
+    >
       <div className="mx-auto max-w-md px-2.5 pb-1.5">
         <div className="grid grid-cols-4 gap-1.5 rounded-[22px] bg-white/90 backdrop-blur-xl border border-white shadow-2xl p-1">
           {navItems.map((item) => {
@@ -57,11 +61,13 @@ export default function BottomNav() {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex flex-col items-center gap-0.5 py-1 rounded-xl text-[10px] font-semibold transition-all duration-200 ${
+                className={`flex flex-col items-center gap-0.5 py-1 rounded-xl text-[10px] font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-catholic-logo focus:ring-offset-2 ${
                   isActive ? 'bg-catholic-logo text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100'
                 }`}
+                aria-label={`${item.label} 페이지로 이동`}
+                aria-current={isActive ? 'page' : undefined}
               >
-                <span className="flex items-center justify-center w-6 h-6">{item.icon}</span>
+                <span className="flex items-center justify-center w-6 h-6" aria-hidden="true">{item.icon}</span>
                 {item.label}
               </Link>
             )

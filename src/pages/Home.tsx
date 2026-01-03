@@ -392,6 +392,7 @@ export default function Home() {
 
   return (
     <div className="bg-gradient-to-b from-white via-gray-50 to-white">
+      <main role="main" aria-label="메인 콘텐츠">
       <section className="relative w-full h-[75vh] min-h-[520px] md:h-[80vh] md:min-h-[620px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           {slideImages.map((img, index) => (
@@ -1076,6 +1077,7 @@ export default function Home() {
           }}
         />
       )}
+      </main>
     </div>
   )
 }

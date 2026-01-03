@@ -12,9 +12,14 @@ export default function Footer() {
   ]
 
   return (
-    <footer className="text-white py-8 md:py-12 lg:py-16 mt-auto relative overflow-hidden" style={{ background: 'linear-gradient(to bottom, #4a1230, #3a0f25)' }}>
+    <footer 
+      className="text-white py-8 md:py-12 lg:py-16 mt-auto relative overflow-hidden" 
+      style={{ background: 'linear-gradient(to bottom, #4a1230, #3a0f25)' }}
+      role="contentinfo"
+      aria-label="사이트 푸터"
+    >
       {/* 장식용 배경 요소 */}
-      <div className="absolute inset-0 opacity-5">
+      <div className="absolute inset-0 opacity-5" aria-hidden="true">
         <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
       </div>
@@ -25,7 +30,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1 lg:col-span-1 flex items-center md:items-start">
             <img 
               src={logo2} 
-              alt="상미성당 로고" 
+              alt="아시시의 성 프란치스코 상미성당 로고" 
               className="h-16 w-auto md:h-20 lg:h-24 object-contain brightness-0 invert opacity-90 hover:opacity-100 transition-opacity duration-300"
             />
           </div>
@@ -33,18 +38,19 @@ export default function Footer() {
           {/* 빠른 링크 섹션 */}
           <div className="col-span-2 md:col-span-1">
             <h3 className="text-base md:text-lg font-bold mb-3 md:mb-5 text-white flex items-center gap-2">
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
               빠른 링크
             </h3>
-            <nav className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-2.5 md:space-y-0">
+            <nav aria-label="빠른 링크 메뉴" className="grid grid-cols-2 md:grid-cols-1 gap-2 md:gap-2.5 md:space-y-0">
               {quickLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="block text-xs md:text-sm hover:text-white transition-colors duration-200 group"
+                  className="block text-xs md:text-sm hover:text-white transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent rounded"
                   style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                  aria-label={`${link.label} 페이지로 이동`}
                 >
                   <span className="flex items-center gap-1.5 md:gap-2">
                     <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-white/40 group-hover:bg-white/80 transition-all duration-200 flex-shrink-0"></span>
@@ -58,16 +64,17 @@ export default function Footer() {
           {/* 연락처 섹션 */}
           <div className="col-span-2 md:col-span-1">
             <h3 className="text-base md:text-lg font-bold mb-3 md:mb-5 text-white flex items-center gap-2">
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
               연락처
             </h3>
-            <div className="space-y-2 md:space-y-3.5">
+            <address className="space-y-2 md:space-y-3.5 not-italic">
               <a 
                 href="tel:031-282-9989" 
-                className="flex items-center gap-2 md:gap-3 group hover:translate-x-1 transition-transform duration-200"
+                className="flex items-center gap-2 md:gap-3 group hover:translate-x-1 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent rounded"
                 style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                aria-label="전화번호: 031-282-9989"
               >
                 <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors flex-shrink-0">
                   <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,8 +85,9 @@ export default function Footer() {
               </a>
               <a 
                 href="mailto:sangmi@casuwon.or.kr" 
-                className="flex items-center gap-2 md:gap-3 group hover:translate-x-1 transition-transform duration-200"
+                className="flex items-center gap-2 md:gap-3 group hover:translate-x-1 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent rounded"
                 style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                aria-label="이메일: sangmi@casuwon.or.kr"
               >
                 <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors flex-shrink-0">
                   <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,8 +98,9 @@ export default function Footer() {
               </a>
               <a 
                 href="tel:031-282-9985" 
-                className="flex items-center gap-2 md:gap-3 group hover:translate-x-1 transition-transform duration-200"
+                className="flex items-center gap-2 md:gap-3 group hover:translate-x-1 transition-transform duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent rounded"
                 style={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                aria-label="팩스번호: 031-282-9985"
               >
                 <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors flex-shrink-0">
                   <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,19 +109,19 @@ export default function Footer() {
                 </div>
                 <span className="text-xs md:text-sm hover:underline">031-282-9985 (팩스)</span>
               </a>
-            </div>
+            </address>
           </div>
           
           {/* 주소 섹션 */}
           <div className="col-span-2 md:col-span-1">
             <h3 className="text-base md:text-lg font-bold mb-3 md:mb-5 text-white flex items-center gap-2">
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               주소
             </h3>
-            <div className="space-y-2 md:space-y-4">
+            <address className="space-y-2 md:space-y-4 not-italic">
               <div className="flex items-start gap-2 md:gap-3">
                 <div className="w-6 h-6 md:w-8 md:h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,8 +137,9 @@ export default function Footer() {
                     href="https://map.naver.com/v5/search/상미성당" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 md:gap-1.5 text-xs px-2 py-1 md:px-3 md:py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                    className="inline-flex items-center gap-1 md:gap-1.5 text-xs px-2 py-1 md:px-3 md:py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent rounded"
                     style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                    aria-label="네이버 지도에서 상미성당 위치 보기"
                   >
                     <svg className="w-3 h-3 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -138,7 +148,7 @@ export default function Footer() {
                   </a>
                 </div>
               </div>
-            </div>
+            </address>
           </div>
         </div>
         
